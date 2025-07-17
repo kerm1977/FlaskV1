@@ -94,7 +94,7 @@
         {% for provincia, rutas_list in rutas_por_provincia.items() %}
             <div class="mb-4"> {# Se eliminan las clases 'card' y 'shadow-sm' #}
                 <div class="card-header-province mt-5">
-                    <h2 class="text-center text-warning">
+                    <h2 class="text-center">
                     {{ provincia }}
                     </h2>
                     <hr>
@@ -105,8 +105,8 @@
                             <li class="route-item">
                                 <div>
                                     <span class="me-2 text-muted">{{ loop.index }}.</span>
-                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning">
-                                        {{ ruta.nombre | title}} en <span class="text-muted">{{ ruta.provincia }}</span>
+                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name">
+                                        {{ ruta.nombre | title}}
                                     </a>
                                 </div>
                                 <div>
