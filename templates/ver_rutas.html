@@ -25,7 +25,7 @@
         }
         .route-name {
             font-weight: 500;
-            color: #007bff; /* Color de enlace primario */
+            color: orange; /* Color de enlace primario */
             text-decoration: none;
         }
         .route-name:hover {
@@ -67,7 +67,7 @@
     {# Formulario de filtro por provincia #}
     <div class="mb-4">
         <form action="{{ url_for('rutas.ver_rutas') }}" method="GET" class="d-flex align-items-center">
-            <label for="provincia-filter" class="form-label me-2 mb-0">Filtrar por Provincia:</label>
+            <label for="provincia-filter" class="form-label me-2 mb-0 ">Filtrar por Provincia:</label>
             <select class="form-select me-2" id="provincia-filter" name="provincia" onchange="this.form.submit()">
                 <option value="Todas" {% if provincia_seleccionada == 'Todas' %}selected{% endif %}>Todas las Provincias</option>
                 {% for provincia in provincias %}
@@ -83,7 +83,7 @@
     {% if rutas_por_provincia %}
         {% for provincia, rutas_list in rutas_por_provincia.items() %}
             <div class="mb-4"> {# Se eliminan las clases 'card' y 'shadow-sm' #}
-                <div class="card-header-province mt-5">
+                <div class="card-header-province mt-5 text-warning text-center">
                     <h2>
                     {{ provincia }}
                     </h2>
@@ -94,8 +94,8 @@
                         {% for ruta in rutas_list %}
                             <li class="route-item">
                                 <div>
-                                    <span class="me-2 text-muted">{{ loop.index }}.</span>
-                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name">
+                                    <span class="me-2 text-muted ">{{ loop.index }}.</span>
+                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning fs-5">
                                         {{ ruta.nombre | title}} en <span class="text-muted">{{ ruta.provincia }}</span>
                                     </a>
                                 </div>
