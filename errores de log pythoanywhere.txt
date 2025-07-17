@@ -1,0 +1,718 @@
+2025-07-13 17:42:02,666: OSError: write error
+2025-07-13 17:42:02,681: OSError: write error
+2025-07-13 17:42:02,700: OSError: write error
+2025-07-13 17:42:02,824: OSError: write error
+2025-07-14 04:25:22,665: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:25:28,246: Exception on /perfil/ [GET]
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:26:56,961: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:29:16,889: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:29:41,302: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:33:03,423: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:39:54,385: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 27, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:43:41,718: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-14 04:43:49,072: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+2025-07-14 04:54:36,539: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 227, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+2025-07-14 04:58:28,895: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 113, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    {% if user.fecha_registro is datetime %}
+jinja2.exceptions.TemplateRuntimeError: No test named 'datetime' found.
+2025-07-14 06:04:57,510: OSError: write error
+2025-07-14 13:43:28,181: Error updating note 2: 413 Request Entity Too Large: The data value transmitted exceeds the capacity limit.
+2025-07-14 13:43:49,629: Error updating note 2: 413 Request Entity Too Large: The data value transmitted exceeds the capacity limit.
+2025-07-14 13:44:14,534: Error updating note 2: 413 Request Entity Too Large: The data value transmitted exceeds the capacity limit.
+2025-07-14 17:42:03,485: OSError: write error
+2025-07-14 17:42:03,539: OSError: write error
+2025-07-17 05:26:43,552: Error running WSGI application
+2025-07-17 05:26:43,557: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/flask/config.py)
+2025-07-17 05:26:43,558:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 05:26:43,558:     from app import app as application  # noqa
+2025-07-17 05:26:43,558: 
+2025-07-17 05:26:43,558:   File "/home/kenth1977/flask/app.py", line 2, in <module>
+2025-07-17 05:26:43,558:     from config import Config
+2025-07-17 05:26:43,558: ***************************************************
+2025-07-17 05:26:43,559: If you're seeing an import error and don't know why,
+2025-07-17 05:26:43,559: we have a dedicated help page to help you debug: 
+2025-07-17 05:26:43,559: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 05:26:43,559: ***************************************************
+2025-07-17 05:26:45,702: Error running WSGI application
+2025-07-17 05:26:45,702: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/flask/config.py)
+2025-07-17 05:26:45,703:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 05:26:45,703:     from app import app as application  # noqa
+2025-07-17 05:26:45,703: 
+2025-07-17 05:26:45,703:   File "/home/kenth1977/flask/app.py", line 2, in <module>
+2025-07-17 05:26:45,704:     from config import Config
+2025-07-17 05:26:45,704: ***************************************************
+2025-07-17 05:26:45,704: If you're seeing an import error and don't know why,
+2025-07-17 05:26:45,704: we have a dedicated help page to help you debug: 
+2025-07-17 05:26:45,704: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 05:26:45,704: ***************************************************
+2025-07-17 05:30:56,880: Error running WSGI application
+2025-07-17 05:30:56,884: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/flask/config.py)
+2025-07-17 05:30:56,884:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 05:30:56,884:     from app import app as application  # noqa
+2025-07-17 05:30:56,884: 
+2025-07-17 05:30:56,885:   File "/home/kenth1977/flask/app.py", line 2, in <module>
+2025-07-17 05:30:56,885:     from config import Config
+2025-07-17 05:30:56,885: ***************************************************
+2025-07-17 05:30:56,885: If you're seeing an import error and don't know why,
+2025-07-17 05:30:56,885: we have a dedicated help page to help you debug: 
+2025-07-17 05:30:56,885: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 05:30:56,885: ***************************************************
+2025-07-17 05:30:58,500: Error running WSGI application
+2025-07-17 05:30:58,504: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/flask/config.py)
+2025-07-17 05:30:58,504:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 05:30:58,504:     from app import app as application  # noqa
+2025-07-17 05:30:58,504: 
+2025-07-17 05:30:58,505:   File "/home/kenth1977/flask/app.py", line 2, in <module>
+2025-07-17 05:30:58,505:     from config import Config
+2025-07-17 05:30:58,505: ***************************************************
+2025-07-17 05:30:58,505: If you're seeing an import error and don't know why,
+2025-07-17 05:30:58,505: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 05:30:58,505: ***************************************************
+2025-07-17 05:32:18,146: Error running WSGI application
+2025-07-17 05:32:18,148: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/flask/config.py)
+2025-07-17 05:32:18,148:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 05:32:18,148:     from app import app as application  # noqa
+2025-07-17 05:32:18,148: 
+2025-07-17 05:32:18,149:   File "/home/kenth1977/flask/app.py", line 2, in <module>
+2025-07-17 05:32:18,149:     from config import Config
+2025-07-17 05:32:18,149: ***************************************************
+2025-07-17 05:32:18,149: If you're seeing an import error and don't know why,
+2025-07-17 05:32:18,149: we have a dedicated help page to help you debug: 
+2025-07-17 05:32:18,149: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 05:32:18,149: ***************************************************
+2025-07-17 05:32:21,429: Error running WSGI application
+2025-07-17 05:32:21,430: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/flask/config.py)
+2025-07-17 05:32:21,430:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 05:32:21,430:     from app import app as application  # noqa
+2025-07-17 05:32:21,430: 
+2025-07-17 05:32:21,430:   File "/home/kenth1977/flask/app.py", line 2, in <module>
+2025-07-17 05:32:21,431:     from config import Config
+2025-07-17 05:32:21,431: ***************************************************
+2025-07-17 05:32:21,431: If you're seeing an import error and don't know why,
+2025-07-17 05:32:21,431: we have a dedicated help page to help you debug: 
+2025-07-17 05:32:21,431: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 05:32:21,432: ***************************************************
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-17 05:35:06,909: Exception on /perfil/ [GET]
+2025-07-17 05:37:24,490: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-17 05:37:57,027: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+2025-07-17 05:38:15,933: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-17 05:40:41,361: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-17 05:41:06,845: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/utils.py", line 92, in from_obj
+    if hasattr(obj, "jinja_pass_arg"):
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'strftime'
+2025-07-17 05:43:10,985: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ (user.fecha_registro | to_datetime).strftime('%d/%m/%Y %H:%M') }}</span>
+jinja2.exceptions.TemplateRuntimeError: No filter named 'to_datetime' found.
+2025-07-17 05:43:17,151: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 45, in ver_perfil
+    return render_template(
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ (user.fecha_registro | to_datetime).strftime('%d/%m/%Y %H:%M') }}</span>
+jinja2.exceptions.TemplateRuntimeError: No filter named 'to_datetime' found.
+2025-07-17 05:46:58,500: Exception on /perfil/ [GET]
+Traceback (most recent call last):
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/flask/app.py", line 919, in full_dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/kenth1977/flask/perfil.py", line 35, in ver_perfil
+    return render_template(
+    rv = template.render(context)
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/kenth1977/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/kenth1977/flask/templates/perfil.html", line 1, in top-level template code
+    {% extends 'base.html' %}
+  File "/home/kenth1977/flask/templates/base.html", line 28, in top-level template code
+    {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+  File "/home/kenth1977/flask/templates/perfil.html", line 229, in block 'content'
+    <span>{{ (user.fecha_registro | to_datetime).strftime('%d/%m/%Y %H:%M') }}</span>
+jinja2.exceptions.TemplateRuntimeError: No filter named 'to_datetime' found.
+2025-07-17 06:39:39,819: Error running WSGI application
+2025-07-17 06:39:39,823: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/FlaskV1/config.py)
+2025-07-17 06:39:39,823:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:39:39,823:     from app import app as application  # noqa
+2025-07-17 06:39:39,823: 
+2025-07-17 06:39:39,823:   File "/home/kenth1977/FlaskV1/app.py", line 2, in <module>
+2025-07-17 06:39:39,823:     from config import Config
+2025-07-17 06:39:39,823: ***************************************************
+2025-07-17 06:39:39,823: If you're seeing an import error and don't know why,
+2025-07-17 06:39:39,824: we have a dedicated help page to help you debug: 
+2025-07-17 06:39:39,824: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:39:39,824: ***************************************************
+2025-07-17 06:39:41,325: Error running WSGI application
+2025-07-17 06:39:41,326: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/FlaskV1/config.py)
+2025-07-17 06:39:41,326:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:39:41,326:     from app import app as application  # noqa
+2025-07-17 06:39:41,326: 
+2025-07-17 06:39:41,326:   File "/home/kenth1977/FlaskV1/app.py", line 2, in <module>
+2025-07-17 06:39:41,327:     from config import Config
+2025-07-17 06:39:41,327: ***************************************************
+2025-07-17 06:39:41,327: If you're seeing an import error and don't know why,
+2025-07-17 06:39:41,327: we have a dedicated help page to help you debug: 
+2025-07-17 06:39:41,327: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:39:41,327: ***************************************************
+2025-07-17 06:41:43,775: Error running WSGI application
+2025-07-17 06:41:43,778: ImportError: cannot import name 'Config' from 'config' (/home/kenth1977/FlaskV1/config.py)
+2025-07-17 06:41:43,779:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:41:43,779:     from app import app as application  # noqa
+2025-07-17 06:41:43,779: 
+2025-07-17 06:41:43,779:   File "/home/kenth1977/FlaskV1/app.py", line 2, in <module>
+2025-07-17 06:41:43,779:     from config import Config
+2025-07-17 06:41:43,779: ***************************************************
+2025-07-17 06:41:43,779: If you're seeing an import error and don't know why,
+2025-07-17 06:41:43,779: we have a dedicated help page to help you debug: 
+2025-07-17 06:41:43,779: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:41:43,780: ***************************************************
+2025-07-17 06:43:57,698: Error running WSGI application
+2025-07-17 06:43:57,706: 
+2025-07-17 06:43:57,706:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:43:57,706: 
+2025-07-17 06:43:57,707:                                                                                                                    ^
+2025-07-17 06:43:57,707: 
+2025-07-17 06:43:57,708:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:43:57,708:     from app import app as application  # noqa
+2025-07-17 06:43:57,708: 
+2025-07-17 06:43:57,709:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:43:57,709: ***************************************************
+2025-07-17 06:43:57,709: If you're seeing an import error and don't know why,
+2025-07-17 06:43:57,710: we have a dedicated help page to help you debug: 
+2025-07-17 06:43:57,711: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:43:57,711: ***************************************************
+2025-07-17 06:43:59,109: 
+2025-07-17 06:43:59,109:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:43:59,111:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:43:59,111: ***************************************************
+2025-07-17 06:43:59,111: If you're seeing an import error and don't know why,
+2025-07-17 06:50:52,552: Error running WSGI application
+2025-07-17 06:50:52,555:   File "/home/kenth1977/FlaskV1/instrucciones.py", line 1134
+2025-07-17 06:50:52,555: 
+2025-07-17 06:50:52,556:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:50:52,556: 
+2025-07-17 06:50:52,556:                                                                                                                    ^
+2025-07-17 06:50:52,556: 
+2025-07-17 06:50:52,556: SyntaxError: f-string expression part cannot include a backslash
+2025-07-17 06:50:52,556:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:50:52,556:     from app import app as application  # noqa
+2025-07-17 06:50:52,556: 
+2025-07-17 06:50:52,556:   File "/home/kenth1977/FlaskV1/app.py", line 23, in <module>
+2025-07-17 06:50:52,556:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:50:52,557: ***************************************************
+2025-07-17 06:50:52,557: If you're seeing an import error and don't know why,
+2025-07-17 06:50:52,557: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:50:52,557: ***************************************************
+2025-07-17 06:50:55,247: Error running WSGI application
+2025-07-17 06:50:55,250:   File "/home/kenth1977/FlaskV1/instrucciones.py", line 1134
+2025-07-17 06:50:55,251: 
+2025-07-17 06:50:55,251:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:50:55,251: 
+2025-07-17 06:50:55,251:                                                                                                                    ^
+2025-07-17 06:50:55,251: 
+2025-07-17 06:50:55,251: SyntaxError: f-string expression part cannot include a backslash
+2025-07-17 06:50:55,251:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:50:55,252:     from app import app as application  # noqa
+2025-07-17 06:50:55,252: 
+2025-07-17 06:50:55,252:   File "/home/kenth1977/FlaskV1/app.py", line 23, in <module>
+2025-07-17 06:50:55,252:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:50:55,252: ***************************************************
+2025-07-17 06:50:55,252: If you're seeing an import error and don't know why,
+2025-07-17 06:50:55,252: we have a dedicated help page to help you debug: 
+2025-07-17 06:50:55,253: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:50:55,253: ***************************************************
+2025-07-17 06:51:01,099: Error running WSGI application
+2025-07-17 06:51:01,099:   File "/home/kenth1977/FlaskV1/instrucciones.py", line 1134
+2025-07-17 06:51:01,100: 
+2025-07-17 06:51:01,100:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:51:01,100: 
+2025-07-17 06:51:01,100:                                                                                                                    ^
+2025-07-17 06:51:01,100: 
+2025-07-17 06:51:01,100: SyntaxError: f-string expression part cannot include a backslash
+2025-07-17 06:51:01,100:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:51:01,100:     from app import app as application  # noqa
+2025-07-17 06:51:01,100: 
+2025-07-17 06:51:01,101:   File "/home/kenth1977/FlaskV1/app.py", line 23, in <module>
+2025-07-17 06:51:01,101:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:51:01,101: ***************************************************
+2025-07-17 06:51:01,101: If you're seeing an import error and don't know why,
+2025-07-17 06:51:01,101: we have a dedicated help page to help you debug: 
+2025-07-17 06:51:01,101: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:51:01,101: ***************************************************
+2025-07-17 06:54:03,149: Error running WSGI application
+2025-07-17 06:54:03,169:   File "/home/kenth1977/FlaskV1/instrucciones.py", line 1134
+2025-07-17 06:54:03,169: 
+2025-07-17 06:54:03,169:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:54:03,174: 
+2025-07-17 06:54:03,174:                                                                                                                    ^
+2025-07-17 06:54:03,175: 
+2025-07-17 06:54:03,175: SyntaxError: f-string expression part cannot include a backslash
+2025-07-17 06:54:03,175:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:54:03,175:     from app import app as application  # noqa
+2025-07-17 06:54:03,175: 
+2025-07-17 06:54:03,175:   File "/home/kenth1977/FlaskV1/app.py", line 23, in <module>
+2025-07-17 06:54:03,175:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:54:03,176: ***************************************************
+2025-07-17 06:54:03,176: If you're seeing an import error and don't know why,
+2025-07-17 06:54:03,176: we have a dedicated help page to help you debug: 
+2025-07-17 06:54:03,176: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:54:03,176: ***************************************************
+2025-07-17 06:54:05,941: Error running WSGI application
+2025-07-17 06:54:05,941:   File "/home/kenth1977/FlaskV1/instrucciones.py", line 1134
+2025-07-17 06:54:05,941: 
+2025-07-17 06:54:05,941:     content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+2025-07-17 06:54:05,942: 
+2025-07-17 06:54:05,942:                                                                                                                    ^
+2025-07-17 06:54:05,942: 
+2025-07-17 06:54:05,942: SyntaxError: f-string expression part cannot include a backslash
+2025-07-17 06:54:05,942:   File "/var/www/kenth1977_pythonanywhere_com_wsgi.py", line 16, in <module>
+2025-07-17 06:54:05,942:     from app import app as application  # noqa
+2025-07-17 06:54:05,942: 
+2025-07-17 06:54:05,943:   File "/home/kenth1977/FlaskV1/app.py", line 23, in <module>
+2025-07-17 06:54:05,943:     from instrucciones import instrucciones_bp # NUEVA: Importa el Blueprint de Instrucciones
+2025-07-17 06:54:05,943: ***************************************************
+2025-07-17 06:54:05,943: If you're seeing an import error and don't know why,
+2025-07-17 06:54:05,943: we have a dedicated help page to help you debug: 
+2025-07-17 06:54:05,943: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-07-17 06:54:05,943: ***************************************************

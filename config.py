@@ -16,16 +16,6 @@ class Config:
 
 
 
-
-
-
-
-
-
-
-
-
-
 # PYTHONANYWHERE---------------------------------------------------------
 
 # import os
@@ -48,8 +38,8 @@ class Config:
 #     # Configuración del pool de conexiones para evitar "Lost connection"
 #     # pool_recycle: Recicla las conexiones después de X segundos de inactividad.
 #     # PythonAnywhere cierra las conexiones inactivas después de 300 segundos (5 minutos).
-#     # Establecerlo un poco por debajo de ese valor ayuda a que SQLAlchemy cierre y reabra
-#     # la conexión antes de que el servidor lo haga.
+    # Establecerlo un poco por debajo de ese valor ayuda a que SQLAlchemy cierre y reabra
+    # la conexión antes de que el servidor lo haga.
 #     SQLALCHEMY_ENGINE_OPTIONS = {
 #         "pool_pre_ping": True, # Prueba la conexión antes de usarla del pool
 #         "pool_recycle": 280,   # Recicla conexiones después de 280 segundos (un poco menos de 5 minutos)

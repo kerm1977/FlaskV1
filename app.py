@@ -120,6 +120,26 @@ def from_json(value):
 
 app.jinja_env.filters['from_json'] = from_json
 
+# Filtro personalizado para Jinja2 para convertir a datetime
+@app.template_filter('to_datetime')
+def to_datetime_filter(value):
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        try:
+            # Intenta parsear diferentes formatos si es necesario
+            return datetime.strptime(value, '%Y-%m-%d %H:%M:%S.%f') # Formato común de SQLAlchemy
+        except ValueError:
+            try:
+                return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                try:
+                    return datetime.strptime(value, '%Y-%m-%d')
+                except ValueError:
+                    # Si no se puede parsear, devuelve None o el valor original
+                    return None
+    return value
+
 
 # DECORADORES PARA ROLES
 def role_required(roles):
@@ -270,7 +290,7 @@ def register():
         if not avatar_filename:
             avatar_filename = 'images/defaults/default_avatar.png'
         
-        # LÓGICA CLAVE PARA ASIGNAR EL ROL DE SUPERUSER
+        # LÓGICA CLAVE PARA ASIGNAR EL ROL DE SUPERUSUARIO
         new_user_role = 'Usuario Regular' # Rol por defecto
         
         # current_app.config.get() es importante por si la bandera no existe (ej. en desarrollo local sin before_request)
@@ -455,8 +475,6 @@ if __name__ == '__main__':
 # flask db init
 # flask db migrate -m "Initial migration after reset"
 # flask db upgrade
-
-
 
 # Cuando se cambia de repositorio
 # git remote -v

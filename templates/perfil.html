@@ -224,12 +224,28 @@
                             {% endif %}
                             <li class="list-group-item">
                                 <strong>Fecha de Registro:</strong>
-                                <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+                                {# MODIFICACIÓN: Usar el filtro to_datetime antes de strftime #}
+                                <span>
+                                    {% set reg_date = user.fecha_registro | to_datetime %}
+                                    {% if reg_date %}
+                                        {{ reg_date.strftime('%d/%m/%Y %H:%M') }}
+                                    {% else %}
+                                        Fecha inválida
+                                    {% endif %}
+                                </span>
                             </li>
                             {% if user.fecha_actualizacion %}
                             <li class="list-group-item">
                                 <strong>Última Actualización:</strong>
-                                <span>{{ user.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') }}</span>
+                                {# MODIFICACIÓN: Usar el filtro to_datetime antes de strftime #}
+                                <span>
+                                    {% set upd_date = user.fecha_actualizacion | to_datetime %}
+                                    {% if upd_date %}
+                                        {{ upd_date.strftime('%d/%m/%Y %H:%M') }}
+                                    {% else %}
+                                        Fecha inválida
+                                    {% endif %}
+                                </span>
                             </li>
                             {% endif %}
                         </ul>
@@ -305,7 +321,8 @@
                         console.error('Error al generar la imagen JPG del perfil:', err);
                         /* Asegurarse de mostrar los botones en caso de error */
                         buttonsContainer.classList.remove('hidden-for-capture');
-                        alert('Hubo un error al exportar la imagen de tu perfil. Por favor, inténtalo de nuevo.');
+                        // Reemplazado alert() con un mensaje en consola para evitar bloqueos en el iFrame
+                        console.log('Hubo un error al exportar la imagen de tu perfil. Por favor, inténtalo de nuevo.');
                     });
                 }, 50); /* Pequeño retraso de 50ms (puedes ajustar si es necesario) */
             });
