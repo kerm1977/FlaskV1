@@ -1,51 +1,81 @@
 {% extends 'base.html' %}
-
-{% block head %}
+{% block content %}
     <title>Crear Nueva Ruta</title>
-    <!-- CKEditor 5 CDN -->
     <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+    {# Los estilos de los botones flotantes se han movido al block content según tu indicación #}
+<div class="container mt-4">
     <style>
         .form-group label {
             font-weight: bold;
         }
-        .btn-back {
-            background-color: #6c757d; /* Gris para el botón de volver */
-            border-color: #6c757d;
-            color: white;
+
+        /* Estilos específicos para el botón flotante (FAB) de crear/guardar - IDÉNTICOS a crear_pagos.html */
+        .fab-container-save {
+            position: fixed;
+            bottom: 50px; /* Distancia desde abajo (de crear_pagos.html) */
+            right: 20px; /* Distancia desde la derecha */
+            z-index: 2000; /* Asegura que esté por encima de otros elementos */
         }
-        .btn-back:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
+        .fab-button-save {
+            width: 60px; /* Tamaño del botón */
+            height: 60px; /* Tamaño del botón */
+            border-radius: 50%; /* Hacerlo circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Tamaño del icono */
+            transition: all 0.3s ease;
+            background-color: #ffc107; /* Color de fondo warning (naranja) */
+            color: #212529; /* Color de texto oscuro para contraste */
+            border: none; /* Asegurar que no haya borde */
+        }
+        .fab-button-save:hover {
+            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+            background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+        }
+
+        /* Estilos específicos para el botón flotante (FAB) de volver atrás - IDÉNTICOS a ver_pagos.html */
+        .fab-container-back {
+            position: fixed;
+            bottom: 70px; /* Distancia desde abajo (de ver_pagos.html) */
+            left: 20px; /* Distancia desde la izquierda */
+            right: auto; /* Anula la distancia derecha */
+            z-index: 2000; /* Asegura que esté por encima de otros elementos */
+        }
+        .fab-button-back {
+            width: 60px; /* Tamaño del botón */
+            height: 60px; /* Tamaño del botón */
+            border-radius: 50%; /* Hacerlo circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Tamaño del icono */
+            transition: all 0.3s ease;
+            background-color: #007bff; /* Color de fondo primary (azul) */
+            color: #ffffff; /* Color de texto blanco */
+            border: none; /* Asegurar que no haya borde */
+            text-decoration: none; /* Eliminar el subrayado */
+        }
+        .fab-button-back:hover {
+            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+            background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
         }
     </style>
-{% endblock %}
-
-{% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h1 class="mb-0">Crear Nueva Ruta</h1>
+    <div>
+        <div class="bg-warning text-white p-3">
+            <h1 class="mb-0">Nuestras Ruta</h1>
         </div>
-        <div class="card-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST" action="{{ url_for('rutas.crear_ruta') }}">
+        <div>
+            <form method="POST" action="{{ url_for('rutas.crear_ruta') }}" id="main-form"> {# Se añadió el ID al formulario #}
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre de la Ruta <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="nombre" name="nombre" required>
                 </div>
                 <div class="mb-3">
                     <label for="provincia" class="form-label">Provincia <span class="text-danger">*</span></label>
-                    <select class="form-select" id="provincia" name="provincia" required>
+                    <select class="form-select" id="provincia" name="provincia">
                         <option value="">Seleccione una provincia</option>
                         {% for provincia_opcion in provincias %}
                             <option value="{{ provincia_opcion }}">{{ provincia_opcion }}</option>
@@ -62,14 +92,26 @@
                     <small class="form-text text-muted">Asegúrate de que el enlace sea compatible con incrustación.</small>
                 </div>
                 
-                <div class="d-flex justify-content-between mt-4">
-                    <button type="submit" class="btn btn-primary">Crear Ruta</button>
-                    <a href="{{ url_for('rutas.ver_rutas') }}" class="btn btn-back">Volver a Rutas</a>
-                </div>
+                {# Los botones originales han sido eliminados para ser reemplazados por los FABs flotantes #}
             </form>
         </div>
     </div>
 </div>
+
+{# Botón flotante para CREAR RUTA (idéntico al de guardar en crear_pagos.html) #}
+<div class="fab-container-save">
+    <button type="submit" form="main-form" class="fab-button-save" title="Crear Ruta">
+        <i class="fas fa-save" style="color: black;"></i> {# Icono de disquete (guardar) #}
+    </button>
+</div>
+
+{# Botón flotante para VOLVER ATRÁS (idéntico al de ver_pagos.html) #}
+<div class="fab-container-back">
+    <a href="{{ url_for('rutas.ver_rutas') }}" class="fab-button-back" title="Volver a Rutas">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+
 {% endblock %}
 
 {% block scripts %}

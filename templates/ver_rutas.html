@@ -1,28 +1,9 @@
 {% extends 'base.html' %}
 
-{% block head %}
+
+{% block content %}
     <title>Ver Rutas</title>
     <style>
-        .card-header-province {
-            background-color: #f8f9fa; /* Un color claro para el encabezado de la provincia */
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #343a40;
-            border-bottom: 2px solid #e9ecef;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1rem;
-            /* Eliminado: border-radius */
-        }
-        .route-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .route-item:last-child {
-            border-bottom: none;
-        }
         .route-name {
             font-weight: 500;
             color: orange; /* Color de enlace primario */
@@ -31,35 +12,64 @@
         .route-name:hover {
             text-decoration: underline;
         }
+
+        /* Estilos específicos para el botón flotante (FAB) de crear ruta - Ahora idénticos a ver_pagos.html */
         .btn-add-route {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 70px; /* Distancia desde abajo (ajustado a 70px para consistencia con ver_pagos.html) */
+            right: 20px; /* Distancia desde la derecha */
             z-index: 1000;
-            background-color: #28a745; /* Color verde para el botón de añadir */
-            border-color: #28a745;
-            /* Eliminado: border-radius: 50%; */
-            width: 60px;
-            height: 60px;
+            width: 60px; /* Tamaño del botón */
+            height: 60px; /* Tamaño del botón */
+            border-radius: 50%; /* Hacerlo circular */
             display: flex;
-            justify-content: center;
             align-items: center;
-            /* Eliminado: box-shadow */
+            justify-content: center;
+            font-size: 1.8rem; /* Tamaño del icono */
             transition: all 0.3s ease;
-        }
-        .btn-add-route:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            transform: scale(1.05);
+            /* Estilos del botón warning de ver_pagos.html */
+            background-color: #ffc107; /* Color de fondo warning */
+            color: #212529; /* Color de texto oscuro para contraste */
+            border: none; /* Asegurar que no haya borde */
+            text-decoration: none; /* Eliminar el subrayado del enlace */
         }
         .btn-add-route i {
-            font-size: 1.8rem;
-            color: white;
+            color: black; /* Asegura que el icono sea negro */
+        }
+        .btn-add-route:hover {
+            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+            background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+        }
+
+        /* Estilos específicos para el botón flotante (FAB) de volver atrás - IDÉNTICOS a crear_rutas.html */
+        .fab-container-back {
+            position: fixed;
+            bottom: 70px; /* Distancia desde abajo (de ver_pagos.html) */
+            left: 20px; /* Distancia desde la izquierda */
+            right: auto; /* Anula la distancia derecha */
+            z-index: 2000; /* Asegura que esté por encima de otros elementos */
+        }
+        .fab-button-back {
+            width: 60px; /* Tamaño del botón */
+            height: 60px; /* Tamaño del botón */
+            border-radius: 50%; /* Hacerlo circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Tamaño del icono */
+            transition: all 0.3s ease;
+            background-color: #007bff; /* Color de fondo primary (azul) */
+            color: #ffffff; /* Color de texto blanco */
+            border: none; /* Asegurar que no haya borde */
+            text-decoration: none; /* Eliminar el subrayado */
+        }
+        .fab-button-back:hover {
+            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+            background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
         }
     </style>
-{% endblock %}
-
-{% block content %}
 
 <div class="container mt-4">
     <h1 class="main-title text-center mb-4 text-warning">Rutas Disponibles</h1>
@@ -67,7 +77,7 @@
     {# Formulario de filtro por provincia #}
     <div class="mb-4">
         <form action="{{ url_for('rutas.ver_rutas') }}" method="GET" class="d-flex align-items-center">
-            <label for="provincia-filter" class="form-label me-2 mb-0 ">Filtrar por Provincia:</label>
+            <label for="provincia-filter" class="form-label me-2 mb-0">Filtrar por Provincia:</label>
             <select class="form-select me-2" id="provincia-filter" name="provincia" onchange="this.form.submit()">
                 <option value="Todas" {% if provincia_seleccionada == 'Todas' %}selected{% endif %}>Todas las Provincias</option>
                 {% for provincia in provincias %}
@@ -83,8 +93,8 @@
     {% if rutas_por_provincia %}
         {% for provincia, rutas_list in rutas_por_provincia.items() %}
             <div class="mb-4"> {# Se eliminan las clases 'card' y 'shadow-sm' #}
-                <div class="card-header-province mt-5 text-warning text-center">
-                    <h2>
+                <div class="card-header-province mt-5">
+                    <h2 class="text-center text-warning">
                     {{ provincia }}
                     </h2>
                     <hr>
@@ -94,8 +104,8 @@
                         {% for ruta in rutas_list %}
                             <li class="route-item">
                                 <div>
-                                    <span class="me-2 text-muted ">{{ loop.index }}.</span>
-                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning fs-5">
+                                    <span class="me-2 text-muted">{{ loop.index }}.</span>
+                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning">
                                         {{ ruta.nombre | title}} en <span class="text-muted">{{ ruta.provincia }}</span>
                                     </a>
                                 </div>
@@ -116,10 +126,18 @@
 
     {% if session.get('role') == 'Superuser' %}
     <a href="{{ url_for('rutas.crear_ruta') }}" class="btn btn-success btn-add-route" title="Crear nueva ruta">
-        <i class="fas fa-plus"></i>
+        <i class="fas fa-plus"></i> {# Icono de más #}
     </a>
     {% endif %}
 </div>
+
+{# Botón flotante para VOLVER ATRÁS (idéntico al de crear_rutas.html) #}
+<div class="fab-container-back">
+    <a href="{{ url_for('caminatas.ver_caminatas') }}" class="fab-button-back" title="Volver a Rutas">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+
 {% endblock %}
 
 {% block scripts %}

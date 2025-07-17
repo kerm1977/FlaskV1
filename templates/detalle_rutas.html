@@ -40,7 +40,7 @@
         </div>
         <div class="detail-section">
             <p class="text-warning">Detalle de la Ruta:</p>
-            <div class="">{{ ruta.detalle | safe | title }}</div>
+            <div class="">{{ (ruta.detalle | title) | safe }}</div>
         </div>
     </div>
 </div>
