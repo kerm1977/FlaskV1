@@ -8,6 +8,7 @@
             font-weight: 500;
             color: orange; /* Color de enlace primario */
             text-decoration: none;
+            font-size: 1.1rem; /* Tamaño de fuente por defecto para pantallas más grandes */
         }
         .route-name:hover {
             text-decoration: underline;
@@ -69,6 +70,13 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
             background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
         }
+
+        /* Media query para pantallas pequeñas (móviles) */
+        @media (max-width: 768px) {
+            .route-name {
+                font-size: 0.9rem; /* Tamaño de fuente más pequeño para móviles */
+            }
+        }
     </style>
 
 <div class="container mt-4">
@@ -105,7 +113,7 @@
                             <li class="route-item">
                                 <div>
                                     <span class="me-2 text-muted">{{ loop.index }}.</span>
-                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name">
+                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning">
                                         {{ ruta.nombre | title}}
                                     </a>
                                 </div>
@@ -133,7 +141,7 @@
 
 {# Botón flotante para VOLVER ATRÁS (idéntico al de crear_rutas.html) #}
 <div class="fab-container-back">
-    <a href="{{ url_for('caminatas.ver_caminatas') }}" class="fab-button-back" title="Volver a Rutas">
+    <a href="{{ url_for('caminatas.ver_caminatas') }}" class="fab-button-back" title="Volver a Caminatas">
         <i class="fas fa-arrow-left"></i>
     </a>
 </div>

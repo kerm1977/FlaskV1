@@ -29,9 +29,9 @@ except locale.Error:
             print("Advertencia: No se pudo configurar el locale a español. Las fechas podrían no mostrarse correctamente.")
 
 
-# Importa db, User, Caminata, AbonoCaminata, caminata_participantes e Itinerario desde models.py
+# Importa db, User, Caminata, AbonoCaminata, caminata_participantes, Itinerario Y AHORA Instruction desde models.py
 # Es CRUCIAL que db y los modelos se importen desde models.py
-from models import db, User, Caminata, AbonoCaminata, caminata_participantes, Itinerario # MODIFICADO: Añade Itinerario
+from models import db, User, Caminata, AbonoCaminata, caminata_participantes, Itinerario, Instruction # <--- MODIFICADO: Añade Instruction aquí
 
 caminatas_bp = Blueprint('caminatas', __name__)
 
@@ -184,7 +184,6 @@ def crear_caminata():
                 file_path = os.path.join(upload_folder, filename)
                 file.save(file_path)
                 imagen_caminata_url = os.path.join('uploads', 'caminatas', filename).replace("\\", "/")
-
 
         nueva_caminata = Caminata(
             nombre=nombre,
@@ -629,23 +628,30 @@ def editar_caminata(caminata_id):
 def eliminar_caminata(caminata_id):
     caminata = Caminata.query.get_or_404(caminata_id)
     try:
-        # Paso 1: Eliminar todos los itinerarios asociados a esta caminata
+        # Paso 1: Eliminar todas las instrucciones asociadas a esta caminata.
+        # Esto es crucial porque 'instruction.caminata_id' es NOT NULL.
+        # Usa .delete(synchronize_session=False) para evitar problemas si el objeto 'caminata'
+        # ya ha cargado las relaciones de 'instructions' en la sesión.
+        Instruction.query.filter_by(caminata_id=caminata.id).delete(synchronize_session=False) # <--- AÑADIR/MODIFICAR ESTA LÍNEA
+        
+        # Paso 2: Eliminar todos los itinerarios asociados a esta caminata
         # Esto es crucial porque itinerario.caminata_id es NOT NULL
-        itinerarios_asociados = Itinerario.query.filter_by(caminata_id=caminata.id).all()
-        for itinerario in itinerarios_asociados:
-            db.session.delete(itinerario)
+        Itinerario.query.filter_by(caminata_id=caminata.id).delete(synchronize_session=False)
         
-        # Paso 2: Eliminar abonos asociados primero para evitar errores de restricción de clave externa
-        AbonoCaminata.query.filter_by(caminata_id=caminata.id).delete()
+        # Paso 3: Eliminar abonos asociados primero para evitar errores de restricción de clave externa
+        AbonoCaminata.query.filter_by(caminata_id=caminata.id).delete(synchronize_session=False)
         
-        # Paso 3: Eliminar las asociaciones en la tabla intermedia caminata_participantes
+        # Paso 4: Eliminar las asociaciones en la tabla intermedia caminata_participantes
         # Esto se hace vaciando la lista de participantes de la caminata
+        # Nota: Si usas cascade="all, delete-orphan" en la relación en models.py,
+        # esta línea podría no ser estrictamente necesaria para la eliminación,
+        # pero es una forma explícita de desvincular.
         caminata.participantes = [] 
 
-        # Paso 4: Eliminar la caminata
+        # Paso 5: Eliminar la caminata
         db.session.delete(caminata)
         db.session.commit()
-        flash('Caminata y sus datos asociados (itinerarios, abonos, participantes) eliminados exitosamente.', 'success')
+        flash('Caminata y sus datos asociados (instrucciones, itinerarios, abonos, participantes) eliminados exitosamente.', 'success') # <--- MENSAJE MODIFICADO
     except IntegrityError as e:
         db.session.rollback()
         # Este error es menos probable ahora, pero se mantiene por si hay otras restricciones
@@ -1324,7 +1330,7 @@ def exportar_caminata_jpg(caminata_id):
             caminata_id=caminata.id,
             user_id=participant.id
         ).all()
-        for abono in abonos_del_participante:
+        for abono in abonos:
             if abono.nombres_acompanantes:
                 try: 
                     names_list = json.loads(abono.nombres_acompanantes)
@@ -1427,4 +1433,3 @@ def exportar_caminata_jpg(caminata_id):
     response = current_app.response_class(buffer.getvalue(), mimetype='image/jpeg')
     response.headers.set('Content-Disposition', 'attachment', filename=f'caminata_{caminata.nombre}.jpg')
     return response
-
