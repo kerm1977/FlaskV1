@@ -1130,14 +1130,19 @@ def exportar_txt(instruction_id):
         content_parts.append(f"  Ropa de Cambio: {instruction.ropa_cambio}\n")
     content_parts.append(f"\n")
 
+    # Pre-formatear las cadenas con saltos de línea para evitar el error de f-string
+    otras_recomendaciones_formateadas = otras_recomendaciones_limpias.replace('-', '\n-').strip()
+    normas_generales_formateadas = normas_generales_limpias.replace('-', '\n-').strip()
+    otras_indicaciones_generales_formateadas = otras_indicaciones_generales_limpias.replace('-', '\n-').strip()
+
     if otras_recomendaciones_limpias and otras_recomendaciones_limpias != 'N/A':
-        content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_limpias.replace('-', '\n-').strip()}\n\n")
+        content_parts.append(f"OTRAS RECOMENDACIONES:\n{otras_recomendaciones_formateadas}\n\n")
     
     if normas_generales_limpias and normas_generales_limpias != 'N/A':
-        content_parts.append(f"NORMAS GENERALES:\n{normas_generales_limpias.replace('-', '\n-').strip()}\n\n")
+        content_parts.append(f"NORMAS GENERALES:\n{normas_generales_formateadas}\n\n")
     
     if otras_indicaciones_generales_limpias and otras_indicaciones_generales_limpias != 'N/A':
-        content_parts.append(f"OTRAS INDICACIONES GENERALES:\n{otras_indicaciones_generales_limpias.replace('-', '\n-').strip()}\n\n")
+        content_parts.append(f"OTRAS INDICACIONES GENERALES:\n{otras_indicaciones_generales_formateadas}\n\n")
 
     content_parts.append(f"Fecha de Creación: {instruction.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S')}\n")
     if instruction.fecha_modificacion:

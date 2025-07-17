@@ -16,33 +16,31 @@ class Config:
 
 
 
-# PYTHONANYWHERE---------------------------------------------------------
-
+# # Importa os para manejar variables de entorno y rutas
 # import os
 
-# # LOCAL------------------------------------------------------------------
-
-# basedir = os.path.abspath(os.path.dirname(__file__))
-
+# # Define la clase de configuración principal para la aplicación Flask
 # class Config:
-#     SECRET_KEY = 'tu_clave_secreta_aqui'
-#     # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.db')
+#     # Clave secreta para proteger las sesiones de usuario y otras operaciones de seguridad
+#     # Se recomienda obtenerla de una variable de entorno para mayor seguridad
+#     SECRET_KEY = os.environ.get('SECRET_KEY') or 'una-cadena-dificil-de-adivinar'
+
+#     # Configuración de la base de datos SQLAlchemy
+#     # URI de la base de datos, obtenida de una variable de entorno o usando una predeterminada
+#     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+#         'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'app.db')
+
+#     # Deshabilita el seguimiento de modificaciones de objetos SQLAlchemy para ahorrar recursos
+#     # y evitar advertencias, ya que no es necesario para la mayoría de las aplicaciones
 #     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-#     # PYTHONANYWHERE---------------------------------------------------------
+#     # Configuración del reciclaje de la conexión de la base de datos para SQLAlchemy
+#     # Establecerlo un poco por debajo de ese valor ayuda a que SQLAlchemy cierre y reabra
+#     # conexiones de base de datos inactivas, evitando problemas de conexión persistente.
+#     SQLALCHEMY_POOL_RECYCLE = 299 # La línea problemática ha sido corregida aquí con un '#'
 
-#     # Asegúrate de que esta sea la configuración activa para PythonAnywhere
-#     # Descomenta y usa esta línea cuando despliegues en PythonAnywhere
-#     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://kenth1977:LaTribu1977@kenth1977.mysql.pythonanywhere-services.com/kenth1977$db'
+#     # Configuración del tamaño del pool de conexiones de la base de datos
+#     SQLALCHEMY_POOL_SIZE = 10
 
-#     # Configuración del pool de conexiones para evitar "Lost connection"
-#     # pool_recycle: Recicla las conexiones después de X segundos de inactividad.
-#     # PythonAnywhere cierra las conexiones inactivas después de 300 segundos (5 minutos).
-    # Establecerlo un poco por debajo de ese valor ayuda a que SQLAlchemy cierre y reabra
-    # la conexión antes de que el servidor lo haga.
-#     SQLALCHEMY_ENGINE_OPTIONS = {
-#         "pool_pre_ping": True, # Prueba la conexión antes de usarla del pool
-#         "pool_recycle": 280,   # Recicla conexiones después de 280 segundos (un poco menos de 5 minutos)
-#         "pool_timeout": 60,    # Tiempo máximo de espera para obtener una conexión del pool
-#         "pool_size": 10        # Número de conexiones en el pool (ajustar según necesidad y límites de PythonAnywhere)
-#     }
+#     # Configuración del tiempo de espera del pool de conexiones
+#     SQLALCHEMY_POOL_TIMEOUT = 30
