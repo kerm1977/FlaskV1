@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<style>
+    /* Eliminar sombras y bordes de la tarjeta principal */
+    .card.shadow.p-4 {
+        box-shadow: none !important;
+        border: none !important;
+        background-color: transparent !important; /* Opcional: para que no tenga fondo blanco de tarjeta */
+    }
+
+    /* Modificado: Permitir que los .form-control dentro de .input-group tengan borde */
+    .input-group > .form-control {
+        /* Se elimina 'border: none !important;' para que aplique el borde de .form-control */
+        border-right: none !important; /* Asegura que el borde derecho no se solape con el botón */
+    }
+
+    /* Ajustes adicionales si se desea que los campos y botones también pierdan "efectos card" */
+    .form-control {
+        border-radius: 0 !important; /* Bordes cuadrados en lugar de redondeados */
+        border: 1px solid #ced4da; /* Volver a poner un borde simple para los campos de formulario */
+    }
+
+    .btn {
+        border-radius: 0 !important; /* Bordes cuadrados en los botones */
+        box-shadow: none !important; /* Eliminar sombras de botones si las tuvieran */
+        border: 1px solid #ced4da; /* Asegura que el botón también tenga un borde */
+        border-left: none !important; /* Elimina el borde izquierdo para que se fusione con el input */
+    }
+
+    /* Ajuste específico para el botón dentro del input-group */
+    .input-group .btn-outline-secondary {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow p-4 mt-5">
+            <h2 class="text-center mb-3s4">Iniciar Sesión</h2>
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="mb-3">
+                    <label for="username_or_email" class="form-label">Nombre de Usuario o Correo Electrónico</label>
+                    <input type="text" class="form-control" id="username_or_email" name="username_or_email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning">Iniciar Sesión</button>
+                </div>
+                <p class="text-center mt-3">¿No tienes una cuenta? <a href="{{ url_for('register') }}">Regístrate aquí</a></p>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Script JavaScript para la funcionalidad de mostrar/ocultar contraseña #}
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', function (e) {
+        // Alternar el tipo entre 'password' y 'text'
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+
+        // Cambiar el icono del ojo
+        this.querySelector('i').classList.toggle('fa-eye');
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+</script>
+
+{# Necesitas Font Awesome para los iconos de ojo. Añade esto en <head> de base.html #}
+{# <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> #}
+
+{% endblock %}

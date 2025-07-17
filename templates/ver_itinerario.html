@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Ver Itinerarios{% endblock %}
+
+{% block head_content %}
+<style>
+    .card-caminata {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+    .card-caminata:hover {
+        transform: translateY(-5px);
+    }
+    .card-img-top-caminata {
+        width: 100%;
+        height: 200px; /* Altura fija para las imágenes */
+        object-fit: cover; /* Asegura que la imagen cubra el área sin distorsionarse */
+    }
+    .card-body-caminata {
+        padding: 1.25rem;
+    }
+    .fab-container {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo (ajustado a 70px para consistencia) */
+        right: 20px;
+        z-index: 1000;
+    }
+    .fab-button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color warning */
+        color: black;
+/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+*/        text-decoration: none; /* CAMBIO: Eliminar el subrayado del enlace */
+    }
+    .fab-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4 text-warning text-center">Itinerarios de Caminatas</h1>
+    <hr class="text-warning">
+
+    {% if itinerarios %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for itinerario in itinerarios %}
+            <div class="col">
+                <div class="card card-caminata h-100">
+                    {% if itinerario.caminata.imagen_caminata_url %}
+                        <img src="{{ url_for('static', filename=itinerario.caminata.imagen_caminata_url) }}" class="card-img-top card-img-top-caminata" alt="Imagen de la Caminata">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/defaults/default_caminata.png') }}" class="card-img-top card-img-top-caminata" alt="Imagen por defecto">
+                    {% endif %}
+                    <div class="card-body card-body-caminata">
+                        <h5 class="card-title text-center text-primary">Itinerario de: {{ itinerario.caminata.nombre }}</h5>
+                        <p class="card-text text-muted text-center">Fecha: {{ itinerario.caminata.fecha.strftime('%d-%m-%Y') }}</p>
+                        {% if itinerario.caminata.etapa %}
+                            <p class="card-text text-muted text-center">Etapa: {{ itinerario.caminata.etapa }}</p>
+                        {% endif %}
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ url_for('itinerario.detalle_itinerario', itinerario_id=itinerario.id) }}" class="btn btn-outline-primary">Ver Más</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center mt-5" role="alert">
+            No hay itinerarios registrados aún. ¡Crea uno nuevo!
+        </div>
+    {% endif %}
+</div>
+
+{# Botón flotante para crear nuevo itinerario #}
+<div class="fab-container">
+    <a href="{{ url_for('itinerario.crear_itinerario') }}" class="fab-button" title="Crear Nuevo Itinerario">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('index') }}" class="fab-button-back" title="Volver al Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

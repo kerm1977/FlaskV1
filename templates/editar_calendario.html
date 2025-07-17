@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Evento - {{ evento.nombre_actividad }}{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el botón flotante (FAB) de guardar */
+    .fab-container-save {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-save {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-save:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Editar Evento: {{ evento.nombre_actividad }}</h1>
+    <hr class="text-warning"> {# Agregado hr con estilo warning #}
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('calendario.editar_calendario', event_id=evento.id) }}" id="editEventForm"> {# Añadido ID al formulario #}
+        <div class="card mb-4 mt-5">
+            <div class="card-header bg-warning text-white"> {# Cambiado a bg-warning text-white #}
+                <h2 class="card-title mb-0">Información del Evento</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="flyer_imagen" class="form-label">Flyer o Imagen Actual</label>
+                    {% if evento.flyer_imagen_url %}
+                        <img src="{{ url_for('static', filename=evento.flyer_imagen_url) }}" class="img-thumbnail d-block mb-2" style="max-height: 150px; object-fit: contain;">
+                        <small class="form-text text-muted">Deja este campo vacío para mantener la imagen actual.</small>
+                    {% else %}
+                        <p class="text-muted">No hay imagen actual.</p>
+                    {% endif %}
+                    <input class="form-control" type="file" id="flyer_imagen" name="flyer_imagen" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label for="nombre_actividad" class="form-label">Nombre de la Actividad <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="nombre_actividad" name="nombre_actividad" value="{{ evento.nombre_actividad }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fecha_actividad" class="form-label">Fecha de la Actividad <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="fecha_actividad" name="fecha_actividad" value="{{ evento.fecha_actividad.strftime('%Y-%m-%d') }}" required>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="es_todo_el_dia" name="es_todo_el_dia" {% if evento.es_todo_el_dia %}checked{% endif %}>
+                    <label class="form-check-label" for="es_todo_el_dia">Evento todo el día</label>
+                </div>
+                <div class="mb-3" id="hora_actividad_group">
+                    <label for="hora_actividad" class="form-label">Hora de la Actividad</label>
+                    <input type="time" class="form-control" id="hora_actividad" name="hora_actividad" value="{{ evento.hora_actividad.strftime('%H:%M') if evento.hora_actividad else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="nombre_etiqueta" class="form-label">Nombre de Etiqueta <span class="text-danger">*</span></label>
+                    <select class="form-select" id="nombre_etiqueta" name="nombre_etiqueta" required>
+                        <option value="">Selecciona una etiqueta</option>
+                        {% for opcion in etiqueta_opciones %}
+                            <option value="{{ opcion }}" {% if opcion == evento.nombre_etiqueta %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="correos_notificacion" class="form-label">Correos Electrónicos para Notificación (separados por coma)</label>
+                    {# Los correos vienen como JSON en el modelo, los unimos para el textarea #}
+                    <textarea class="form-control" id="correos_notificacion" name="correos_notificacion" rows="3">{{ evento.correos_notificacion or '' }}</textarea>
+                    <small class="form-text text-muted">Ej: correo1@ejemplo.com, correo2@ejemplo.com</small>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion">{{ evento.descripcion or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        {# Botón "Guardar Cambios" original, ahora oculto #}
+        <button type="submit" class="btn btn-primary d-none">Guardar Cambios</button>
+        {# Botón "Cancelar" original, ahora oculto #}
+        <a href="{{ url_for('calendario.detalle_calendario', event_id=evento.id) }}" class="btn btn-secondary d-none">Cancelar</a>
+    </form>
+</div>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar CKEditor en el textarea con id 'descripcion'
+        ClassicEditor
+            .create( document.querySelector( '#descripcion' ) )
+            .catch( error => {
+                console.error( error );
+            } );
+
+        const esTodoElDiaCheckbox = document.getElementById('es_todo_el_dia');
+        const horaActividadGroup = document.getElementById('hora_actividad_group');
+        const horaActividadInput = document.getElementById('hora_actividad');
+        
+        // Función para alternar la visibilidad y el atributo 'required' del campo de hora
+        function toggleHoraActividad() {
+            if (esTodoElDiaCheckbox.checked) {
+                horaActividadGroup.style.display = 'none';
+                horaActividadInput.removeAttribute('required'); // No requerido si es todo el día
+                horaActividadInput.value = ''; // Limpiar valor
+            } else {
+                horaActividadGroup.style.display = 'block';
+                // Solo añadir 'required' si el campo está visible y es para hora específica
+                if (horaActividadInput.value === '') { 
+                    horaActividadInput.setAttribute('required', 'required'); 
+                }
+            }
+        }
+
+        // Llamar al cargar la página para establecer el estado inicial
+        toggleHoraActividad();
+
+        // Escuchar cambios en el checkbox "Todo el día"
+        esTodoElDiaCheckbox.addEventListener('change', toggleHoraActividad);
+    });
+</script>
+
+{# Botón flotante para guardar cambios #}
+<div class="fab-container-save">
+    <a href="#" class="fab-button-save" title="Guardar Cambios" onclick="document.getElementById('editEventForm').submit(); return false;">
+        <i class="fas fa-save" style="color: black;"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('calendario.detalle_calendario', event_id=evento.id) }}" class="fab-button-back" title="Volver al Detalle del Evento">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

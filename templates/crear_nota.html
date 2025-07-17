@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Nueva Nota{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el botón flotante (FAB) de guardar */
+    .fab-container-save {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-save {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-save:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Crear Nueva Nota</h1>
+    <hr class="text-warning">
+    <form method="POST" action="{{ url_for('notas.crear_nota') }}" enctype="multipart/form-data" id="createNoteForm">
+        <div class="row">
+            <div class="col-md-12">
+                {# Título de la Nota #}
+                <div class="mb-3">
+                    <label for="title" class="form-label">Título de la Nota <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+                {# Imagen de la Nota (para la miniatura de la nota) #}
+                <div class="mb-3">
+                    <label for="image" class="form-label">Imagen de la Nota (Opcional, para la miniatura)</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                    <div class="form-text">Formatos permitidos: PNG, JPG, JPEG, GIF. Esta imagen es para la nota en general, no para insertar en el contenido del texto.</div>
+                </div>
+
+                {# Contenedor para Quill.js #}
+                <div class="mb-3">
+                    <label for="editor-container" class="form-label">Contenido de la Nota</label>
+                    {# El editor de Quill.js se adjuntará a este div #}
+                    <div id="editor-container" style="height: 300px; border: 1px solid #ced4da; border-radius: 0.25rem;"></div>
+                    {# Este input oculto contendrá el contenido HTML final de Quill #}
+                    <input type="hidden" name="content" id="quill-content-input">
+                </div>
+
+                {# NUEVO: Selector de color de fondo para la nota #}
+                <div class="mb-3">
+                    <label for="background_color" class="form-label">Color de Fondo de la Nota</label>
+                    <input type="color" class="form-control form-control-color" id="background_color" name="background_color" value="#FFFFFF" title="Elige un color para el fondo de la nota">
+                    <div class="form-text">Este color se aplicará al fondo de la tarjeta de la nota en la vista de lista.</div>
+                </div>
+
+                {# Switch para visibilidad pública #}
+                <div class="mb-3 form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="is_public" name="is_public">
+                    <label class="form-check-label" for="is_public">Hacer esta nota pública (visible para todos los usuarios logueados)</label>
+                </div>
+
+                {# Multiselector de Contactos que pueden ver la nota #}
+                <div class="mb-3">
+                    <label for="authorized_viewers" class="form-label">Usuarios que pueden ver esta nota (Multi-selección)</label>
+                    <select class="form-select" id="authorized_viewers" name="authorized_viewers" multiple size="7">
+                        {% for user in all_users %}
+                            {# No permitimos que el creador se deseleccione a sí mismo #}
+                            {% if user.id == session.user_id %}
+                                <option value="{{ user.id }}" selected disabled>{{ user.nombre }} {{ user.primer_apellido }} (Creador)</option>
+                            {% else %}
+                                <option value="{{ user.id }}">
+                                    {{ user.nombre }} {{ user.primer_apellido }} {{ user.segundo_apellido if user.segundo_apellido else '' }} ({{ user.username }})
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Mantén 'Ctrl' (Windows) / 'Cmd' (Mac) para seleccionar múltiples usuarios. El creador siempre tendrá acceso.</div>
+                </div>
+
+                {# Autofechas y Creador (manejados por el backend, no necesitan input aquí) #}
+                <p class="text-muted mt-3">
+                    La fecha de creación y el contacto creador se asignarán automáticamente.
+                </p>
+                
+
+                {# Ocultar los botones originales #}
+                <button type="submit" class="btn btn-success mt-3 d-none"><i class="fas fa-save"></i> Guardar Nota</button>
+                <a href="{{ url_for('notas.ver_notas') }}" class="btn btn-secondary mt-3 d-none"><i class="fas fa-ban"></i> Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{# Quill.js CSS #}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+{# Quill.js JS #}
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar Quill.js
+        const quill = new Quill('#editor-container', {
+            theme: 'snow', // Tema 'snow' para una barra de herramientas completa
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }], // h1 hasta h6
+                    ['bold', 'italic', 'underline', 'strike'], // negrita, cursiva, subrayado, tachado
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }], // números tipo lista, viñeta
+                    [{ 'align': [] }], // alineado centrado, justificado, derecha, izquierda
+                    ['link', 'image'], // enlace, imagen
+                    [{ 'script': 'sub'}, { 'script': 'super' }], // subíndice/superíndice
+                    [{ 'indent': '-1'}, { 'indent': '+1' }], // indentar/sangría
+                    [{ 'direction': 'rtl' }], // dirección de texto (derecha a izquierda)
+                    [{ 'color': [] }, { 'background': [] }], // color de texto, color de fondo
+                    ['blockquote', 'code-block'], // cita en bloque, bloque de código
+                    ['undo', 'redo'], // Deshacer y rehacer
+                    ['clean'] // Eliminar formato
+                ],
+                history: { // Para deshacer/rehacer (ya estaba configurado)
+                    delay: 2000,
+                    maxStack: 500,
+                    userOnly: true
+                }
+            },
+            placeholder: 'Escribe el contenido de tu nota aquí...',
+        });
+
+        // Cuando el contenido de Quill cambie, actualiza el input oculto
+        const quillContentInput = document.getElementById('quill-content-input');
+        quill.on('text-change', function() {
+            // Guarda el contenido HTML en el input oculto
+            quillContentInput.value = quill.root.innerHTML;
+        });
+
+        // Asegúrate de que el contenido inicial se guarde al cargar (si es necesario)
+        quillContentInput.value = quill.root.innerHTML;
+
+        // Lógica para el multiselector de usuarios (misma que antes)
+        const creatorId = {{ session.user_id }};
+        const selectElement = document.getElementById('authorized_viewers');
+        for (let i = 0; i < selectElement.options.length; i++) {
+            if (parseInt(selectElement.options[i].value) === creatorId) {
+                selectElement.options[i].selected = true;
+                break;
+            }
+        }
+
+        // Cuando el formulario se envía, asegúrate de que el contenido final de Quill esté en el input oculto
+        document.querySelector('form').addEventListener('submit', function() {
+            quillContentInput.value = quill.root.innerHTML;
+        });
+    });
+</script>
+
+{# Botón flotante para guardar nota #}
+<div class="fab-container-save">
+    <a href="#" class="fab-button-save" title="Guardar Nota" onclick="document.getElementById('createNoteForm').submit(); return false;">
+        <i class="fas fa-save" style="color: black;"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('notas.ver_notas') }}" class="fab-button-back" title="Volver a Notas">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

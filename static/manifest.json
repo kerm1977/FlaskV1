@@ -1,0 +1,21 @@
+{
+    "name": "La Tribu ",
+    "short_name": "La Tribu",
+    "description": "Una aplicación Flask convertida en PWA",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#fe3000",
+    "theme_color": "#fe3000",
+    "icons": [
+        {
+            "src": "/static/uploads/icons/icon-192x192.jpg",
+            "sizes": "192x192",
+            "type": "image/jpg"
+        },
+        {
+            "src": "/static/uploads/icons/icon-512x512.jpg",
+            "sizes": "512x512",
+            "type": "image/jpg"
+        }
+    ]
+}

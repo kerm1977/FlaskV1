@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalles de Contacto{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Nueva clase para ocultar elementos sin eliminarlos del flujo */
+    .hidden-for-capture {
+        visibility: hidden !important;
+    }
+
+    /* FAB buttons for actions - Copied from detalle_itinerario.html */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Higher z-index for action buttons */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */ /* Eliminado */
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1);
+        /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); */ /* Eliminado */
+    }
+
+    /* Estilos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* CAMBIO: Distancia desde abajo, subido para alinear */
+        left: 20px; /* Distancia desde la izquierda */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 50px; /* Tamaño del botón */
+        height: 50px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem; /* Tamaño del icono */
+        background-color: #007bff; /* Color de fondo primario (azul) */
+        color: white; /* Color de texto blanco */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */ /* Eliminado */
+        transition: all 0.3s ease;
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); */ /* Eliminado */
+    }
+
+    /* Estilos para el contenedor de la tarjeta de contacto */
+    .contact-detail-card {
+        background-color: #fff;
+        /* border-radius: 15px; */ /* Eliminado */
+        padding: 30px;
+        /* box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); */ /* Eliminado */
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+
+    /* Estilos para el avatar */
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #ffc107; /* Borde amarillo para el avatar */
+        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */ /* Eliminado */
+    }
+
+    /* Estilos para los títulos de sección */
+    .section-title {
+        color: #ffc107; /* Color amarillo */
+        font-weight: bold;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #ffc107;
+        padding-bottom: 5px;
+    }
+
+    /* Estilos para los detalles */
+    .detail-item {
+        margin-bottom: 10px;
+    }
+    .detail-item strong {
+        color: #495057;
+        font-weight: 600;
+        display: block; /* Asegura que la etiqueta esté en su propia línea */
+    }
+    .detail-item span {
+        color: #212529;
+        display: block; /* Asegura que el valor esté en su propia línea */
+        font-size: 1.05em;
+    }
+
+    /* Estilos para los botones de acción en la tarjeta */
+    .action-buttons .btn {
+        margin-right: 10px;
+    }
+
+    /* Media queries para responsividad */
+    @media (max-width: 768px) {
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+        }
+        .section-title {
+            font-size: 1.3rem;
+        }
+        .detail-item strong, .detail-item span {
+            font-size: 0.95em;
+        }
+        .fab-button-action, .fab-button-back {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+        }
+        .fab-container-actions {
+            bottom: 15px;
+            right: 15px;
+            gap: 8px;
+        }
+        .fab-container-back {
+            bottom: 15px;
+            left: 15px;
+        }
+    }
+</style>
+<!-- Incluir html2canvas y jspdf para la exportación de JPG/PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-9">
+            <div class="contact-detail-card">
+                <div class="text-center mb-4">
+                    <img src="{{ avatar_url }}" alt="Avatar de {{ user.username }}" class="profile-avatar mb-3">
+                    <h3 class="text-warning">{{ user.nombre }} {{ user.primer_apellido }} {{ user.segundo_apellido if user.segundo_apellido else '' }}</h3>
+                    <p class="text-muted">@{{ user.username }}</p>
+                </div>
+
+                <h4 class="section-title">Información de Contacto</h4>
+                <div class="row">
+                    <div class="col-md-6 detail-item">
+                        <strong>Teléfono:</strong>
+                        <span>{{ user.telefono }}</span>
+                    </div>
+                    {% if user.email %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Email:</strong>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.empresa %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Empresa:</strong>
+                        <span>{{ user.empresa }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.direccion %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Dirección (Provincia):</strong>
+                        <span>{{ user.direccion }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Rol:</strong>
+                        <span>{{ user.role }}</span>
+                    </div>
+                    {% if user.cedula %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Cédula:</strong>
+                        <span>{{ user.cedula }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <h4 class="section-title">Información Adicional</h4>
+                <div class="row">
+                    {% if user.fecha_registro %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Fecha de Registro:</strong>
+                        <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.fecha_actualizacion %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Última Actualización:</strong>
+                        <span>{{ user.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.fecha_nacimiento %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Fecha de Nacimiento:</strong>
+                        <span>{{ user.fecha_nacimiento.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.genero %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Género:</strong>
+                        <span>{{ user.genero }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.actividad %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Actividad:</strong>
+                        <span>{{ user.actividad }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.capacidad %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Capacidad:</strong>
+                        <span>{{ user.capacidad }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.participacion %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Participación:</strong>
+                        <span>{{ user.participacion }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.fecha_cumpleanos %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Fecha de Cumpleaños:</strong>
+                        <span>{{ user.fecha_cumpleanos.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.tipo_sangre %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Tipo de Sangre:</strong>
+                        <span>{{ user.tipo_sangre }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.poliza %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Póliza:</strong>
+                        <span>{{ user.poliza }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.aseguradora %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Aseguradora:</strong>
+                        <span>{{ user.aseguradora }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.alergias %}
+                    <div class="col-md-12 detail-item">
+                        <strong>Alergias:</strong>
+                        <span>{{ user.alergias }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.enfermedades_cronicas %}
+                    <div class="col-md-12 detail-item">
+                        <strong>Enfermedades Crónicas:</strong>
+                        <span>{{ user.enfermedades_cronicas }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <h4 class="section-title">Contacto de Emergencia</h4>
+                <div class="row">
+                    {% if user.nombre_emergencia %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Nombre Contacto Emergencia:</strong>
+                        <span>{{ user.nombre_emergencia }}</span>
+                    </div>
+                    {% endif %}
+                    {% if user.telefono_emergencia %}
+                    <div class="col-md-6 detail-item">
+                        <strong>Teléfono Emergencia:</strong>
+                        <span>{{ user.telefono_emergencia }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="action-buttons text-center mt-4">
+                    {% if current_role == 'Superuser' or current_role == 'Administrador' or current_user_id == user.id %}
+                        <a href="{{ url_for('contactos.editar_contacto', user_id=user.id) }}" class="btn btn-warning me-2">
+                            <i class="fas fa-edit me-1"></i> Editar
+                        </a>
+                    {% endif %}
+                    {% if current_role == 'Superuser' %}
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                            <i class="fas fa-trash-alt me-1"></i> Eliminar
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Eliminación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar a {{ user.nombre }} {{ user.primer_apellido }}? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('contactos.eliminar_contacto', user_id=user.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botones flotantes para acciones #}
+<div class="fab-container-actions">
+    {% if current_role == 'Superuser' or current_role == 'Administrador' %}
+    <a href="{{ url_for('contactos.exportar_vcard', user_id=user.id) }}" class="fab-button-action btn btn-info" title="Exportar vCard">
+        <i class="fas fa-address-card"></i>
+    </a>
+    <a href="{{ url_for('contactos.exportar_excel', user_id=user.id) }}" class="fab-button-action btn btn-success" title="Exportar Excel">
+        <i class="fas fa-file-excel"></i>
+    </a>
+    {% endif %}
+    <!-- Botón para exportar a JPG -->
+    <button id="exportToJpg" class="fab-button-action btn btn-primary" title="Exportar como JPG">
+        <i class="fas fa-image"></i>
+    </button>
+    <!-- Botón para exportar a PDF -->
+    <button id="exportToPdf" class="fab-button-action btn btn-danger" title="Exportar como PDF">
+        <i class="fas fa-file-pdf"></i>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const exportToPdfButton = document.getElementById('exportToPdf');
+        const exportToJpgButton = document.getElementById('exportToJpg');
+        const contentToCapture = document.querySelector('.contact-detail-card');
+        const fabContainers = document.querySelectorAll('.fab-container-actions, .fab-container-back');
+
+        // Función para mostrar mensajes temporales
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `alert alert-${type} text-center mt-3`;
+            messageDiv.textContent = message;
+            document.querySelector('.container.mt-5.mb-5').prepend(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        if (exportToPdfButton) {
+            exportToPdfButton.addEventListener('click', async function() {
+                // Mostrar mensaje de carga
+                const loadingMessage = document.createElement('div');
+                loadingMessage.className = 'alert alert-info text-center mt-3';
+                loadingMessage.textContent = 'Generando PDF, por favor espera...';
+                document.querySelector('.container.mt-5.mb-5').prepend(loadingMessage);
+
+                // Ocultar botones FAB para la captura
+                fabContainers.forEach(container => container.classList.add('hidden-for-capture'));
+
+                // Ocultar los botones de acción dentro de la tarjeta para la captura
+                const actionButtonsInCard = contentToCapture.querySelector('.action-buttons');
+                if (actionButtonsInCard) {
+                    actionButtonsInCard.classList.add('hidden-for-capture');
+                }
+
+                try {
+                    const canvas = await html2canvas(contentToCapture, {
+                        scale: 2, // Aumenta la escala para mejor calidad
+                        useCORS: true, // Importante si tienes imágenes de diferentes orígenes
+                        logging: true,
+                        scrollY: -window.scrollY, // Asegura que la captura empiece desde la parte superior visible
+                        windowWidth: document.documentElement.offsetWidth,
+                        windowHeight: document.documentElement.offsetHeight
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'px',
+                        format: 'a4'
+                    });
+
+                    const imgWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+
+                    pdf.save('detalle_contacto.pdf');
+                    loadingMessage.remove();
+                    showMessage('¡PDF exportado con éxito!', 'success');
+                } catch (err) {
+                    console.error('Error al generar el PDF:', err);
+                    loadingMessage.remove();
+                    showMessage('Error al exportar el PDF. Por favor, inténtalo de nuevo.', 'danger');
+                } finally {
+                    // Volver a mostrar los botones FAB
+                    fabContainers.forEach(container => container.classList.remove('hidden-for-capture'));
+                    // Volver a mostrar los botones de acción dentro de la tarjeta
+                    if (actionButtonsInCard) {
+                        actionButtonsInCard.classList.remove('hidden-for-capture');
+                    }
+                }
+            });
+        }
+
+        if (exportToJpgButton) {
+            exportToJpgButton.addEventListener('click', function() {
+                // Mostrar mensaje de carga
+                const loadingMessage = document.createElement('div');
+                loadingMessage.className = 'alert alert-info text-center mt-3';
+                loadingMessage.textContent = 'Generando imagen JPG, por favor espera...';
+                document.querySelector('.container.mt-5.mb-5').prepend(loadingMessage);
+
+                // Ocultar botones FAB para la captura
+                fabContainers.forEach(container => container.classList.add('hidden-for-capture'));
+
+                // Ocultar los botones de acción dentro de la tarjeta para la captura
+                const actionButtonsInCard = contentToCapture.querySelector('.action-buttons');
+                if (actionButtonsInCard) {
+                    actionButtonsInCard.classList.add('hidden-for-capture');
+                }
+
+                html2canvas(contentToCapture, {
+                    scale: 2, // Aumenta la escala para mejor calidad
+                    useCORS: true, // Importante si tienes imágenes de diferentes orígenes
+                    logging: true,
+                    scrollY: -window.scrollY,
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight
+                }).then(canvas => {
+                    // Crear un enlace temporal para la descarga
+                    const link = document.createElement('a');
+                    link.download = 'detalle_contacto.jpg';
+                    link.href = canvas.toDataURL('image/jpeg', 0.9); // 0.9 es la calidad de la imagen
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    loadingMessage.remove(); // Eliminar mensaje de carga
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'alert alert-success text-center mt-3';
+                    successMessage.textContent = '¡Imagen exportada con éxito!';
+                    document.querySelector('.container.mt-5.mb-5').prepend(successMessage);
+                    setTimeout(() => successMessage.remove(), 3000); // Quitar el mensaje después de 3 segundos
+                }).catch(err => {
+                    console.error('Error al generar la imagen JPG:', err);
+                    loadingMessage.remove(); // Eliminar mensaje de carga en caso de error
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'alert alert-danger text-center mt-3';
+                    errorMessage.textContent = 'Error al exportar la imagen. Por favor, inténtalo de nuevo.';
+                    document.querySelector('.container.mt-5.mb-5').prepend(errorMessage);
+                    setTimeout(() => errorMessage.remove(), 5000); // Quitar el mensaje después de 5 segundos
+                }).finally(() => {
+                    // Volver a mostrar los botones FAB
+                    fabContainers.forEach(container => container.classList.remove('hidden-for-capture'));
+                    // Volver a mostrar los botones de acción dentro de la tarjeta
+                    if (actionButtonsInCard) {
+                        actionButtonsInCard.classList.remove('hidden-for-capture');
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('contactos.ver_contactos') }}" class="fab-button-back" title="Volver a la Lista de Contactos">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

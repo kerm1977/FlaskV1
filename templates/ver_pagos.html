@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Ver Pagos{% endblock %}
+
+{% block head_content %}
+{# Estilos específicos para esta página que no están en main.css o sobrescriben base.html #}
+<style>
+    /* Estilos específicos para la imagen de pago */
+    .imagen-pago {
+        width: 100%; /* La imagen ocupará el 100% del ancho de su contenedor */
+        height: auto; /* La altura se ajustará automáticamente para mantener la proporción real de la imagen */
+        display: block; /* Asegura que la imagen ocupe el espacio definido */
+        cursor: pointer; /* Indica que la imagen es clicable */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de crear */
+    .fab-container {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo (ajustado a 70px para consistencia) */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        /* Estilos del botón warning de ver_caminatas.html */
+        background-color: #ffc107; /* Color de fondo warning */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* CAMBIO: Eliminar el subrayado del enlace */
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Ajustes para las imágenes dentro de las tarjetas */
+    /* Eliminamos la altura fija y object-fit para que la imagen se ajuste a sus proporciones reales */
+    .card-img-top {
+        /* height: 200px; */ /* Eliminado para permitir que la imagen se ajuste a su altura real */
+        /* object-fit: cover; */ /* Eliminado para evitar recortes y mantener la proporción */
+    }
+
+    /* Estilos del Modal */
+    .modal {
+        display: none; /* Oculto por defecto */
+        position: fixed; /* Se mantiene en su lugar */
+        z-index: 2000; /* Por encima de todo */
+        padding-top: 100px; /* Espacio desde arriba */
+        left: 0;
+        top: 0;
+        width: 100%; /* Ancho completo */
+        height: 100%; /* Alto completo */
+        overflow: auto; /* Habilitar scroll si es necesario */
+        background-color: rgba(0,0,0,0.9); /* Fondo negro semi-transparente */
+    }
+
+    /* Contenido del Modal (la imagen) */
+    .modal-content {
+        margin: auto;
+        display: block;
+        max-width: 90%; /* Permite que la imagen ocupe hasta el 90% del ancho del modal */
+        max-height: 90vh; /* Permite que la imagen ocupe hasta el 90% de la altura del viewport */
+        width: auto; /* La anchura se ajustará automáticamente */
+        height: auto; /* La altura se ajustará automáticamente */
+        object-fit: contain; /* ¡CRUCIAL! Escala la imagen para que quepa dentro del contenedor, manteniendo su relación de aspecto. */
+        padding: 10px; /* Pequeño padding para evitar que toque los bordes en pantallas muy pequeñas */
+        box-sizing: border-box; /* Incluye el padding en el ancho y alto total del elemento */
+    }
+
+    /* Texto del pie de imagen del Modal */
+    #caption {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+        text-align: center;
+        color: #ccc;
+        padding: 10px 0;
+        height: 150px;
+    }
+
+    /* Botón de cerrar */
+    .close-button {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Animación */
+    .modal-content, #caption {
+        -webkit-animation-name: zoom;
+        -webkit-animation-duration: 0.6s;
+        animation-name: zoom;
+        animation-duration: 0.6s;
+    }
+
+    @-webkit-keyframes zoom {
+        from {-webkit-transform:scale(0)}
+        to {-webkit-transform:scale(1)}
+    }
+
+    @keyframes zoom {
+        from {transform:scale(0)}
+        to {transform:scale(1)}
+    }
+
+    /* Ancho de imagen al 100% en pantallas más pequeñas */
+    @media only screen and (max-width: 700px){
+        .modal-content {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center text-center text-warning">Listado de Pagos de Caminatas</h1>
+    <hr class="text-warning">
+    {# El botón "Crear Nuevo Pago" normal ha sido eliminado, ya que el flotante lo reemplaza. #}
+
+    {% if pagos %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for pago in pagos %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    {% if pago.flyer_imagen_url %}
+                        {# Aplicamos la clase 'imagen-pago' y el evento onclick #}
+                        <img src="{{ url_for('static', filename=pago.flyer_imagen_url) }}" class="card-img-top imagen-pago" alt="{{ pago.nombre_caminata }}" onclick="openImageModal(this.src, this.alt)">
+                    {% else %}
+                        {# Aplicamos la clase 'imagen-pago' y el evento onclick #}
+                        <img src="{{ url_for('static', filename='images/defaults/default_caminata.png') }}" class="card-img-top imagen-pago" alt="Imagen por defecto" onclick="openImageModal(this.src, this.alt)">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ pago.nombre_caminata }}</h5>
+                        <p class="card-text mb-1"><strong>Precio Paquete:</strong> ¢{{ "{:,.0f}".format(pago.precio_paquete) }}</p>
+                        <p class="card-text mb-3"><strong>Capacidad:</strong> {{ pago.capacidad }} personas</p>
+                        <div class="mt-auto"> {# Empuja el botón hacia abajo #}
+                            <a href="{{ url_for('pagos.detalle_pagos', pago_id=pago.id) }}" class="btn btn-warning w-100">Ver Más</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            No hay pagos registrados aún. ¡Crea el primero!
+        </div>
+    {% endif %}
+</div>
+
+{# Botón flotante para crear pago #}
+<div class="fab-container">
+    <a href="{{ url_for('pagos.crear_pagos') }}" class="fab-button" title="Crear Nuevo Pago">
+        <i class="fas fa-plus" style="color: black;"></i> {# Icono de más en negro #}
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('index') }}" class="fab-button-back" title="Volver al Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+
+{# El Modal #}
+<div id="imageModal" class="modal">
+    <span class="close-button">&times;</span>
+    <img class="modal-content" id="fullImage">
+    <div id="caption" class="caption"></div>
+</div>
+
+<script>
+    // Obtener el modal
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("fullImage");
+    const captionText = document.getElementById("caption");
+
+    // Obtener el elemento <span> (botón de cerrar)
+    const span = document.getElementsByClassName("close-button")[0];
+
+    // Función para abrir el modal
+    function openImageModal(imgSrc, imgAlt) {
+        modal.style.display = "block";
+        modalImg.src = imgSrc;
+        captionText.innerHTML = imgAlt;
+    }
+
+    // Cuando el usuario hace clic en <span> (x), cierra el modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Cuando el usuario hace clic en cualquier lugar fuera del contenido del modal, lo cierra
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

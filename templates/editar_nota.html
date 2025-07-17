@@ -1,0 +1,257 @@
+<!-- templates/ver_aboutus.html -->
+{% extends 'base.html' %}
+{% block title %}Acerca de Nosotros{% endblock %}
+{% block head_content %}
+    <style>
+        /* Estilos generales para el contenedor principal */
+        .about-us-container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            /* Eliminado: background-color */
+            border-radius: 12px;
+            /* Eliminado: box-shadow */
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+
+        /* Estilo para el título principal */
+        .about-us-title {
+            font-size: 2.5rem;
+            font-weight: 7            00;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        /* Estilos para la sección del logo */
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            /* Eliminado: background-color */
+            border-radius: 10px;
+            /* Eliminado: border */
+        }
+
+        .logo-image {
+            max-width: 200px;
+            height: auto;
+            border-radius: 8px;
+            /* Eliminado: box-shadow */
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.03);
+        }
+
+        .logo-info {
+            font-size: 1.1rem;
+            color: #555;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* Estilos para el detalle principal */
+        .detail-section {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 30px;
+            padding: 20px;
+            /* Eliminado: background-color */
+            border-radius: 10px;
+            /* Eliminado: border */
+        }
+
+        /* Estilos para las fechas */
+        .date-info {
+            font-size: 0.95rem;
+            color: #777;
+            text-align: right;
+            border-top: 1px dashed #ddd;
+            padding-top: 15px;
+            margin-top: 25px;
+        }
+
+        /* Estilos para los botones de acción flotantes (replicados de editar_nota.html) */
+        .fab-container-actions {
+            position: fixed; /* Fija la posición en la ventana */
+            bottom: 70px;    /* 70px desde la parte inferior (como editar_nota.html) */
+            right: 20px;     /* 20px desde la derecha */
+            z-index: 1050;   /* Asegura que esté por encima de otros elementos */
+            display: flex;
+            flex-direction: column; /* Apila los botones verticalmente */
+            gap: 10px;       /* Espacio entre los botones */
+        }
+
+        .fab-button-action {
+            width: 60px; /* Tamaño del botón (como editar_nota.html) */
+            height: 60px; /* Tamaño del botón (como editar_nota.html) */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Tamaño del icono (como editar_nota.html) */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto flotante */
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none !important;
+            cursor: pointer;
+        }
+
+        .fab-button-action:hover {
+            transform: scale(1.05); /* Efecto de escala al pasar el ratón */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada al pasar el ratón */
+        }
+
+        /* Colores específicos para los botones */
+        .fab-button-edit { background-color: #ffc107; color: black !important; } /* Warning */
+        .fab-button-delete { background-color: #dc3545; color: white !important; } /* Danger */
+        .fab-button-pdf { background-color: #6f42c1; color: white !important; } /* Purple */
+        .fab-button-txt { background-color: #17a2b8; color: white !important; } /* Info-dark */
+        .fab-button-jpg { background-color: #fd7e14; color: white !important; } /* Orange */
+
+        /* Estilos para el botón flotante (FAB) de volver atrás (copiado de editar_nota.html) */
+        .fab-container-back {
+            position: fixed;
+            bottom: 70px; /* Distancia desde abajo */
+            left: 20px; /* Distancia desde la izquierda */
+            right: auto; /* Anula la distancia derecha */
+            z-index: 1000; /* Asegura que esté por encima de otros elementos */
+        }
+        .fab-button-back {
+            width: 60px; /* Tamaño del botón */
+            height: 60px; /* Tamaño del botón */
+            border-radius: 50%; /* Hacerlo circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Tamaño del icono */
+            transition: all 0.3s ease;
+            background-color: #007bff; /* Color de fondo primary */
+            color: #ffffff; /* Color de texto blanco */
+            border: none; /* Asegurar que no haya borde */
+            text-decoration: none; /* Eliminar el subrayado */
+        }
+        .fab-button-back:hover {
+            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+            background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+        }
+
+        /* Estilos para el modal de confirmación */
+        .modal-content {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.3); /* Mantener sombra para el modal */
+        }
+        .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .modal-footer {
+            border-top: none;
+            padding-top: 0;
+        }
+        .modal-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .btn-confirm-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+        .btn-confirm-delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="about-us-container">
+        {% if about_us_entry %}
+            <h1 class="about-us-title">{{ about_us_entry.title }}</h1>
+
+            <div class="logo-section">
+                {% if about_us_entry.logo_filename %}
+                    {# La ruta de la imagen debe ser relativa a la carpeta 'static' #}
+                    <img src="{{ url_for('static', filename='uploads/aboutus_images/' + about_us_entry.logo_filename) }}" 
+                         alt="Logo de la empresa" class="logo-image">
+                {% else %}
+                    <p class="text-muted">No hay logo disponible.</p>
+                {% endif %}
+                <p class="logo-info">{{ about_us_entry.logo_info }}</p>
+            </div>
+
+            <div class="detail-section">
+                {{ about_us_entry.detail | safe }}
+            </div>
+
+            <div class="date-info">
+                <p>Fecha de Creación: {{ about_us_entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                <p>Fecha de Modificación: {{ about_us_entry.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            </div>
+
+            {# Contenedor para los botones de acción flotantes a la derecha #}
+            <div class="fab-container-actions">
+                <a href="{{ url_for('aboutus.editar_aboutus', aboutus_id=about_us_entry.id) }}" class="fab-button-action fab-button-edit" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button type="button" class="fab-button-action fab-button-delete" title="Eliminar" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <a href="{{ url_for('aboutus.exportar_aboutus', aboutus_id=about_us_entry.id, format='pdf') }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </a>
+                <a href="{{ url_for('aboutus.exportar_aboutus', aboutus_id=about_us_entry.id, format='txt') }}" class="fab-button-action fab-button-txt" title="Exportar a TXT">
+                    <i class="fas fa-file-alt"></i>
+                </a>
+                <a href="{{ url_for('aboutus.exportar_aboutus', aboutus_id=about_us_entry.id, format='jpg') }}" class="fab-button-action fab-button-jpg" title="Exportar a JPG">
+                    <i class="fas fa-image"></i>
+                </a>
+            </div>
+
+            {# Botón flotante para volver atrás (copiado de editar_nota.html) #}
+            <div class="fab-container-back">
+                <a href="{{ url_for('home') }}" class="fab-button-back" title="Volver a la Página Principal">
+                    <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+                </a>
+            </div>
+
+            <!-- Modal de Confirmación de Eliminación -->
+            <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que deseas eliminar esta sección "Acerca de Nosotros"? Esta acción no se puede deshacer.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form action="{{ url_for('aboutus.eliminar_aboutus', aboutus_id=about_us_entry.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-confirm-delete">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <div class="text-center p-5 bg-light rounded-lg">
+                <p class="lead">Aún no se ha creado una sección "Acerca de Nosotros".</p>
+                <a href="{{ url_for('aboutus.crear_aboutus') }}" class="btn btn-primary btn-lg mt-3">Crear Ahora</a>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

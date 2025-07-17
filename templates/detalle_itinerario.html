@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Itinerario{% endblock %}
+
+{% block head_content %}
+<style>
+    .itinerario-card {
+        border-radius: 15px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        background-color: #f8f9fa; /* Light background for the card */
+    }
+    .itinerario-header {
+        background-color: #28a745; /* Success green */
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .itinerario-body {
+        padding: 2rem;
+    }
+    .itinerario-section-title {
+        color: #007bff; /* Primary blue */
+        font-weight: bold;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 5px;
+    }
+    .itinerario-info p {
+        margin-bottom: 0.5rem;
+    }
+    .itinerario-info strong {
+        color: #343a40; /* Darker text for labels */
+    }
+    .itinerario-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .itinerario-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .itinerario-content th, .itinerario-content td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: left;
+    }
+    .itinerario-content th {
+        background-color: #e9ecef;
+    }
+    .itinerario-content ul, .itinerario-content ol {
+        padding-left: 20px;
+    }
+    .itinerario-content pre {
+        background-color: #e9ecef;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+
+    /* FAB buttons for actions */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Higher z-index for action buttons */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    .fab-button-edit { background-color: #ffc107; color: black; } /* Warning */
+    .fab-button-delete { background-color: #dc3545; color: white; } /* Danger */
+    .fab-button-pdf { background-color: #6f42c1; color: white; } /* Purple */
+    .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark */
+    .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange */
+
+    /* Modal styles */
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+        background-color: #dc3545; /* Danger red */
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .modal-footer .btn {
+        border-radius: 8px;
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="card itinerario-card">
+        <div class="itinerario-header">
+            <h1 class="mb-0">Itinerario de la Caminata: <br>{{ itinerario.caminata.nombre }}</h1>
+            <p class="lead mb-0">Fecha de la Caminata: {{ itinerario.caminata.fecha.strftime('%d-%m-%Y') }}</p>
+            {% if itinerario.caminata.etapa %}
+                <p class="lead mb-0">Etapa: {{ itinerario.caminata.etapa }}</p>
+            {% endif %}
+        </div>
+        <div class="card-body itinerario-body">
+            <div class="itinerario-info">
+                <h3 class="itinerario-section-title">Detalles Clave</h3>
+                <p><strong>Lugar de Salida:</strong> {{ itinerario.lugar_salida or 'N/A' }}</p>
+                <p><strong>Hora de Salida:</strong> {{ itinerario.hora_salida.strftime('%H:%M') if itinerario.hora_salida else 'N/A' }}</p>
+                <p><strong>Pasaremos a comer:</strong> {{ itinerario.pasaremos_a_comer or 'N/A' }}</p>
+
+                {% if puntos_recogida_list %}
+                    <h3 class="itinerario-section-title">Puntos de Recogida</h3>
+                    <ul>
+                        {% for punto in puntos_recogida_list %}
+                            <li>{{ punto }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No se especificaron puntos de recogida.</p>
+                {% endif %}
+            </div>
+
+            {% if itinerario.contenido_itinerario %}
+                <h3 class="itinerario-section-title">Contenido Detallado del Itinerario</h3>
+                <div class="itinerario-content">
+                    {{ itinerario.contenido_itinerario | safe }}
+                </div>
+            {% else %}
+                <p>No hay contenido detallado para este itinerario.</p>
+            {% endif %}
+
+            {% if instrucciones_url %}
+                <div class="mt-4 text-center">
+                    <a href="{{ instrucciones_url }}" class="btn btn-info btn-lg">Ver Instrucciones de la Caminata</a>
+                </div>
+            {% endif %}
+
+            <div class="text-muted mt-4 text-end">
+                <small>Creado el: {{ itinerario.fecha_creacion.strftime('%d-%m-%Y %H:%M') }}</small><br>
+                <small>Última modificación: {{ itinerario.fecha_modificacion.strftime('%d-%m-%Y %H:%M') if itinerario.fecha_modificacion else 'N/A' }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# FAB buttons for actions #}
+<div class="fab-container-actions">
+    <a href="{{ url_for('itinerario.editar_itinerario', itinerario_id=itinerario.id) }}" class="fab-button-action fab-button-edit" title="Editar Itinerario">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Itinerario" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="{{ url_for('itinerario.exportar_itinerario_pdf', itinerario_id=itinerario.id) }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
+        <i class="fas fa-file-pdf"></i>
+    </a>
+    <a href="{{ url_for('itinerario.exportar_itinerario_txt', itinerario_id=itinerario.id) }}" class="fab-button-action fab-button-txt" title="Exportar a TXT">
+        <i class="fas fa-file-alt"></i>
+    </a>
+    <a href="{{ url_for('itinerario.exportar_itinerario_jpg', itinerario_id=itinerario.id) }}" class="fab-button-action fab-button-jpg" title="Exportar a JPG">
+        <i class="fas fa-image"></i>
+    </a>
+</div>
+
+{# Modal de Confirmación de Eliminación #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar este itinerario? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('itinerario.eliminar_itinerario', itinerario_id=itinerario.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('itinerario.ver_itinerario') }}" class="fab-button-back" title="Volver al Listado de Itinerarios">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+{% endblock %}

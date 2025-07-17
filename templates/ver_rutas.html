@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Ver Rutas</title>
+    <style>
+        .card-header-province {
+            background-color: #f8f9fa; /* Un color claro para el encabezado de la provincia */
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #343a40;
+            border-bottom: 2px solid #e9ecef;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            /* Eliminado: border-radius */
+        }
+        .route-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .route-item:last-child {
+            border-bottom: none;
+        }
+        .route-name {
+            font-weight: 500;
+            color: #007bff; /* Color de enlace primario */
+            text-decoration: none;
+        }
+        .route-name:hover {
+            text-decoration: underline;
+        }
+        .btn-add-route {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #28a745; /* Color verde para el botón de añadir */
+            border-color: #28a745;
+            /* Eliminado: border-radius: 50%; */
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Eliminado: box-shadow */
+            transition: all 0.3s ease;
+        }
+        .btn-add-route:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: scale(1.05);
+        }
+        .btn-add-route i {
+            font-size: 1.8rem;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h1 class="main-title text-center mb-4 text-warning">Rutas Disponibles</h1>
+
+    {# Formulario de filtro por provincia #}
+    <div class="mb-4">
+        <form action="{{ url_for('rutas.ver_rutas') }}" method="GET" class="d-flex align-items-center">
+            <label for="provincia-filter" class="form-label me-2 mb-0">Filtrar por Provincia:</label>
+            <select class="form-select me-2" id="provincia-filter" name="provincia" onchange="this.form.submit()">
+                <option value="Todas" {% if provincia_seleccionada == 'Todas' %}selected{% endif %}>Todas las Provincias</option>
+                {% for provincia in provincias %}
+                    <option value="{{ provincia }}" {% if provincia_seleccionada == provincia %}selected{% endif %}>{{ provincia }}</option>
+                    <hr>
+                {% endfor %}
+            </select>
+            {# Puedes añadir un botón de búsqueda si no quieres que se envíe automáticamente en el cambio #}
+            {# <button type="submit" class="btn btn-primary">Buscar</button> #}
+        </form>
+    </div>
+
+    {% if rutas_por_provincia %}
+        {% for provincia, rutas_list in rutas_por_provincia.items() %}
+            <div class="mb-4"> {# Se eliminan las clases 'card' y 'shadow-sm' #}
+                <div class="card-header-province mt-5">
+                    <h2>
+                    {{ provincia }}
+                    </h2>
+                    <hr>
+                </div>
+                <div> {# Se eliminan las clases 'card-body' #}
+                    <ul class="list-unstyled">
+                        {% for ruta in rutas_list %}
+                            <li class="route-item">
+                                <div>
+                                    <span class="me-2 text-muted">{{ loop.index }}.</span>
+                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name">
+                                        {{ ruta.nombre | title}} en <span class="text-muted">{{ ruta.provincia }}</span>
+                                    </a>
+                                </div>
+                                <div>
+                                    
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center" role="alert">
+            No hay rutas disponibles. ¡Crea una nueva!
+        </div>
+    {% endif %}
+
+    {% if session.get('role') == 'Superuser' %}
+    <a href="{{ url_for('rutas.crear_ruta') }}" class="btn btn-success btn-add-route" title="Crear nueva ruta">
+        <i class="fas fa-plus"></i>
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" xintegrity="sha512-..." crossorigin="anonymous"></script>
+    <script>
+        // Opcional: Script para añadir interactividad si es necesario
+    </script>
+{% endblock %}

@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Contacto{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el botón flotante (FAB) de guardar */
+    .fab-container-save {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-save {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-save:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            {# MODIFICACIÓN: Se elimina la clase 'shadow-lg' para quitar la sombra de la tarjeta #}
+            {# CAMBIO: Se elimina la clase 'card' para quitar el efecto de tarjeta #}
+            <div class="p-4">
+                <h2 class="card-title text-center mb-4 text-warning">Editar Contacto</h2>
+                
+                <form method="POST" action="{{ url_for('contactos.editar_contacto', user_id=user.id) }}" enctype="multipart/form-data" id="editContactForm">
+                    <p class="text-muted text-center">Los campos marcados con * son obligatorios.</p>
+
+                    {# Avatar Imagen #}
+                    <div class="mb-3 text-center">
+                        <label for="avatar" class="form-label d-block mb-2">Avatar Actual</label>
+                        <img src="{{ avatar_url }}" alt="Avatar de {{ user.username }}" 
+                             class="img-thumbnail rounded-circle mb-3" 
+                             style="width: 120px; height: 120px; object-fit: cover; border-color: #ffc107 !important;">
+                        
+                        <label for="avatar" class="form-label mt-3">Cambiar Avatar (Opcional)</label>
+                        <input class="form-control" type="file" id="avatar" name="avatar" accept="image/*">
+                        <div class="form-text">Sube una nueva imagen de perfil si deseas cambiarla.</div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    {# Nombre #}
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" value="{{ user.nombre }}" required>
+                    </div>
+
+                    {# Primer Apellido #}
+                    <div class="mb-3">
+                        <label for="primer_apellido" class="form-label">Primer Apellido *</label>
+                        <input type="text" class="form-control" id="primer_apellido" name="primer_apellido" value="{{ user.primer_apellido }}" required>
+                    </div>
+
+                    {# Segundo Apellido (Opcional) #}
+                    <div class="mb-3">
+                        <label for="segundo_apellido" class="form-label">Segundo Apellido</label>
+                        <input type="text" class="form-control" id="segundo_apellido" name="segundo_apellido" value="{{ user.segundo_apellido if user.segundo_apellido else '' }}">
+                    </div>
+
+                    {# Username (para poder editarlo) #}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nombre de Usuario *</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" required>
+                    </div>
+
+                    {# Email #}
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico *</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+
+                    {# Teléfono #}
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono *</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ user.telefono }}" required>
+                    </div>
+
+                    {# Teléfono de Emergencia #}
+                    <div class="mb-3">
+                        <label for="telefono_emergencia" class="form-label">Teléfono de Emergencia</label>
+                        <input type="tel" class="form-control" id="telefono_emergencia" name="telefono_emergencia" value="{{ user.telefono_emergencia if user.telefono_emergencia else '' }}">
+                    </div>
+
+                    {# Nombre de Contacto de Emergencia #}
+                    <div class="mb-3">
+                        <label for="nombre_emergencia" class="form-label">Nombre Contacto Emergencia</label>
+                        <input type="text" class="form-control" id="nombre_emergencia" name="nombre_emergencia" value="{{ user.nombre_emergencia if user.nombre_emergencia else '' }}">
+                    </div>
+
+                    {# Empresa #}
+                    <div class="mb-3">
+                        <label for="empresa" class="form-label">Empresa</label>
+                        <input type="text" class="form-control" id="empresa" name="empresa" value="{{ user.empresa if user.empresa else '' }}">
+                    </div>
+
+                    {# Cédula #}
+                    <div class="mb-3">
+                        <label for="cedula" class="form-label">Cédula</label>
+                        <input type="text" class="form-control" id="cedula" name="cedula" value="{{ user.cedula if user.cedula else '' }}">
+                    </div>
+
+                    {# Dirección - CAMBIO A SELECT #}
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Provincia</label>
+                        <select class="form-select" id="direccion" name="direccion">
+                            <option value="">Seleccionar Provincia</option> {# Opción por defecto #}
+                            {% for provincia in provincia_opciones %}
+                                <option value="{{ provincia }}" {% if provincia == (request.form.get('direccion') or user.direccion) %}selected{% endif %}>{{ provincia }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Fecha de Cumpleaños #}
+                    <div class="mb-3">
+                        <label for="fecha_cumpleanos" class="form-label">Fecha de Cumpleaños</label>
+                        <input type="date" class="form-control" id="fecha_cumpleanos" name="fecha_cumpleanos" value="{{ user.fecha_cumpleanos.strftime('%Y-%m-%d') if user.fecha_cumpleanos else '' }}">
+                        {# Este campo utiliza el datepicker nativo del navegador para input type="date".
+                           Si el día no es seleccionable, podría ser un comportamiento específico del navegador
+                           o una interferencia de CSS/JS externo no visible aquí. #}
+                    </div>
+
+                    {# Tipo de Sangre #}
+                    <div class="mb-3">
+                        <label for="tipo_sangre" class="form-label">Tipo de Sangre</label>
+                        <select class="form-select" id="tipo_sangre" name="tipo_sangre">
+                            {% for option in tipo_sangre_opciones %}
+                                <option value="{{ option }}" {% if option == (request.form.get('tipo_sangre') or user.tipo_sangre) %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# Póliza #}
+                    <div class="mb-3">
+                        <label for="poliza" class="form-label">Póliza</label>
+                        <input type="text" class="form-control" id="poliza" name="poliza" value="{{ user.poliza if user.poliza else '' }}">
+                    </div>
+
+                    {# Aseguradora #}
+                    <div class="mb-3">
+                        <label for="aseguradora" class="form-label">Aseguradora</label>
+                        <input type="text" class="form-control" id="aseguradora" name="aseguradora" value="{{ user.aseguradora if user.aseguradora else '' }}">
+                    </div>
+
+                    {# Alergias #}
+                    <div class="mb-3">
+                        <label for="alergias" class="form-label">Alergias</label>
+                        <textarea class="form-control" id="alergias" name="alergias" rows="3">{{ user.alergias if user.alergias else '' }}</textarea>
+                    </div>
+
+                    {# Enfermedades Crónicas #}
+                    <div class="mb-3">
+                        <label for="enfermedades_cronicas" class="form-label">Enfermedades Crónicas</label>
+                        <textarea class="form-control" id="enfermedades_cronicas" name="enfermedades_cronicas" rows="3">{{ user.enfermedades_cronicas if user.enfermedades_cronicas else '' }}</textarea>
+                    </div>
+                    
+                    {# MODIFICACIÓN: Actividad - Visible solo para Superuser #}
+                    {% if logged_in_user_role == 'Superuser' %}
+                    <div class="mb-3">
+                        <label for="actividad" class="form-label">Actividad</label>
+                        <select class="form-select" id="actividad" name="actividad">
+                            {% for option in actividad_opciones %}
+                                <option value="{{ option }}" {% if option == (request.form.get('actividad') or user.actividad) %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {# MODIFICACIÓN: Capacidad - Visible solo para Superuser #}
+                    {% if logged_in_user_role == 'Superuser' %}
+                    <div class="mb-3">
+                        <label for="capacidad" class="form-label">Capacidad</label>
+                        <select class="form-select" id="capacidad" name="capacidad">
+                            {% for option in capacidad_opciones %}
+                                <option value="{{ option }}" {% if option == (request.form.get('capacidad') or user.capacidad) %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {# MODIFICACIÓN: Participación - Visible solo para Superuser #}
+                    {% if logged_in_user_role == 'Superuser' %}
+                    <div class="mb-3">
+                        <label for="participacion" class="form-label">Participación</label>
+                        <select class="form-select" id="participacion" name="participacion">
+                            {% for option in participacion_opciones %}
+                                <option value="{{ option }}" {% if option == (request.form.get('participacion') or user.participacion) %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {# CAMPO DE ROL (Visible solo para Superusers) #}
+                    {% if logged_in_user_role == 'Superuser' %}
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Rol del Usuario</label>
+                        <select class="form-select" id="role" name="role">
+                            {% for role_option in role_opciones %}
+                                <option value="{{ role_option }}" {% if role_option == (request.form.get('role') or user.role) %}selected{% endif %}>{{ role_option }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text text-danger">¡Precaución! Solo puede haber hasta 2 Superusuarios.</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2 mt-4 d-none">
+                        <button type="submit" class="btn btn-success btn-lg">Guardar Cambios</button>
+                    </div>
+                    <div class="text-center mt-3 d-none">
+                        <a href="{{ url_for('contactos.ver_detalle', user_id=user.id) }}" class="btn btn-secondary btn-sm">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para guardar cambios #}
+<div class="fab-container-save">
+    <a href="#" class="fab-button-save" title="Guardar Cambios" onclick="document.getElementById('editContactForm').submit(); return false;">
+        <i class="fas fa-save" style="color: black;"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('contactos.ver_detalle', user_id=user.id) }}" class="fab-button-back" title="Volver al Detalle del Contacto">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

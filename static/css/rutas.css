@@ -1,0 +1,187 @@
+/* NUEVO ENVOLVENTE: Contenedor para aplicar el margen lateral */
+    .video-player-wrapper {
+        width: 80vw; /* Ocupa todo el ancho del viewport */
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%); /* Centra el wrapper en el viewport */
+        padding: 0 10px; /* ¡Aquí aplicamos los 10px de padding a cada lado! */
+        box-sizing: border-box; /* Importante para que el padding no aumente el ancho total */
+        margin-bottom: 1.5rem; /* Mantén el margen inferior deseado */
+        overflow: hidden; /* Asegura que no haya desbordamiento horizontal */
+    }
+
+    /* Contenedor del video, ahora será el 100% del ancho de su padre (video-player-wrapper) */
+    .full-viewport-video-container {
+        width: 100% !important; /* Ahora es 100% del padre con padding */
+        /* Eliminamos las propiedades de posicionamiento y márgenes negativos de aquí */
+        /* ya que el `video-player-wrapper` se encarga de eso */
+        padding: 0 !important;
+        box-sizing: border-box;
+    }
+
+    /* Contenedor del iframe que mantiene la relación de aspecto */
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%; /* Relación de aspecto 16:9 (altura/ancho = 9/16 = 0.5625) */
+        height: 0;
+        overflow: hidden;
+        max-width: 100%;
+        background: #000;
+        border-radius: .5rem; /* Bordes redondeados para el video */
+        margin: 0 auto; /* Centra el contenedor del video si no ocupa el 100% */
+        width: 100%; /* Asegura que ocupe el 100% del ancho disponible de su padre */
+    }
+    .video-container iframe,
+    .video-container object,
+    .video-container embed {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none; /* Asegura que no haya borde predeterminado en el iframe */
+    }
+
+    /* Estilos para botones flotantes */
+    .btn-floating {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    .btn-floating .btn {
+        margin-bottom: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,.2);
+    }
+    .btn-floating .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .btn-floating .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+    .btn-floating .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+    .btn-floating .btn-info:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
+    .btn-floating .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    .btn-floating .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    /* Estilos generales para las secciones de contenido */
+    .detail-section {
+        padding: 1rem 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .detail-section:last-of-type {
+        border-bottom: none;
+    }
+    .main-title {
+        color: #0d6efd;
+        margin-bottom: 1.5rem;
+    }
+    .detail-label {
+        font-weight: bold;
+        color: #495057;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .detail-value {
+        color: #212529;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Centrar el contenido de la página (para el texto) */
+    .content-wrapper {
+        max-width: 960px; /* Ancho máximo para el contenido principal (ajustable) */
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0 15px; /* Padding para los lados del contenido textual */
+    }
+
+    /* Estilos para los botones de acción flotantes (FAB) - Adaptados de detalle_caminatas.html */
+.fab-container-actions {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1050; /* Z-index alto para que estén por encima de otros elementos */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio entre los botones */
+}
+.fab-button-action {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Hace que los botones sean circulares */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem; /* Tamaño del icono */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto 3D */
+    transition: all 0.3s ease; /* Transición suave para hover */
+    text-decoration: none; /* Elimina el subrayado de los enlaces */
+}
+.fab-button-action:hover {
+    transform: scale(1.1); /* Agranda el botón al pasar el ratón */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada al pasar el ratón */
+}
+/* Colores de los botones */
+.fab-button-edit { background-color: #ffc107; color: black; } /* Amarillo para editar */
+.fab-button-delete { background-color: #dc3545; color: white; } /* Rojo para eliminar */
+.fab-button-pdf { background-color: #6f42c1; color: white; } /* Morado */
+.fab-button-txt { background-color: #17a2b8; color: white; } /* Azul cian (info-dark) */
+/* NOTA: El botón JPG no está presente en detalle_rutas.html, pero dejo el estilo por si lo añades */
+.fab-button-jpg { background-color: #fd7e14; color: white; } /* Naranja */
+
+/* Estilo para el botón flotante de "Volver" a la izquierda */
+.fab-container-back {
+    position: fixed;
+    bottom: 50px; /* Distancia desde abajo, ajustado para no chocar con los otros FABs */
+    left: 20px; /* Distancia desde la izquierda */
+    z-index: 1000; /* Asegura que esté por encima */
+}
+.fab-button-back {
+    width: 60px; /* Tamaño del botón */
+    height: 60px; /* Tamaño del botón */
+    border-radius: 50%; /* Hacerlo circular */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem; /* Tamaño del icono */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra flotante */
+    transition: all 0.3s ease;
+    background-color: #0d6efd; /* Color azul de Bootstrap primary */
+    color: white;
+    text-decoration: none; /* Elimina el subrayado */
+}
+.fab-button-back:hover {
+    transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal styles - Asegurarse de que el modal de confirmación de eliminación también tenga el mismo estilo */
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+}
+.modal-header {
+    background-color: #dc3545; /* Rojo de peligro */
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.modal-footer .btn {
+    border-radius: 8px;
+}

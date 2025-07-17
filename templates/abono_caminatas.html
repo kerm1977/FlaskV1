@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Estilos adicionales si fueran necesarios */
+    /* Estilos para el botón flotante (FAB) */
+    .fab-container {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo para alinearse con ver_caminatas */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-container.left { /* Contenedor para el botón flotante de la izquierda */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para que se vea flotante */
+        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+</style>
+
+<div class="container"> {# Se eliminó 'mt-4' para alinear con ver_caminatas #}
+    {# MODIFICACIÓN: Eliminadas las clases "card shadow-lg p-4 mb-5 bg-white rounded" #}
+    <div class="p-4 mb-5"> {# Mantener padding y margin-bottom para espaciado interno #}
+        <h2 class="card-title text-center mb-4 text-warning mt-4">Recibo para Caminante</h2> {# Añadido mt-4 para espacio superior del título #}
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Caminata:</strong> {{ caminata.nombre }}</p>
+                <p><strong>Fecha de Caminata:</strong> {{ caminata.fecha.strftime('%d-%m-%Y') }}</p>
+                <p><strong>Actividad:</strong> {{ caminata.actividad }}</p>
+                <p><strong>Dificultad:</strong> {{ caminata.dificultad if caminata.dificultad else 'N/A' }}</p>
+                <p><strong>Distancia:</strong> {{ "%.1f km"|format(caminata.distancia) if caminata.distancia is not none else 'N/A' }}</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p><strong>Participante:</strong> {{ participante.nombre }} {{ participante.primer_apellido }}</p>
+                <p><strong>Precio por Persona:</strong> ¢{{ caminata.precio | int }}</p>
+                <h4 class="text-success"><strong>Total Abonado:</strong> ¢{{ total_abonado | int }}</h4>
+                {# MODIFICACIÓN: Condicional para Monto Restante #}
+                {% if monto_restante | int == 0 %}
+                <h4 class="text-success"><strong>Estado:</strong> Cancelado</h4> {# Cambiado a text-success para 'Cancelado' #}
+                {% else %}
+                <h4 class="text-danger"><strong>Monto Restante:</strong> ¢{{ monto_restante | int }}</h4>
+                {% endif %}
+                <p><small class="text-muted">Total a Pagar (incluyendo acompañantes): ¢{{ total_a_pagar_por_participante | int }}</small></p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h4 class="mb-3 text-warning">Registrar Nuevo Abono</h4>
+        <form id="abonoForm" method="POST" action="{{ url_for('caminatas.abono_caminata', caminata_id=caminata.id, user_id=participante.id) }}">
+            <input type="hidden" name="add_abono" value="true">
+            <div class="row mb-3">
+                {# REINTRODUCIR EL SELECTOR DE OPCIÓN AQUÍ #}
+                <div class="col-md-4">
+                    <label for="opcion" class="form-label">Opción <span class="text-danger">*</span>:</label>
+                    <select class="form-select" id="opcion" name="opcion" required>
+                        <option value="">Seleccionar Opción</option>
+                        <option value="Abono">Abono</option>
+                        <option value="Reserva">Reserva</option>
+                        <option value="Cancelación">Cancelación</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="cantidad_acompanantes" class="form-label">Cantidad Acompañantes:</label>
+                    <select class="form-select" id="cantidad_acompanantes" name="cantidad_acompanantes" required>
+                        {% for i in range(10) %}
+                        <option value="{{ i }}">{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="monto_abono" class="form-label">Monto de Abono <span class="text-danger">*</span>:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">¢</span>
+                        <input type="number" step="1" class="form-control" id="monto_abono" name="monto_abono" required min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="nombres_acompanantes_raw" class="form-label">Nombres de Acompañantes o Detalles (separados por comas):</label>
+                <textarea class="form-control" id="nombres_acompanantes_raw" name="nombres_acompanantes_raw" rows="2" placeholder="Ej: Juan Pérez, María Gómez"></textarea>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-warning">Agregar Abono</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <h4 class="mb-3 text-warning">Historial de Abonos</h4>
+        {% if abonos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha Abono</th>
+                        <th>Opción</th> {# COLUMNA OPCION VUELVE AQUÍ #}
+                        <th>Acompañantes</th>
+                        <th>Nombres de Acompañantes o Detalles</th>
+                        <th>Monto Abonado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for abono in abonos %}
+                    <tr>
+                        <td>{{ abono.fecha_abono.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ abono.opcion }}</td> {# Mostrar la opción #}
+                        <td>{{ abono.cantidad_acompanantes }}</td>
+                        <td>
+                            {% set nombres_acom = abono.nombres_acompanantes|from_json %}
+                            {% if nombres_acom %}
+                                {{ nombres_acom|join(', ') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>¢{{ abono.monto_abono | int }}</td>
+                        <td>
+                            <form action="{{ url_for('caminatas.abono_caminata', caminata_id=caminata.id, user_id=participante.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="delete_abono" value="true">
+                                <input type="hidden" name="abono_id" value="{{ abono.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este abono?');">Borrar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            No hay abonos registrados para este participante en esta caminata aún.
+        </div>
+        {% endif %}
+
+        <hr>
+
+        {# MODIFICACIÓN: Contenedor de botones responsivo con sistema de cuadrícula de Bootstrap #}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2 mt-4">
+            <div class="col">
+                <a href="{{ url_for('caminatas.abono_caminata', caminata_id=caminata.id, user_id=participante.id) }}" class="btn btn-warning w-100" style="color: black;">Gestionar Abono</a>
+            </div>
+            <div class="col">
+                <a href="{{ url_for('caminatas.exportar_abono_pdf', caminata_id=caminata.id, user_id=participante.id) }}" class="btn btn-warning w-100" style="color: black;">Exportar PDF</a>
+            </div>
+            <div class="col">
+                <a href="{{ url_for('caminatas.exportar_abono_jpg', caminata_id=caminata.id, user_id=participante.id) }}" class="btn btn-warning w-100" style="color: black;">Exportar JPG</a>
+            </div>
+            <div class="col">
+                <a href="{{ url_for('caminatas.exportar_abono_txt', caminata_id=caminata.id, user_id=participante.id) }}" class="btn btn-warning w-100" style="color: black;">Exportar TXT</a>
+            </div>
+            {# Se eliminó el botón "Volver Atrás" cuadrado #}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nombresAcompanantesInput = document.getElementById('nombres_acompanantes_raw');
+        const cantidadAcompanantesSelect = document.getElementById('cantidad_acompanantes'); // Nuevo: Referencia al select
+        const abonoForm = document.getElementById('abonoForm');
+        
+        // Claves únicas por URL para cada campo
+        const nombresStorageKey = 'lastNombresAcompanantes_' + window.location.pathname;
+        const cantidadStorageKey = 'lastCantidadAcompanantes_' + window.location.pathname; // Nueva clave
+
+        // 1. Cargar los valores guardados al cargar la página
+        if (nombresAcompanantesInput) {
+            const savedNombres = sessionStorage.getItem(nombresStorageKey);
+            if (savedNombres) {
+                nombresAcompanantesInput.value = savedNombres;
+            }
+        }
+
+        if (cantidadAcompanantesSelect) {
+            const savedCantidad = sessionStorage.getItem(cantidadStorageKey);
+            if (savedCantidad) {
+                cantidadAcompanantesSelect.value = savedCantidad;
+            }
+        }
+
+        // 2. Guardar los valores al enviar el formulario
+        if (abonoForm) {
+            abonoForm.addEventListener('submit', function() {
+                if (nombresAcompanantesInput) {
+                    sessionStorage.setItem(nombresStorageKey, nombresAcompanantesInput.value);
+                }
+                if (cantidadAcompanantesSelect) {
+                    sessionStorage.setItem(cantidadStorageKey, cantidadAcompanantesSelect.value);
+                }
+            });
+        }
+    });
+</script>
+
+{# Nuevo botón flotante para volver atrás a la izquierda #}
+<div class="fab-container left">
+    <a href="{{ url_for('caminatas.detalle_caminata', caminata_id=caminata.id) }}" class="btn btn-primary fab-button" title="Volver al Detalle de la Caminata">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+{% endblock %}

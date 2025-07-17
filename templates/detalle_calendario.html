@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Evento - {{ evento.nombre_actividad }}{% endblock %}
+
+{% block head_content %}
+<style>
+    /* FAB buttons for actions - Copied from detalle_itinerario.html */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Higher z-index for action buttons */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    .fab-button-edit { background-color: #ffc107; color: black; } /* Warning */
+    .fab-button-delete { background-color: #dc3545; color: white; } /* Danger */
+    .fab-button-pdf { background-color: #6f42c1; color: white; } /* Purple */
+    .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark */
+    .fab-button-excel { background-color: #28a745; color: white; } /* Success green for Excel */
+    /* .fab-button-jpg { background-color: #fd7e14; color: white; } */ /* Orange - Uncomment if JPG export is added */
+
+    /* Modal styles - Copied from detalle_itinerario.html */
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+        background-color: #dc3545; /* Danger red */
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .modal-footer .btn {
+        border-radius: 8px;
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Detalle de Evento: {{ evento.nombre_actividad }}</h1>
+
+    <div class="card mb-4 mt-5"> {# Añadido mt-5 para espacio superior #}
+        <div class="card-header bg-warning text-white"> {# Añadido bg-warning text-white #}
+            <h2 class="card-title mb-0">Información del Evento</h2> {# Cambiado h3 a h2 y añadido card-title mb-0 #}
+        </div>
+        <div class="card-body">
+            {% if evento.flyer_imagen_url %}
+                <div class="mb-3 text-center"> {# Centrado de imagen #}
+                    <img src="{{ url_for('static', filename=evento.flyer_imagen_url) }}" class="img-fluid rounded mb-3" alt="{{ evento.nombre_actividad }}" style="max-height: 250px; object-fit: contain;"> {# Ajustado max-height #}
+                </div>
+            {% else %}
+                <div class="mb-3 text-center"> {# Centrado de imagen por defecto #}
+                    <img src="{{ url_for('static', filename='images/defaults/default_calendar.png') }}" class="img-fluid rounded mb-3" alt="Imagen por defecto" style="max-height: 250px; object-fit: contain;"> {# Ajustado max-height #}
+                </div>
+            {% endif %}
+            
+            {# Eliminado h3 duplicado #}
+            <p><strong>Nombre de la Actividad:</strong> {{ evento.nombre_actividad }}</p>
+            <p><strong>Fecha de la Actividad:</strong> {{ evento.fecha_actividad.strftime('%d/%m/%Y') }}</p> {# Formato de fecha consistente #}
+            <p><strong>Hora de la Actividad:</strong> 
+                {% if evento.es_todo_el_dia %}
+                    Todo el día
+                {% else %}
+                    {{ evento.hora_actividad.strftime('%H:%M') if evento.hora_actividad else 'N/A' }} {# Formato de hora consistente #}
+                {% endif %}
+            </p>
+            <p><strong>Etiqueta:</strong> <span class="badge bg-primary">{{ evento.nombre_etiqueta }}</span></p>
+            <p><strong>Es evento de todo el día:</strong> {% if evento.es_todo_el_dia %}Sí{% else %}No{% endif %}</p>
+            
+            <h4 class="mt-4">Correos Electrónicos para Notificación:</h4> {# Cambiado a "para Notificación" #}
+            {% if correos_list %}
+                <ul class="list-group list-group-flush mb-3">
+                    {% for correo in correos_list %}
+                        <li class="list-group-item">{{ correo }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No se han registrado correos para notificación.</p>
+            {% endif %}
+
+            <h4 class="mt-4">Descripción:</h4>
+            <div class="card card-body bg-light">
+                {{ evento.descripcion | safe if evento.descripcion else '<p class="text-muted">No hay descripción disponible.</p>' }}
+            </div>
+
+            <p class="mt-4 text-muted text-end"><small>Creado el: {{ evento.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</small></p> {# Formato de fecha/hora consistente y alineado a la derecha #}
+            {% if evento.fecha_modificacion %}
+                <p class="text-muted text-end"><small>Última Modificación: {{ evento.fecha_modificacion.strftime('%d/%m/%Y %H:%M') }}</small></p> {# Formato de fecha/hora consistente y alineado a la derecha #}
+            {% endif %}
+        </div>
+    </div>
+
+    {# FAB buttons for actions - Copied from detalle_itinerario.html #}
+    <div class="fab-container-actions">
+        <a href="{{ url_for('calendario.editar_calendario', event_id=evento.id) }}" class="fab-button-action fab-button-edit" title="Editar Evento">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Evento" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        <a href="{{ url_for('calendario.exportar_excel', event_id=evento.id) }}" class="fab-button-action fab-button-excel" title="Exportar a Excel">
+            <i class="fas fa-file-excel"></i>
+        </a>
+        <a href="{{ url_for('calendario.exportar_pdf', event_id=evento.id) }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
+            <i class="fas fa-file-pdf"></i>
+        </a>
+        <a href="{{ url_for('calendario.exportar_txt', event_id=evento.id) }}" class="fab-button-action fab-button-txt" title="Exportar a TXT">
+            <i class="fas fa-file-alt"></i>
+        </a>
+        <!-- Si tienes exportación a JPG para calendario, descomenta y añade el botón -->
+        {# <a href="{{ url_for('calendario.exportar_jpg', event_id=evento.id) }}" class="fab-button-action fab-button-jpg" title="Exportar a JPG">
+            <i class="fas fa-image"></i>
+        </a> #}
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación - Copied from detalle_itinerario.html -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar el evento "{{ evento.nombre_actividad }}"? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="{{ url_for('calendario.eliminar_calendario', event_id=evento.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('calendario.ver_calendario') }}" class="fab-button-back" title="Volver al Calendario">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

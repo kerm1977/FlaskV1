@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Instrucción - {{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el botón flotante (FAB) de guardar */
+    .fab-container-save {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-save {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-save:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Editar Instrucción</h1> {# Cambiado a text-warning text-center #}
+    <hr class="text-warning"> {# Agregado hr con estilo warning #}
+    <form method="POST" action="{{ url_for('instrucciones.editar_instrucciones', instruction_id=instruction.id) }}" id="editInstructionForm"> {# Añadido ID al formulario #}
+        <div class="card mb-4 mt-5"> {# Añadido mt-5 #}
+            <div class="card-header bg-warning text-white"> {# Cambiado a bg-warning text-white #}
+                <h2 class="card-title mb-0">Información General de la Caminata</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="caminata_id" class="form-label">Instrucciones para la Caminata <span class="text-danger">*</span></label>
+                    <select class="form-select" id="caminata_id" name="caminata_id" required>
+                        <option value="">Selecciona una Caminata Activa</option>
+                        {% for caminata in caminatas_activas %}
+                            <option value="{{ caminata.id }}" {% if caminata.id == instruction.caminata_id %}selected{% endif %}>
+                                {{ caminata.nombre }} ({{ caminata.fecha.strftime('%d-%m-%Y') }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="dificultad" class="form-label">Dificultad <span class="text-danger">*</span></label>
+                    <select class="form-select" id="dificultad" name="dificultad" required>
+                        <option value="">Selecciona la Dificultad</option>
+                        {% for opcion in dificultad_opciones %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.dificultad %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="distancia" class="form-label">Distancia (km) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.1" class="form-control" id="distancia" name="distancia" value="{{ instruction.distancia }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="capacidad" class="form-label">Capacidad <span class="text-danger">*</span></label>
+                    <select class="form-select" id="capacidad" name="capacidad" required>
+                        <option value="">Selecciona la Capacidad</option>
+                        {% for opcion in capacidad_opciones %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.capacidad %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="lugar_salida" class="form-label">Salimos desde: <span class="text-danger">*</span></label>
+                    <select class="form-select" id="lugar_salida" name="lugar_salida" required>
+                        <option value="">Selecciona un lugar de salida</option>
+                        {% for opcion in lugar_salida_opciones %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.lugar_salida %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="fecha_salida" class="form-label">Fecha de Salida <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="fecha_salida" name="fecha_salida" value="{{ instruction.fecha_salida.strftime('%Y-%m-%d') if instruction.fecha_salida else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="hora_salida" class="form-label">Hora de Salida <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control" id="hora_salida" name="hora_salida" value="{{ instruction.hora_salida.strftime('%H:%M') if instruction.hora_salida else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="fecha_caminata" class="form-label">Fecha de Caminata <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="fecha_caminata" name="fecha_caminata" value="{{ instruction.fecha_caminata.strftime('%Y-%m-%d') if instruction.fecha_caminata else '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="hora_inicio_caminata" class="form-label">Hora de Inicio Caminata <span class="text-danger">*</span></label>
+                    <input type="time" class="form-control" id="hora_inicio_caminata" name="hora_inicio_caminata" value="{{ instruction.hora_inicio_caminata.strftime('%H:%M') if instruction.hora_inicio_caminata else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4"> {# Separador #}
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="card-title mb-0">Puntos de Recogida</h2>
+            </div>
+            <div class="card-body">
+                <div id="recogemos_en_container">
+                    {# Decodifica la cadena JSON a una lista Python y luego la pasamos a JavaScript #}
+                    {% set recogemos_en_list_py = instruction.recogemos_en_list if instruction.recogemos_en_list is defined else [] %}
+                    {% if recogemos_en_list_py %}
+                        {% for item in recogemos_en_list_py %}
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" name="recogemos_en[]" value="{{ item }}" placeholder="Punto de Recogida">
+                                <button type="button" class="btn btn-outline-danger remove-recogemos-item">X</button>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" name="recogemos_en[]" placeholder="Punto de Recogida">
+                            <button type="button" class="btn btn-outline-danger remove-recogemos-item">X</button>
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="button" id="add_recogemos_item" class="btn btn-outline-secondary btn-sm mt-2">Agregar otro punto de recogida</button>
+            </div>
+        </div>
+
+        <hr class="my-4"> {# Separador #}
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0">Para el Camino</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="hidratacion" class="form-label">Hidratación</label>
+                        <select class="form-select" id="hidratacion" name="hidratacion">
+                            <option value="">Seleccionar</option>
+                            {% for opcion in opciones_sino_opcional %}
+                                <option value="{{ opcion }}" {% if opcion == instruction.hidratacion %}selected{% endif %}>{{ opcion }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="litros_hidratacion" class="form-label">Cantidad (ej. 2.lts)</label>
+                        <input type="text" class="form-control" id="litros_hidratacion" name="litros_hidratacion" value="{{ instruction.litros_hidratacion }}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="tennis_ligera" class="form-label">Tennis ligera</label>
+                    <select class="form-select" id="tennis_ligera" name="tennis_ligera">
+                        <option value="SI" {% if instruction.tennis_ligera == 'SI' %}selected{% endif %}>SI</option>
+                        <option value="NO" {% if instruction.tennis_ligera == 'NO' %}selected{% endif %}>NO</option>
+                        <option value="OPCIONAL" {% if instruction.tennis_ligera == 'OPCIONAL' %}selected{% endif %}>OPCIONAL</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="tennis_runner" class="form-label">Tennis runner</label>
+                    <select class="form-select" id="tennis_runner" name="tennis_runner">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.tennis_runner %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="tennis_hiking_baja" class="form-label">Tennis Hiking baja</label>
+                    <select class="form-select" id="tennis_hiking_baja" name="tennis_hiking_baja">
+                        <option value="OPCIONAL" {% if instruction.tennis_hiking_baja == 'OPCIONAL' %}selected{% endif %}>OPCIONAL</option>
+                        <option value="SI" {% if instruction.tennis_hiking_baja == 'SI' %}selected{% endif %}>SI</option>
+                        <option value="NO" {% if instruction.tennis_hiking_baja == 'NO' %}selected{% endif %}>NO</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="zapato_cana_media" class="form-label">Zapato Caña media</label>
+                    <select class="form-select" id="zapato_cana_media" name="zapato_cana_media">
+                        <option value="OPCIONAL" {% if instruction.zapato_cana_media == 'OPCIONAL' %}selected{% endif %}>OPCIONAL</option>
+                        <option value="SI" {% if instruction.zapato_cana_media == 'SI' %}selected{% endif %}>SI</option>
+                        <option value="NO" {% if instruction.zapato_cana_media == 'NO' %}selected{% endif %}>NO</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="zapato_cana_alta" class="form-label">Zapato Caña alta</label>
+                    <select class="form-select" id="zapato_cana_alta" name="zapato_cana_alta">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.zapato_cana_alta %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="bastones" class="form-label">Bastones</label>
+                    <select class="form-select" id="bastones" name="bastones">
+                        <option value="NO NECESARIOS" {% if instruction.bastones == 'NO NECESARIOS' %}selected{% endif %}>NO NECESARIOS</option>
+                        <option value="SI" {% if instruction.bastones == 'SI' %}selected{% endif %}>SI</option>
+                        <option value="OPCIONAL" {% if instruction.bastones == 'OPCIONAL' %}selected{% endif %}>OPCIONAL</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="foco_headlamp" class="form-label">Foco o Head-lamp</label>
+                    <select class="form-select" id="foco_headlamp" name="foco_headlamp">
+                        <option value="Siempre" {% if instruction.foco_headlamp == 'Siempre' %}selected{% endif %}>Siempre</option>
+                        <option value="NO" {% if instruction.foco_headlamp == 'NO' %}selected{% endif %}>NO</option>
+                        <option value="OPCIONAL" {% if instruction.foco_headlamp == 'OPCIONAL' %}selected{% endif %}>OPCIONAL</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="snacks" class="form-label">Snacks</label>
+                    <select class="form-select" id="snacks" name="snacks">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.snacks %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="repelente" class="form-label">Repelente</label>
+                    <select class="form-select" id="repelente" name="repelente">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.repelente %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="poncho" class="form-label">Poncho</label>
+                    <select class="form-select" id="poncho" name="poncho">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.poncho %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="guantes" class="form-label">Guantes</label>
+                    <select class="form-select" id="guantes" name="guantes">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.guantes %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="bloqueador" class="form-label">Bloqueador</label>
+                    <select class="form-select" id="bloqueador" name="bloqueador">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.bloqueador %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="ropa_cambio" class="form-label">Ropa de Cambio</label>
+                    <select class="form-select" id="ropa_cambio" name="ropa_cambio">
+                        <option value="">Seleccionar</option>
+                        {% for opcion in opciones_sino_opcional %}
+                            <option value="{{ opcion }}" {% if opcion == instruction.ropa_cambio %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4"> {# Separador #}
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="card-title mb-0">Otras Recomendaciones</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <textarea class="form-control" id="otras_recomendaciones" name="otras_recomendaciones">{{ instruction.otras_recomendaciones }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4"> {# Separador #}
+
+        <div class="card mb-4">
+            <div class="card-header bg-danger text-white">
+                <h2 class="card-title mb-0">Normas Generales</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <textarea class="form-control" id="normas_generales" name="normas_generales">{{ instruction.normas_generales }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4"> {# Separador #}
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="card-title mb-0">Otras Indicaciones Generales</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <textarea class="form-control" id="otras_indicaciones_generales" name="otras_indicaciones_generales">{{ instruction.otras_indicaciones_generales }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        {# Botón "Guardar Cambios" original, ahora oculto #}
+        <button type="submit" class="btn btn-primary d-none">Guardar Cambios</button>
+        {# Botón "Cancelar" original, ahora oculto #}
+        <a href="{{ url_for('instrucciones.detalle_instrucciones', instruction_id=instruction.id) }}" class="btn btn-secondary d-none">Cancelar</a>
+    </form>
+</div>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar CKEditor en todas las textareas necesarias
+        ClassicEditor
+            .create( document.querySelector( '#otras_recomendaciones' ) )
+            .catch( error => {
+                console.error( error );
+            } );
+        ClassicEditor
+            .create( document.querySelector( '#normas_generales' ) )
+            .catch( error => {
+                console.error( error );
+            } );
+        ClassicEditor
+            .create( document.querySelector( '#otras_indicaciones_generales' ) )
+            .catch( error => {
+                console.error( error );
+            } );
+
+        // Lógica para añadir/remover dinámicamente puntos de recogida
+        const recogemosContainer = document.getElementById('recogemos_en_container');
+        const addRecogemosBtn = document.getElementById('add_recogemos_item');
+        const caminataSelect = document.getElementById('caminata_id'); // Obtener el select de caminata
+
+        function addRecogemosItem(value = '') {
+            const div = document.createElement('div');
+            div.classList.add('input-group', 'mb-2');
+            div.innerHTML = `
+                <input type="text" class="form-control" name="recogemos_en[]" value="${value}" placeholder="Punto de Recogida">
+                <button type="button" class="btn btn-outline-danger remove-recogemos-item">X</button>
+            `;
+            recogemosContainer.appendChild(div);
+        }
+
+        function removeRecogemosItem(event) {
+            if (event.target.classList.contains('remove-recogemos-item')) {
+                // Asegurarse de que no elimine el último elemento si es el único
+                if (recogemosContainer.children.length > 1) {
+                    event.target.closest('.input-group').remove();
+                } else {
+                    // Si solo queda uno, limpiarlo en lugar de eliminarlo
+                    event.target.closest('.input-group').querySelector('input').value = '';
+                }
+            }
+        }
+
+        addRecogemosBtn.addEventListener('click', function() {
+            addRecogemosItem();
+        });
+
+        recogemosContainer.addEventListener('click', removeRecogemosItem);
+
+        // Pre-rellenar los campos de recogida si hay datos existentes
+        const initialRecogemosData = JSON.parse('{{ instruction.recogemos_en | default("[]") | safe }}');
+        if (initialRecogemosData.length > 0) {
+            recogemosContainer.innerHTML = ''; // Limpiar cualquier input por defecto
+            initialRecogemosData.forEach(item => {
+                addRecogemosItem(item);
+            });
+        } else if (recogemosContainer.children.length === 0) {
+             // Si no hay datos y el contenedor está vacío, añadir un input vacío para empezar
+            addRecogemosItem();
+        }
+
+        // --- Lógica para heredar campos de la caminata seleccionada ---
+        caminataSelect.addEventListener('change', function() {
+            const caminataId = this.value;
+            if (caminataId) {
+                fetch(`/instrucciones/get_caminata_details/${caminataId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('dificultad').value = data.dificultad || '';
+                        document.getElementById('distancia').value = data.distancia || '';
+                        document.getElementById('capacidad').value = data.capacidad || '';
+                        document.getElementById('lugar_salida').value = data.lugar_salida || '';
+                        document.getElementById('fecha_salida').value = data.fecha_salida || '';
+                        document.getElementById('hora_salida').value = data.hora_salida || '';
+                        document.getElementById('fecha_caminata').value = data.fecha_caminata || '';
+                        document.getElementById('hora_inicio_caminata').value = data.hora_inicio_caminata || '';
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener detalles de la caminata:', error);
+                        // Opcional: Limpiar campos si hay un error
+                        document.getElementById('dificultad').value = '';
+                        document.getElementById('distancia').value = '';
+                        document.getElementById('capacidad').value = '';
+                        document.getElementById('lugar_salida').value = '';
+                        document.getElementById('fecha_salida').value = '';
+                        document.getElementById('hora_salida').value = '';
+                        document.getElementById('fecha_caminata').value = '';
+                        document.getElementById('hora_inicio_caminata').value = '';
+                    });
+            } else {
+                // Limpiar campos si no se selecciona ninguna caminata
+                document.getElementById('dificultad').value = '';
+                document.getElementById('distancia').value = '';
+                document.getElementById('capacidad').value = '';
+                document.getElementById('lugar_salida').value = '';
+                document.getElementById('fecha_salida').value = '';
+                document.getElementById('hora_salida').value = '';
+                document.getElementById('fecha_caminata').value = '';
+                document.getElementById('hora_inicio_caminata').value = '';
+            }
+        });
+    });
+</script>
+
+{# Botón flotante para guardar cambios #}
+<div class="fab-container-save">
+    <a href="#" class="fab-button-save" title="Guardar Cambios" onclick="document.getElementById('editInstructionForm').submit(); return false;">
+        <i class="fas fa-save" style="color: black;"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('instrucciones.detalle_instrucciones', instruction_id=instruction.id) }}" class="fab-button-back" title="Volver al Detalle de la Instrucción">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,393 @@
+{% extends 'base.html' %} {# Extiende la plantilla base.html para la estructura general #}
+
+{% block content %} {# Define el bloque de contenido para esta página #}
+
+{# Formulario oculto para la eliminación de la caminata #}
+{# MOVIDO AL PRINCIPIO DEL BLOQUE CONTENT PARA ASEGURAR QUE ESTÉ CARGADO ANTES DE CUALQUIER SCRIPT #}
+<form id="deleteCaminataForm" method="POST" action="{{ url_for('caminatas.eliminar_caminata', caminata_id=caminata.id) }}" style="display: none;">
+    {# Incluir el token CSRF para protección contra ataques CSRF #}
+    {# Asume que tienes un csrf_token disponible, por ejemplo, de Flask-WTF #}
+    
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+</form>
+
+<style>
+    /* Estilos para los botones de acción flotantes (FAB) */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Z-index alto para que estén por encima de otros elementos */
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Espacio entre los botones */
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%; /* Hace que los botones sean circulares */
+        display: flex;
+        align-items: center;    
+        justify-content: center;
+        font-size: 1.5rem; /* Tamaño del icono */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto 3D */
+        transition: all 0.3s ease; /* Transición suave para hover */
+        text-decoration: none; /* Elimina el subrayado de los enlaces */
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1); /* Agranda el botón al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada al pasar el ratón */
+    }
+    .fab-button-edit { background-color: #ffc107; color: black; } /* Color amarillo para editar */
+    .fab-button-delete { background-color: #dc3545; color: white; } /* Color rojo para eliminar */
+    .fab-button-pdf { background-color: #6f42c1; color: white; } /* Purple */
+    .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark */
+    .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange */
+    .fab-button-info { background-color: #0dcaf0; color: black; } /* Info */
+
+
+    /* Modal styles - Copied from detalle_itinerario.html */
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+        background-color: #dc3545; /* Danger red */
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .modal-footer .btn {
+        border-radius: 8px;
+    }
+
+    /* Estilos adicionales si fueran necesarios */
+    .fab-container { /* This is for the back button, keeping it separate for clarity */
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-container.left { /* Contenedor para el botón flotante de la izquierda */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para que se vea flotante */
+        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilos para el modal de imagen a pantalla completa */
+    .fullscreen-modal .modal-dialog {
+        max-width: 100vw;
+        height: 100vh;
+        margin: 0;
+    }
+    .fullscreen-modal .modal-content {
+        height: 100%;
+        border-radius: 0;
+        background-color: rgba(0, 0, 0, 0.9); /* Fondo oscuro semitransparente */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .fullscreen-modal .modal-body {
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+    }
+    .fullscreen-modal .modal-body img {
+        max-width: 95%;
+        max-height: 95%;
+        object-fit: contain; /* Asegura que la imagen completa sea visible */
+    }
+    .fullscreen-modal .btn-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 1100;
+        color: white;
+        opacity: 1;
+        font-size: 1.5rem;
+        background: none; /* Elimina el fondo predeterminado del botón de cerrar */
+        border: none; /* Elimina el borde del botón de cerrar */
+        text-shadow: 0 0 5px black; /* Sombra para mejor visibilidad */
+    }
+</style>
+
+{# MODIFICACIÓN: Se eliminó 'mt-4' del contenedor principal para que coincida con ver_caminatas #}
+<div class="container">
+    {# MODIFICACIÓN: Se eliminan las clases de la tarjeta y sombra como se acordó previamente. Se mantiene p-4 mb-5 para el espaciado. #}
+    <div class="p-4 mb-5">
+        <h2 class="card-title text-center mb-4 text-warning">Detalle de Caminata: {{ caminata.nombre }}</h2>
+
+        <div class="row">
+            <div class="col-md-4 text-center">
+                {% if caminata.imagen_caminata_url %}
+                    {# Se añade data-bs-toggle y data-bs-target para abrir el modal #}
+                    <img src="{{ url_for('static', filename=caminata.imagen_caminata_url) }}" class="img-fluid rounded shadow-sm mb-3 clickable-image" alt="Imagen de la Caminata" style="width: 100%; height: auto; object-fit: contain; max-width: 250px;" data-bs-toggle="modal" data-bs-target="#imageFullscreenModal" data-image-url="{{ url_for('static', filename=caminata.imagen_caminata_url) }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/defaults/no_image.png') }}" class="img-fluid rounded shadow-sm mb-3" alt="Sin Imagen" style="width: 100%; height: auto; object-fit: contain; max-width: 250px;">
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <p><strong>Actividad:</strong> {{ caminata.actividad }}</p>
+                {% if caminata.etapa and caminata.etapa != 'N/A' %}<p><strong>Etapa:</strong> {{ caminata.etapa }}</p>{% endif %}
+                <p><strong>Nombre:</strong> {{ caminata.nombre }}</p>
+                <p><strong>Precio:</strong> ¢{{ caminata.precio | int }}</p>
+                <p><strong>Fecha:</strong> {{ caminata.fecha.strftime('%d-%m-%Y') }}</p>
+                {% if caminata.hora_salida %}<p><strong>Hora de Salida:</strong> {{ caminata.hora_salida.strftime('%H:%M') }}</p>{% endif %}
+                {% if caminata.hora_regreso %}<p><strong>Hora de Regreso:</strong> {{ caminata.hora_regreso.strftime('%H:%M') }}</p>{% endif %}
+                {% if caminata.duracion_horas is not none %}<p><strong>Duración (horas):</strong> {{ "%.1f"|format(caminata.duracion_horas) }}</p>{% endif %}
+                {% if caminata.lugar_salida and caminata.lugar_salida != 'N/A' %}<p><strong>Lugar de Salida:</strong> {{ caminata.lugar_salida }}</p>{% endif %}
+                {% if caminata.dificultad and caminata.dificultad != 'N/A' %}<p><strong>Dificultad:</strong> {{ caminata.dificultad }}</p>{% endif %}
+                {% if caminata.distancia is not none %}<p><strong>Distancia:</strong> {{ "%.1f km"|format(caminata.distancia) }}</p>{% endif %}
+                {% if caminata.capacidad_minima is not none %}<p><strong>Capacidad Mínima:</strong> {{ caminata.capacidad_minima }}</p>{% endif %}
+                {% if caminata.capacidad_maxima is not none %}<p><strong>Capacidad Máxima:</strong> {{ caminata.capacidad_maxima }}</p>{% endif %}
+                {% if caminata.nombre_guia and caminata.nombre_guia != 'N/A' %}<p><strong>Nombre del Guía:</strong> {{ caminata.nombre_guia }}</p>{% endif %}
+                {% if caminata.se_requiere and caminata.se_requiere != 'N/A' %}<p><strong>Se Requiere:</strong> {{ caminata.se_requiere }}</p>{% endif %}
+                {% if caminata.provincia and caminata.provincia != 'N/A' %}<p><strong>Provincia:</strong> {{ caminata.provincia }}</p>{% endif %}
+                {% if caminata.tipo_terreno and caminata.tipo_terreno|from_json %}<p><strong>Tipo de Terreno:</strong> {{ caminata.tipo_terreno|from_json|join(', ') }}</p>{% endif %}
+                {% if caminata.otras_senas_terreno and caminata.otras_senas_terreno != 'N/A' %}<p><strong>Otras Señas del Terreno:</strong> {{ caminata.otras_senas_terreno }}</p>{% endif %}
+                {% if caminata.tipo_transporte and caminata.tipo_transporte|from_json %}<p><strong>Tipo de Transporte:</strong> {{ caminata.tipo_transporte|from_json|join(', ') }}</p>{% endif %}
+                {% if caminata.incluye and caminata.incluye|from_json %}<p><strong>Incluye:</strong> {{ caminata.incluye|from_json|join(', ') }}</p>{% endif %}
+                {% if caminata.cuenta_con and caminata.cuenta_con|from_json %}<p><strong>Cuenta con:</strong> {{ caminata.cuenta_con|from_json|join(', ') }}</p>{% endif %}
+                {% if caminata.tipo_clima and caminata.tipo_clima != 'N/A' %}<p><strong>Tipo de Clima:</strong> {{ caminata.tipo_clima }}</p>{% endif %}
+                {% if caminata.altura_maxima is not none %}<p><strong>Altura Máxima:</strong> {{ "%.1f m"|format(caminata.altura_maxima) }}</p>{% endif %}
+                {% if caminata.altura_minima is not none %}<p><strong>Altura Mínima:</strong> {{ "%.1f m"|format(caminata.altura_minima) }}</p>{% endif %}
+                {% if caminata.altura_positiva is not none %}<p><strong>Altura Positiva:</strong> {{ "%.1f m"|format(caminata.altura_positiva) }}</p>{% endif %}
+                {% if caminata.altura_negativa is not none %}<p><strong>Altura Negativa:</strong> {{ "%.1f m"|format(caminata.altura_negativa) }}</p>{% endif %}
+                
+                {% if caminata.otros_datos and caminata.otros_datos|striptags|trim %}
+                    <p><strong>Otros Datos:</strong></p>
+                    <div>
+                        {{ caminata.otros_datos|safe }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <h3 class="text-warning mt-4">Participantes de la Caminata</h3>
+        <div class="list-group mb-3">
+            {# MODIFICACIÓN INICIA AQUÍ: Se itera sobre 'participantes_con_info' #}
+            {% if participantes_con_info %}
+                {% set participant_counter = namespace(value=1) %} {# Inicializar contador de participantes #}
+                {% for participant_info in participantes_con_info %}
+                <div class="list-group-item">
+                    <div>
+                        <a href="{{ url_for('perfil.ver_perfil', user_id=participant_info.id) }}" class="text-decoration-none">
+                            <strong>{{ participant_counter.value }}. {{ participant_info.nombre }} {{ participant_info.primer_apellido }}</strong> ({{ participant_info.username }})
+                        </a>
+                        {# NUEVO: Mostrar el estado del abono con el formato solicitado #}
+                        {% if participant_info.estado_abono %}
+                            {% if participant_info.estado_abono == 'Reserva' %}
+                                <span style="color: purple; font-weight: bold; margin-left: 10px;">RESERVADO</span>
+                            {% elif participant_info.estado_abono == 'Abono' %}
+                                <span style="color: #CCCC00; font-weight: bold; margin-left: 10px;">ABONO</span>
+                            {% elif participant_info.estado_abono == 'Cancelación' %}
+                                <span style="color: green; font-weight: bold; margin-left: 10px;">CANCELADO</span>
+                            {% endif %}
+                        {% endif %}
+                        {# FIN NUEVO BLOQUE DE ESTADO #}
+
+                        {# MODIFICACIÓN: Email y Teléfono visibles solo para Superuser y solo si existen #}
+                        {% if session.role == 'Superuser' %}
+                            {% if participant_info.email and participant_info.email != 'N/A' %}<br>Email: {{ participant_info.email }} {% endif %}
+                            {% if participant_info.telefono and participant_info.telefono != 'N/A' %}<br>Teléfono: {{ participant_info.telefono }} {% endif %}
+                        {% endif %}
+
+                        {# Mostrar acompañantes para este participante con numeración #}
+                        {% if participant_info.acompanantes %}
+                            <div class="mt-2 ms-4"> {# Añadir margen para indentación #}
+                                <strong>Acompañante(s) registrado(s) por {{ participant_info.nombre }}:</strong>
+                                <ul>
+                                    {% set companion_sub_counter = namespace(value=1) %} {# Inicializar contador de acompañantes #}
+                                    {% for companion_name in participant_info.acompanantes %}
+                                        {# Solo muestra el acompañante si el nombre no está vacío #}
+                                        {% if companion_name and companion_name.strip() %}
+                                            <li>{{ companion_sub_counter.value }}. {{ companion_name }}</li>
+                                            {% set companion_sub_counter.value = companion_sub_counter.value + 1 %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {# Línea horizontal para separar detalles de botones #}
+                    <hr class="my-2"> 
+                    {# MODIFICACIÓN: Botones de Gestionar Abono y Eliminar visibles solo para Superuser #}
+                    {% if session.role == 'Superuser' %}
+                        <div class="d-flex flex-column flex-sm-row justify-content-end align-items-stretch mt-2">
+                            <a href="{{ url_for('caminatas.abono_caminata', caminata_id=caminata.id, user_id=participant_info.id) }}" class="btn btn-info btn-sm mb-2 mb-sm-0 me-sm-2 w-100">Gestionar Abono</a>
+                            <form action="{{ url_for('caminatas.gestionar_participantes', caminata_id=caminata.id) }}" method="POST" class="d-inline w-100">
+                                <input type="hidden" name="user_id" value="{{ participant_info.id }}">
+                                <button type="button" name="remove_participant" class="btn btn-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#confirmRemoveParticipantModal{{ participant_info.id }}">Eliminar</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+                {# Modal de Confirmación de Eliminación de Participante #}
+                <div class="modal fade" id="confirmRemoveParticipantModal{{ participant_info.id }}" tabindex="-1" aria-labelledby="confirmRemoveParticipantModalLabel{{ participant_info.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmRemoveParticipantModalLabel{{ participant_info.id }}">Confirmar Eliminación de Participante</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Estás seguro de que quieres eliminar a <strong>{{ participant_info.nombre }} {{ participant_info.primer_apellido }}</strong> de esta caminata? Esto también eliminará todos sus abonos asociados a esta caminata.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <form action="{{ url_for('caminatas.gestionar_participantes', caminata_id=caminata.id) }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="user_id" value="{{ participant_info.id }}">
+                                    <button type="submit" name="remove_participant" class="btn btn-danger">Eliminar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% set participant_counter.value = participant_counter.value + 1 %}
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info text-center" role="alert">
+                    No hay participantes registrados para esta caminata aún.
+                </div>
+            {% endif %}
+            {# MODIFICACIÓN TERMINA AQUÍ #}
+        </div>
+
+        {# MODIFICACIÓN: Sección "Agregar Participante" visible solo para Superuser #}
+        {% if session.role == 'Superuser' %}
+            <h4 class="text-warning mt-4">Agregar Participante</h4>
+            <form method="POST" action="{{ url_for('caminatas.gestionar_participantes', caminata_id=caminata.id) }}">
+                <div class="input-group mb-3">
+                    <select class="form-select" name="user_id" required>
+                        <option value="">Selecciona un contacto</option>
+                        {% for user in usuarios_registrados %}
+                            {# Asegurarse de que el usuario no esté ya en la lista de participantes actuales #}
+                            {% set user_is_participant = false %}
+                            {% for info in participantes_con_info %}
+                                {% if info.id == user.id %}
+                                    {% set user_is_participant = true %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if not user_is_participant %}
+                                <option value="{{ user.id }}">{{ user.nombre }} {{ user.primer_apellido }} ({{ user.username }})</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <button type="submit" name="add_participant" class="btn btn-success">Agregar</button>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+
+{# FAB buttons for actions - Copied from detalle_itinerario.html #}
+<div class="fab-container-actions">
+    {% if session.role == 'Superuser' %}
+        <a href="{{ url_for('caminatas.editar_caminata', caminata_id=caminata.id) }}" class="fab-button-action fab-button-edit" title="Editar Caminata">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Caminata" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        {% if caminata.instrucciones %}
+        <a href="{{ url_for('instrucciones.detalle_instrucciones', instruction_id=caminata.instrucciones[0].id) }}" class="fab-button-action fab-button-info" title="Ver Instrucciones">
+            <i class="fas fa-info-circle"></i>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('caminatas.exportar_caminata_pdf', caminata_id=caminata.id) }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
+            <i class="fas fa-file-pdf"></i>
+        </a>
+        <a href="{{ url_for('caminatas.exportar_caminata_txt', caminata_id=caminata.id) }}" class="fab-button-action fab-button-txt" title="Exportar a TXT">
+            <i class="fas fa-file-alt"></i>
+        </a>
+        <a href="{{ url_for('caminatas.exportar_caminata_jpg', caminata_id=caminata.id) }}" class="fab-button-action fab-button-jpg" title="Exportar a JPG">
+            <i class="fas fa-image"></i>
+        </a>
+    {% endif %}
+</div>
+
+{# MODAL DE CONFIRMACIÓN DE ELIMINACIÓN - Copied from detalle_itinerario.html #}
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar esta caminata? Esto también eliminará todos los abonos asociados.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar Caminata</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Nuevo Modal para la imagen a pantalla completa #}
+<div class="modal fade fullscreen-modal" id="imageFullscreenModal" tabindex="-1" aria-labelledby="imageFullscreenModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img src="" class="img-fluid" id="fullscreenImage" alt="Imagen a pantalla completa">
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmDeleteButton = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteButton) {
+            confirmDeleteButton.addEventListener('click', function() {
+                // Envía el formulario de eliminación cuando se confirma en el modal
+                const deleteForm = document.getElementById('deleteCaminataForm');
+                console.log('Formulario de eliminación:', deleteForm); // Línea para depuración
+                if (deleteForm) {
+                    deleteForm.submit();
+                } else {
+                    console.error("Error: El formulario 'deleteCaminataForm' no fue encontrado."); // Error más específico
+                }
+            });
+        }
+
+        // Lógica para el modal de imagen a pantalla completa
+        const imageFullscreenModal = document.getElementById('imageFullscreenModal');
+        imageFullscreenModal.addEventListener('show.bs.modal', function (event) {
+            // Botón que disparó el modal
+            const button = event.relatedTarget; 
+            // Extrae la información de los atributos data-bs-*
+            const imageUrl = button.getAttribute('data-image-url');
+            // Actualiza el src de la imagen dentro del modal
+            const fullscreenImage = imageFullscreenModal.querySelector('#fullscreenImage');
+            fullscreenImage.src = imageUrl;
+        });
+    });
+</script>
+
+{# Nuevo botón flotante para volver atrás a la izquierda #}
+<div class="fab-container left">
+    <a href="{{ url_for('caminatas.ver_caminatas') }}" class="btn btn-primary fab-button" title="Volver a Caminatas">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+{% endblock %}

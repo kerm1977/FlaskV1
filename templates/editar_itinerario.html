@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Itinerario{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el botón flotante (FAB) de guardar */
+    .fab-container-save {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-save {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-save:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Editar Itinerario</h1>
+    <hr class="text-warning">
+    <form method="POST" action="{{ url_for('itinerario.editar_itinerario', itinerario_id=itinerario.id) }}" id="editItinerarioForm">
+        <div class="card mb-4 mt-5">
+            <div class="card-header bg-warning text-white">
+                <h2 class="card-title mb-0">Información General del Itinerario</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="caminata_id" class="form-label">Caminata Asociada <span class="text-danger">*</span></label>
+                    <select class="form-select" id="caminata_id" name="caminata_id" required>
+                        <option value="">Selecciona una Caminata Activa</option>
+                        {% for caminata in caminatas_activas %}
+                            <option value="{{ caminata.id }}" {% if caminata.id == itinerario.caminata_id %}selected{% endif %}>
+                                {{ caminata.nombre }} ({{ caminata.fecha.strftime('%d-%m-%Y') }}) {% if caminata.etapa %}(Etapa: {{ caminata.etapa }}){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="lugar_salida" class="form-label">Lugar de Salida:</label>
+                    <input type="text" class="form-control" id="lugar_salida" name="lugar_salida" value="{{ itinerario.lugar_salida or '' }}">
+                </div>
+                <div class="mb-3">
+                    <label for="hora_salida" class="form-label">Hora de Salida:</label>
+                    <input type="time" class="form-control" id="hora_salida" name="hora_salida" value="{{ itinerario.hora_salida.strftime('%H:%M') if itinerario.hora_salida else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="card-title mb-0">Puntos de Recogida</h2>
+            </div>
+            <div class="card-body">
+                <div id="puntos_recogida_container">
+                    {% if itinerario.puntos_recogida %}
+                        {% for item in itinerario.puntos_recogida %}
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" name="puntos_recogida[]" value="{{ item }}" placeholder="Punto de Recogida">
+                                <button type="button" class="btn btn-outline-danger remove-puntos-recogida-item">X</button>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" name="puntos_recogida[]" placeholder="Punto de Recogida">
+                            <button type="button" class="btn btn-outline-danger remove-puntos-recogida-item">X</button>
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="button" id="add_puntos_recogida_item" class="btn btn-outline-secondary btn-sm mt-2">Agregar otro punto de recogida</button>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0">Contenido Detallado del Itinerario</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="contenido_itinerario" class="form-label">Detalles del Itinerario:</label>
+                    <textarea class="form-control" id="contenido_itinerario" name="contenido_itinerario">{{ itinerario.contenido_itinerario or '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0">Opciones Adicionales</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="pasaremos_a_comer" class="form-label">Pasaremos a comer algún lado:</label>
+                    <select class="form-select" id="pasaremos_a_comer" name="pasaremos_a_comer">
+                        {% for opcion in pasaremos_a_comer_opciones %}
+                            <option value="{{ opcion }}" {% if opcion == itinerario.pasaremos_a_comer %}selected{% endif %}>{{ opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        {# Botón "Guardar Itinerario" original, ahora oculto #}
+        <button type="submit" class="btn btn-primary d-none">Guardar Itinerario</button>
+    </form>
+</div>
+
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar CKEditor
+        ClassicEditor
+            .create( document.querySelector( '#contenido_itinerario' ) )
+            .catch( error => {
+                console.error( error );
+            } );
+
+        // Lógica para añadir/remover dinámicamente puntos de recogida
+        const puntosRecogidaContainer = document.getElementById('puntos_recogida_container');
+        const addPuntosRecogidaBtn = document.getElementById('add_puntos_recogida_item');
+
+        function addPuntosRecogidaItem(value = '') {
+            const div = document.createElement('div');
+            div.classList.add('input-group', 'mb-2');
+            div.innerHTML = `
+                <input type="text" class="form-control" name="puntos_recogida[]" value="${value}" placeholder="Punto de Recogida">
+                <button type="button" class="btn btn-outline-danger remove-puntos-recogida-item">X</button>
+            `;
+            puntosRecogidaContainer.appendChild(div);
+        }
+
+        function removePuntosRecogidaItem(event) {
+            if (event.target.classList.contains('remove-puntos-recogida-item')) {
+                if (puntosRecogidaContainer.children.length > 1) {
+                    event.target.closest('.input-group').remove();
+                } else {
+                    event.target.closest('.input-group').querySelector('input').value = '';
+                }
+            }
+        }
+
+        addPuntosRecogidaBtn.addEventListener('click', function() {
+            addPuntosRecogidaItem();
+        });
+
+        puntosRecogidaContainer.addEventListener('click', removePuntosRecogidaItem);
+
+        // Si al cargar la página no hay puntos de recogida (o la lista está vacía después de parsear JSON)
+        // Y el contenedor está vacío, añade un input por defecto
+        const initialPuntosRecogida = {{ itinerario.puntos_recogida | tojson | safe }}; // Ya es una lista en el backend para editar
+        if (puntosRecogidaContainer.children.length === 0 && initialPuntosRecogida.length === 0) {
+            addPuntosRecogidaItem();
+        }
+
+
+        // Lógica para cargar Lugar de Salida y Hora de Salida al seleccionar una caminata
+        const caminataSelect = document.getElementById('caminata_id');
+        const lugarSalidaInput = document.getElementById('lugar_salida');
+        const horaSalidaInput = document.getElementById('hora_salida');
+
+        caminataSelect.addEventListener('change', function() {
+            const selectedCaminataId = this.value;
+            if (selectedCaminataId) {
+                fetch(`/itinerario/get_caminata_data/${selectedCaminataId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        lugarSalidaInput.value = data.lugar_salida;
+                        horaSalidaInput.value = data.hora_salida;
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener datos de la caminata:', error);
+                        lugarSalidaInput.value = '';
+                        horaSalidaInput.value = '';
+                    });
+            } else {
+                lugarSalidaInput.value = '';
+                horaSalidaInput.value = '';
+            }
+        });
+        
+        // Cargar datos iniciales al cargar la página si ya hay una caminata seleccionada
+        // Esto es importante si el formulario se recarga debido a un error de validación
+        if (caminataSelect.value) {
+            // No es necesario disparar el evento 'change' si el valor ya está preseleccionado
+            // y la lógica de prellenado ya se maneja en el backend para la carga inicial.
+            // Solo si se quiere que el JS sobrescriba lo del backend al cargar la página:
+            // caminataSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
+{# Botón flotante para guardar itinerario #}
+<div class="fab-container-save">
+    <a href="#" class="fab-button-save" title="Guardar Itinerario" onclick="document.getElementById('editItinerarioForm').submit(); return false;">
+        <i class="fas fa-save" style="color: black;"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('itinerario.detalle_itinerario', itinerario_id=itinerario.id) }}" class="fab-button-back" title="Volver al Detalle del Itinerario">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+{% endblock %}

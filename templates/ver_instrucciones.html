@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Instrucciones de Caminata{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para los botones flotantes de acción (Mantener si se usan en otros lugares, si no, pueden removerse si solo se usa el FAB) */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Asegura que esté por encima de otros elementos */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    .fab-button-add { background-color: #28a745; color: white; } /* Success green */
+
+    /* Estilos para las tarjetas de instrucción */
+    .instruction-card {
+        border: 1px solid #dee2e6; /* Borde sutil */
+        border-radius: 0.5rem; /* Bordes redondeados */
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Sombra ligera */
+        margin-bottom: 1.5rem; /* Espacio entre tarjetas */
+        display: flex;
+        flex-direction: column;
+        height: 100%; /* Asegura que las tarjetas tengan la misma altura en una fila */
+    }
+
+    .instruction-card .card-body {
+        flex-grow: 1; /* Permite que el cuerpo de la tarjeta ocupe el espacio disponible */
+        display: flex;
+        flex-direction: column;
+        padding: 20px; /* Padding de 20px dentro del cuerpo de la tarjeta - CAMBIO AQUÍ */
+    }
+
+    .instruction-card .card-footer {
+        background-color: transparent; /* Fondo transparente para el footer de la tarjeta */
+        border-top: none; /* Sin borde superior */
+        padding-top: 0; /* Sin padding superior */
+    }
+
+    .instruction-card .btn-group {
+        width: 100%; /* Asegura que los botones ocupen todo el ancho disponible */
+        display: flex;
+        justify-content: space-around; /* Distribuye los botones equitativamente */
+    }
+
+    .instruction-card .btn-group .btn {
+        flex: 1; /* Cada botón ocupa una parte igual del espacio */
+        margin: 0 0.25rem; /* Pequeño margen entre botones */
+    }
+
+    /* Regla para rodear el contenedor principal con un padding de 20px */
+    .container.mt-4 {
+        padding: 20px !important;
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de crear */
+    .fab-container {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo (ajustado a 70px para consistencia) */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Instrucciones de Caminatas</h1>
+    <hr class="text-warning">
+
+    {# Botón "Crear Nueva Instrucción" original, ahora oculto #}
+    <div class="d-flex justify-content-between align-items-center mb-4 d-none">
+        <a href="{{ url_for('instrucciones.crear_instrucciones') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Crear Nueva Instrucción
+        </a>
+    </div>
+
+    {% if instrucciones %}
+        {# Usamos las clases de Bootstrap para un grid responsivo #}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for instruction in instrucciones %}
+            <div class="col">
+                <div class="instruction-card">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="card-title mb-0 text-center">
+                            Caminata: {{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}
+                            {% if instruction.caminata and instruction.caminata.etapa %}
+                                (Etapa: {{ instruction.caminata.etapa }})
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text mb-1"><strong>Dificultad:</strong> {{ instruction.dificultad }}</p>
+                        {# Modificación aquí: Añadir verificación para None #}
+                        <p class="card-text mb-1"><strong>Fecha Caminata:</strong> {{ instruction.fecha_caminata.strftime('%d-%m-%Y') if instruction.fecha_caminata else 'N/A' }}</p>
+                        {# Modificación aquí: Añadir verificación para None #}
+                        <p class="card-text mb-1"><strong>Hora Inicio:</strong> {{ instruction.hora_inicio_caminata.strftime('%I:%M %p') if instruction.hora_inicio_caminata else 'N/A' }}</p>
+                        <p class="card-text mb-auto text-muted"><small>Creada: {{ instruction.fecha_creacion.strftime('%d-%m-%Y %H:%M') }}</small></p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-center">
+                        <div class="btn-group" role="group" aria-label="Acciones">
+                            <a href="{{ url_for('instrucciones.detalle_instrucciones', instruction_id=instruction.id) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i> Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="confirmDeleteModal{{ instruction.id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ instruction.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmDeleteModalLabel{{ instruction.id }}">Confirmar Eliminación</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que deseas eliminar las instrucciones para la caminata "{{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}" del {{ instruction.fecha_caminata.strftime('%d-%m-%Y') if instruction.fecha_caminata else 'N/A' }}? Esta acción no se puede deshacer.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form action="{{ url_for('instrucciones.eliminar_instrucciones', instruction_id=instruction.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center" role="alert">
+            No hay instrucciones de caminatas registradas. <a href="{{ url_for('instrucciones.crear_instrucciones') }}">¡Crea una ahora!</a>
+        </div>
+    {% endif %}
+</div>
+
+{# Botón flotante para crear nueva instrucción (AHORA IDÉNTICO AL DE PAGOS) #}
+<div class="fab-container">
+    <a href="{{ url_for('instrucciones.crear_instrucciones') }}" class="fab-button" title="Crear Nueva Instrucción">
+        <i class="fas fa-plus" style="color: black;"></i> {# Icono de más y color negro explícito #}
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('index') }}" class="fab-button-back" title="Volver al Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

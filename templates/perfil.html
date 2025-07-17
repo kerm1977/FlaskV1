@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Nueva clase para ocultar elementos sin eliminarlos del flujo */
+    .hidden-for-capture {
+        visibility: hidden !important;
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos para el contenedor principal de la tarjeta, sin sombras ni bordes */
+    #profile-details-card {
+        background-color: #ffffff; /* Fondo blanco */
+        padding: 30px; /* Relleno interno */
+        border-radius: 15px; /* Bordes redondeados */
+        /* Eliminar sombras y bordes explícitamente si Bootstrap los aplica */
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* Estilos para el avatar */
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-color: #ffc107 !important; /* Borde naranja como en detalle_contactos */
+        border: 3px solid; /* Asegura que el borde se aplique */
+    }
+
+    /* Estilos para los ítems de lista */
+    .list-group-item {
+        border: none !important; /* Eliminar bordes de los ítems de lista */
+        padding: 8px 0; /* Ajustar padding para separación */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Línea divisoria para los ítems de lista */
+    .list-group-item:not(:last-child) {
+        border-bottom: 1px dotted #e9ecef !important;
+    }
+
+    /* Margen inferior para el contenedor de botones */
+    #export-buttons-container {
+        margin-bottom: 80px; /* Margen inferior de 80px */
+    }
+
+    /* Asegurar que el img-thumbnail no tenga bordes */
+    .img-thumbnail {
+        border: none !important;
+    }
+
+    /* Ajuste para el contenido principal para evitar que el navbar lo cubra */
+    body {
+        padding-top: 70px; /* Ajusta este valor según la altura de tu navbar */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-8">
+            {# Contenedor principal del perfil, con el mismo ID para la captura JPG #}
+            <div id="profile-details-card" class="p-4">
+                <h2 class="card-title text-center mb-4 text-warning">Mi Perfil</h2>
+
+                <div class="text-center mb-4">
+                    {% if avatar_url %}
+                        <img src="{{ avatar_url }}" alt="Avatar de {{ user.username }}"
+                             class="img-thumbnail rounded-circle mb-3 profile-avatar">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/defaults/default_avatar.png') }}" alt="Avatar por defecto"
+                             class="img-thumbnail rounded-circle mb-3 profile-avatar">
+                    {% endif %}
+                    <h3 class="h4 mb-1">{{ user.nombre }} {{ user.primer_apellido }} {{ user.segundo_apellido if user.segundo_apellido else '' }}</h3>
+                    <p class="text-muted">@{{ user.username }}</p>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h4 class="text-warning mb-3">Información de Contacto</h4>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Teléfono:</strong>
+                                <span>{{ user.telefono }}</span>
+                            </li>
+                            {% if user.email %}
+                            <li class="list-group-item">
+                                <strong>Email:</strong>
+                                <span>{{ user.email }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.telefono_emergencia %}
+                            <li class="list-group-item">
+                                <strong>Tel. Emergencia:</strong>
+                                <span>{{ user.telefono_emergencia }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.nombre_emergencia %}
+                            <li class="list-group-item">
+                                <strong>Contacto Emergencia:</strong>
+                                <span>{{ user.nombre_emergencia }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.direccion %}
+                            <li class="list-group-item">
+                                <strong>Provincia:</strong>
+                                <span>{{ user.direccion }}</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <h4 class="text-warning mb-3">Información Adicional</h4>
+                        <ul class="list-group list-group-flush">
+                            {% if user.cedula %}
+                            <li class="list-group-item">
+                                <strong>Cédula:</strong>
+                                <span>{{ user.cedula }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.empresa %}
+                            <li class="list-group-item">
+                                <strong>Empresa:</strong>
+                                <span>{{ user.empresa }}</span>
+                            </li>
+                            {% endif %}
+                            {# MODIFICACIÓN: Mostrar Actividad solo para Superuser #}
+                            {% if session.role == 'Superuser' %}
+                                {% if user.actividad %}
+                                <li class="list-group-item">
+                                    <strong>Actividad:</strong>
+                                    <span>{{ user.actividad }}</span>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                            {# MODIFICACIÓN: Mostrar Capacidad solo para Superuser #}
+                            {% if session.role == 'Superuser' %}
+                                {% if user.capacidad %}
+                                <li class="list-group-item">
+                                    <strong>Capacidad:</strong>
+                                    <span>{{ user.capacidad }}</span>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                            {# MODIFICACIÓN: Mostrar Participación solo para Superuser #}
+                            {% if session.role == 'Superuser' %}
+                                {% if user.participacion %}
+                                <li class="list-group-item">
+                                    <strong>Participación:</strong>
+                                    <span>{{ user.participacion }}</span>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                            {% if user.fecha_cumpleanos %}
+                            <li class="list-group-item">
+                                <strong>Fecha de Cumpleaños:</strong>
+                                <span>{{ user.fecha_cumpleanos.strftime('%d/%m/%Y') }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.tipo_sangre %}
+                            <li class="list-group-item">
+                                <strong>Tipo de Sangre:</strong>
+                                <span>{{ user.tipo_sangre }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.poliza %}
+                            <li class="list-group-item">
+                                <strong>Póliza:</strong>
+                                <span>{{ user.poliza }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.aseguradora %}
+                            <li class="list-group-item">
+                                <strong>Aseguradora:</strong>
+                                <span>{{ user.aseguradora }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.alergias %}
+                            <li class="list-group-item">
+                                <strong>Alergias:</strong>
+                                <span>{{ user.alergias }}</span>
+                            </li>
+                            {% endif %}
+                            {% if user.enfermedades_cronicas %}
+                            <li class="list-group-item">
+                                <strong>Enfermedades Crónicas:</strong>
+                                <span>{{ user.enfermedades_cronicas }}</span>
+                            </li>
+                            {% endif %}
+                            <li class="list-group-item">
+                                <strong>Fecha de Registro:</strong>
+                                <span>{{ user.fecha_registro.strftime('%d/%m/%Y %H:%M') }}</span>
+                            </li>
+                            {% if user.fecha_actualizacion %}
+                            <li class="list-group-item">
+                                <strong>Última Actualización:</strong>
+                                <span>{{ user.fecha_actualizacion.strftime('%d/%m/%Y %H:%M') }}</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                {# Contenedor de botones #}
+                <div class="d-flex flex-wrap justify-content-center gap-2 mt-4" id="export-buttons-container">
+                    <a href="{{ url_for('perfil.editar_perfil') }}" class="btn btn-primary btn-lg">
+                        Editar mi Información
+                    </a>
+                    {% set first_digit = user.telefono[0] if user.telefono else '' %}
+                    {% set disable_whatsapp = first_digit in ['1', '2', '3', '4', '5', '9', '0'] %}
+
+                    {% if disable_whatsapp %}
+                        <button class="btn btn-success btn-lg d-flex align-items-center disabled" disabled title="Este número de teléfono no es compatible con WhatsApp.">
+                            <i class="fab fa-whatsapp me-2"></i> Enviar por WhatsApp
+                        </button>
+                    {% else %}
+                        <a href="https://wa.me/{{ user.telefono }}?text={{ (
+                            'Hola, te comparto tu información de perfil: '
+                            + user.nombre + ' ' + user.primer_apellido
+                            + ((' ' + user.segundo_apellido) if user.segundo_apellido else '')
+                            + '. Tu teléfono es ' + user.telefono + '.'
+                        )|urlencode }}"
+                           target="_blank" class="btn btn-success btn-lg d-flex align-items-center">
+                            <i class="fab fa-whatsapp me-2"></i> Enviar por WhatsApp
+                        </a>
+                    {% endif %}
+
+                    {# Botón para exportar el carnet a JPG #}
+                    <button type="button" class="btn btn-secondary dropdown-toggle btn-lg" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        Exportar Perfil
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="#" id="exportMyProfileJpgBtn">Exportar JPG (.jpg)</a></li>
+                        {# Puedes añadir más opciones de exportación aquí si las tienes implementadas en Flask #}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Script para html2canvas para exportar a JPG #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const exportMyProfileJpgBtn = document.getElementById('exportMyProfileJpgBtn');
+        const profileElement = document.getElementById('profile-details-card'); // Apunta al contenedor principal del perfil
+        const buttonsContainer = document.getElementById('export-buttons-container');
+
+        if (exportMyProfileJpgBtn && profileElement && buttonsContainer) {
+            exportMyProfileJpgBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                buttonsContainer.classList.add('hidden-for-capture'); // Oculta los botones antes de la captura
+                setTimeout(() => { // Pequeño retraso para asegurar que la clase se aplique
+                    html2canvas(profileElement, { /* Captura solo el div del perfil */
+                        scale: 2, /* Aumenta la resolución de la captura */
+                        useCORS: true, /* Importante si hay imágenes de diferentes orígenes */
+                        logging: false /* Deshabilita los logs en consola */
+                    }).then(function(canvas) {
+                        /* Mostrar los botones de nuevo después de la captura */
+                        buttonsContainer.classList.remove('hidden-for-capture');
+
+                        const link = document.createElement('a');
+                        link.download = 'mi_perfil_{{ user.username }}.jpg'; /* Nombre del archivo */
+                        link.href = canvas.toDataURL('image/jpeg', 0.9); /* Calidad 90% para JPG */
+                        document.body.appendChild(link);
+                        link.click(); /* Simula un clic en el enlace para descargar */
+                        document.body.removeChild(link);
+                    }).catch(err => {
+                        console.error('Error al generar la imagen JPG del perfil:', err);
+                        /* Asegurarse de mostrar los botones en caso de error */
+                        buttonsContainer.classList.remove('hidden-for-capture');
+                        alert('Hubo un error al exportar la imagen de tu perfil. Por favor, inténtalo de nuevo.');
+                    });
+                }, 50); /* Pequeño retraso de 50ms (puedes ajustar si es necesario) */
+            });
+        }
+    });
+</script>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('home') }}" class="fab-button-back" title="Volver a Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

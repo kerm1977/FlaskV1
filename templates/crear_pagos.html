@@ -1,0 +1,676 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Nuevo Pago{% endblock %}
+
+{% block head_content %}
+{# Estilos específicos para esta página que no están en main.css o sobrescriben base.html #}
+<style>
+    /* Estilos específicos para el botón flotante (FAB) de guardar */
+    .fab-container-save {
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-save {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+    }
+    .fab-button-save:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás, idénticos a crear_caminatas.html */
+    .fab-container-back {
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        /* Los colores de btn-primary se aplican directamente de Bootstrap,
+           pero se especifican aquí para asegurar la consistencia si Bootstrap cambia */
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Crear Nuevo Pago</h1>
+    <hr class="text-warning">
+
+    {# Contenedor para mensajes de alerta #}
+    <div id="form-messages" class="mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flashed-messages">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('pagos.crear_pagos') }}" id="createPagoForm">
+        <div class="card mb-4 mt-5">
+            <div class="card-header bg-warning text-white">
+                <h2 class="card-title mb-0">Información</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="flyer_imagen" class="form-label">Flyer o Imagen</label>
+                    <input class="form-control" type="file" id="flyer_imagen" name="flyer_imagen" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label for="nombre_caminata" class="form-label">Nombre de la Caminata <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="nombre_caminata" name="nombre_caminata" value="{{ nombre_caminata if nombre_caminata is defined else '' }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="precio_paquete" class="form-label">Precio del Paquete (¢) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="precio_paquete" name="precio_paquete" value="{{ precio_paquete if precio_paquete is defined else '' }}" step="1" min="0" required>
+                </div>
+                <div class="mb-3">
+                    <label for="capacidad" class="form-label">Capacidad <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="capacidad" name="capacidad" value="{{ capacidad if capacidad is defined else '' }}" step="1" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="tipo_cambio" class="form-label">Tipo de Cambio</label>
+                    <input type="number" class="form-control" id="tipo_cambio" name="tipo_cambio" value="{{ tipo_cambio if tipo_cambio is defined else '0' }}" step="1" min="0">
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h2 class="card-title mb-0">Transporte</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_buseta" class="form-label">Precio Buseta (¢)</label>
+                        <input type="number" class="form-control transport-input" id="precio_buseta" name="precio_buseta" value="{{ precio_buseta if precio_buseta is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_busetas" class="form-label">Cantidad Busetas</label>
+                        <input type="number" class="form-control transport-input" id="cantidad_busetas" name="cantidad_busetas" value="{{ cantidad_busetas if cantidad_busetas is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_acuatico" class="form-label">Precio Acuático (¢)</label>
+                        <input type="number" class="form-control transport-input" id="precio_acuatico" name="precio_acuatico" value="{{ precio_acuatico if precio_acuatico is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_acuatico" class="form-label">Cantidad Acuático</label>
+                        <input type="number" class="form-control transport-input" id="cantidad_acuatico" name="cantidad_acuatico" value="{{ cantidad_acuatico if cantidad_acuatico is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_aereo" class="form-label">Precio Aéreo (¢)</label>
+                        <input type="number" class="form-control transport-input" id="precio_aereo" name="precio_aereo" value="{{ precio_aereo if precio_aereo is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_aereo" class="form-label">Cantidad Aéreo</label>
+                        <input type="number" class="form-control transport-input" id="cantidad_aereo" name="cantidad_aereo" value="{{ cantidad_aereo if cantidad_aereo is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_otros_transporte" class="form-label">Precio Otros Transporte (¢)</label>
+                        <input type="number" class="form-control transport-input" id="precio_otros_transporte" name="precio_otros_transporte" value="{{ precio_otros_transporte if precio_otros_transporte is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_otros_transporte" class="form-label">Cantidad Otros Transporte</label>
+                        <input type="number" class="form-control transport-input" id="cantidad_otros_transporte" name="cantidad_otros_transporte" value="{{ cantidad_otros_transporte if cantidad_otros_transporte is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion_otros_transporte" class="form-label">Descripción Otros Transporte</label>
+                    <input type="text" class="form-control" id="descripcion_otros_transporte" name="descripcion_otros_transporte" value="{{ descripcion_otros_transporte if descripcion_otros_transporte is defined else '' }}">
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5>Total General Transporte: <span id="total_general_transporte">¢0</span></h5>
+                    <h5>Total Individual Transporte: <span id="total_individual_transporte">¢0</span></h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0">Otros Generales</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_guias" class="form-label">Precio Guía por Grupo (¢)</label>
+                        <input type="number" class="form-control guide-input" id="precio_guias" name="precio_guias" value="{{ precio_guias if precio_guias is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_guia_por_persona" class="form-label">Precio Guía por Persona (¢)</label>
+                        <input type="number" class="form-control guide-input" id="precio_guia_por_persona" name="precio_guia_por_persona" value="{{ precio_guia_por_persona if precio_guia_por_persona is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="cantidad_guias" class="form-label">Cantidad Guías</label>
+                    <input type="number" class="form-control" id="cantidad_guias" name="cantidad_guias" value="{{ cantidad_guias if cantidad_guias is defined else '0' }}" step="1" min="0">
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5>Total General Guías: <span id="total_general_guias">¢0</span></h5>
+                    <h5>Total Individual Guías: <span id="total_individual_guias">¢0</span></h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-white">
+                <h2 class="card-title mb-0">Otros Personales</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_estadia" class="form-label">Precio Estadía (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_estadia" name="precio_estadia" value="{{ precio_estadia if precio_estadia is defined else '0' }}" step="1" min="0">
+                        <small class="form-text text-muted">Total por días: <span id="display_precio_estadia"></span></small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_dias_estadia" class="form-label">Cantidad Días Estadía</label>
+                        <input type="number" class="form-control personal-input" id="cantidad_dias_estadia" name="cantidad_dias_estadia" value="{{ cantidad_dias_estadia if cantidad_dias_estadia is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_desayuno" class="form-label">Precio Desayuno (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_desayuno" name="precio_desayuno" value="{{ precio_desayuno if precio_desayuno is defined else '0' }}" step="1" min="0">
+                        <small class="form-text text-muted">Total por días: <span id="display_precio_desayuno"></span></small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_dias_desayuno" class="form-label">Cantidad Días Desayuno</label>
+                        <input type="number" class="form-control personal-input" id="cantidad_dias_desayuno" name="cantidad_dias_desayuno" value="{{ cantidad_dias_desayuno if cantidad_dias_desayuno is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_merienda" class="form-label">Precio Merienda (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_merienda" name="precio_merienda" value="{{ precio_merienda if precio_merienda is defined else '0' }}" step="1" min="0">
+                        <small class="form-text text-muted">Total por días: <span id="display_precio_merienda"></span></small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_dias_merienda" class="form-label">Cantidad Días Merienda</label>
+                        <input type="number" class="form-control personal-input" id="cantidad_dias_merienda" name="cantidad_dias_merienda" value="{{ cantidad_dias_merienda if cantidad_dias_merienda is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_almuerzo" class="form-label">Precio Almuerzo (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_almuerzo" name="precio_almuerzo" value="{{ precio_almuerzo if precio_almuerzo is defined else '0' }}" step="1" min="0">
+                        <small class="form-text text-muted">Total por días: <span id="display_precio_almuerzo"></span></small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_dias_almuerzo" class="form-label">Cantidad Días Almuerzo</label>
+                        <input type="number" class="form-control personal-input" id="cantidad_dias_almuerzo" name="cantidad_dias_almuerzo" value="{{ cantidad_dias_almuerzo if cantidad_dias_almuerzo is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_cafe" class="form-label">Precio Café (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_cafe" name="precio_cafe" value="{{ precio_cafe if precio_cafe is defined else '0' }}" step="1" min="0">
+                        <small class="form-text text-muted">Total por días: <span id="display_precio_cafe"></span></small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_dias_cafe" class="form-label">Cantidad Días Café</label>
+                        <input type="number" class="form-control personal-input" id="cantidad_dias_cafe" name="cantidad_dias_cafe" value="{{ cantidad_dias_cafe if cantidad_dias_cafe is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_cena" class="form-label">Precio Cena (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_cena" name="precio_cena" value="{{ precio_cena if precio_cena is defined else '0' }}" step="1" min="0">
+                        <small class="form-text text-muted">Total por días: <span id="display_precio_cena"></span></small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cantidad_dias_cena" class="form-label">Cantidad Días Cena</label>
+                        <input type="number" class="form-control personal-input" id="cantidad_dias_cena" name="cantidad_dias_cena" value="{{ cantidad_dias_cena if cantidad_dias_cena is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_impuestos" class="form-label">Precio Impuestos (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_impuestos" name="precio_impuestos" value="{{ precio_impuestos if precio_impuestos is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_banos" class="form-label">Precio Baños (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_banos" name="precio_banos" value="{{ precio_banos if precio_banos is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_servicios_sanitarios" class="form-label">Precio Servicios Sanitarios (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_servicios_sanitarios" name="precio_servicios_sanitarios" value="{{ precio_servicios_sanitarios if precio_servicios_sanitarios is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_acarreo" class="form-label">Precio Acarreo (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_acarreo" name="precio_acarreo" value="{{ precio_acarreo if precio_acarreo is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_entrada" class="form-label">Precio Entrada (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_entrada" name="precio_entrada" value="{{ precio_entrada if precio_entrada is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_reconocimiento" class="form-label">Precio Reconocimiento (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_reconocimiento" name="precio_reconocimiento" value="{{ precio_reconocimiento if precio_reconocimiento is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_permisos" class="form-label">Precio Permisos (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_permisos" name="precio_permisos" value="{{ precio_permisos if precio_permisos is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_pasaporte" class="form-label">Precio Pasaporte (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_pasaporte" name="precio_pasaporte" value="{{ precio_pasaporte if precio_pasaporte is defined else '0' }}" step="1" min="0">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_otros1_personales" class="form-label">Precio Otros 1 Personales (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_otros1_personales" name="precio_otros1_personales" value="{{ precio_otros1_personales if precio_otros1_personales is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="descripcion_otros1_personales" class="form-label">Descripción Otros 1 Personales</label>
+                        <input type="text" class="form-control" id="descripcion_otros1_personales" name="descripcion_otros1_personales" value="{{ descripcion_otros1_personales if descripcion_otros1_personales is defined else '' }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_otros2_personales" class="form-label">Precio Otros 2 Personales (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_otros2_personales" name="precio_otros2_personales" value="{{ precio_otros2_personales if precio_otros2_personales is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="descripcion_otros2_personales" class="form-label">Descripción Otros 2 Personales</label>
+                        <input type="text" class="form-control" id="descripcion_otros2_personales" name="descripcion_otros2_personales" value="{{ descripcion_otros2_personales if descripcion_otros2_personales is defined else '' }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_otros3_personales" class="form-label">Precio Otros 3 Personales (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_otros3_personales" name="precio_otros3_personales" value="{{ precio_otros3_personales if precio_otros3_personales is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="descripcion_otros3_personales" class="form-label">Descripción Otros 3 Personales</label>
+                        <input type="text" class="form-control" id="descripcion_otros3_personales" name="descripcion_otros3_personales" value="{{ descripcion_otros3_personales if descripcion_otros3_personales is defined else '' }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="precio_otros4_personales" class="form-label">Precio Otros 4 Personales (¢)</label>
+                        <input type="number" class="form-control personal-input" id="precio_otros4_personales" name="precio_otros4_personales" value="{{ precio_otros4_personales if precio_otros4_personales is defined else '0' }}" step="1" min="0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="descripcion_otros4_personales" class="form-label">Descripción Otros 4 Personales</label>
+                        <input type="text" class="form-control" id="descripcion_otros4_personales" name="descripcion_otros4_personales" value="{{ descripcion_otros4_personales if descripcion_otros4_personales is defined else '' }}">
+                    </div>
+                </div>
+                <hr>
+                <h5>Total Individual Personales: <span id="total_individual_personales">¢0</span></h5>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h2 class="card-title mb-0">Totales Finales</h2>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4>TOTAL GENERAL: <span id="total_general_final">¢0</span></h4>
+                    <h4>TOTAL INDIVIDUAL: <span id="total_individual_final">¢0</span></h4>
+                </div>
+                {# Nuevo campo para el Total Individual en Dólares #}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4>TOTAL INDIVIDUAL $: <span id="total_individual_usd">$0.00</span></h4>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h4>GANANCIA POR PERSONA: <span id="ganancia_pp">¢0</span></h4>
+                    <h4>GANANCIA GENERAL: <span id="ganancia_gral">¢0</span></h4>
+                </div>
+            </div>
+        </div>
+
+        {# El botón "Crear Nuevo Pago" normal ha sido eliminado, ya que el flotante lo reemplaza. #}
+        {# Se ha añadido un ID al formulario para poder referenciarlo desde el FAB #}
+    </form>
+</div>
+
+{# Botón flotante para crear pago #}
+<div class="fab-container-save">
+    <button type="submit" class="fab-button-save" title="Crear Nuevo Pago" form="createPagoForm">
+        <i class="fas fa-save" style="color: black;"></i> {# Icono de guardar #}
+    </button>
+</div>
+
+{# Botón flotante para volver atrás, idéntico al de crear_caminatas.html #}
+<div class="fab-container-back">
+    <a href="{{ url_for('pagos.ver_pagos') }}" class="btn btn-primary fab-button-back" title="Volver a Pagos">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    console.log("Script de crear_pagos.html iniciado."); 
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOMContentLoaded event fired."); 
+
+        // Obtener referencias a todos los inputs relevantes
+        const precioPaqueteInput = document.getElementById('precio_paquete');
+        const capacidadInput = document.getElementById('capacidad');
+        const tipoCambioInput = document.getElementById('tipo_cambio');
+
+        // Inputs de Transporte
+        const precioBusetaInput = document.getElementById('precio_buseta');
+        const cantidadBusetasInput = document.getElementById('cantidad_busetas');
+        const precioAcuaticoInput = document.getElementById('precio_acuatico');
+        const cantidadAcuaticoInput = document.getElementById('cantidad_acuatico');
+        const precioAereoInput = document.getElementById('precio_aereo');
+        const cantidadAereoInput = document.getElementById('cantidad_aereo');
+        const precioOtrosTransporteInput = document.getElementById('precio_otros_transporte');
+        const cantidadOtrosTransporteInput = document.getElementById('cantidad_otros_transporte');
+
+        // Inputs de Guías
+        const precioGuiaPorGrupoInput = document.getElementById('precio_guias');
+        const precioGuiaPorPersonaInput = document.getElementById('precio_guia_por_persona');
+        const cantidadGuiasInput = document.getElementById('cantidad_guias');
+        
+        // Inputs de Otros Personales (Precios y Cantidades de Días)
+        const precioEstadiaInput = document.getElementById('precio_estadia');
+        const cantidadDiasEstadiaInput = document.getElementById('cantidad_dias_estadia');
+        const precioDesayunoInput = document.getElementById('precio_desayuno');
+        const cantidadDiasDesayunoInput = document.getElementById('cantidad_dias_desayuno');
+        const precioMeriendaInput = document.getElementById('precio_merienda');
+        const cantidadDiasMeriendaInput = document.getElementById('cantidad_dias_merienda');
+        const precioAlmuerzoInput = document.getElementById('precio_almuerzo');
+        const cantidadDiasAlmuerzoInput = document.getElementById('cantidad_dias_almuerzo');
+        const precioCafeInput = document.getElementById('precio_cafe');
+        const cantidadDiasCafeInput = document.getElementById('cantidad_dias_cafe');
+        const precioCenaInput = document.getElementById('precio_cena');
+        const cantidadDiasCenaInput = document.getElementById('cantidad_dias_cena');
+
+        // Otros Inputs Personales
+        const precioImpuestosInput = document.getElementById('precio_impuestos');
+        const precioBanosInput = document.getElementById('precio_banos');
+        const precioServiciosSanitariosInput = document.getElementById('precio_servicios_sanitarios');
+        const precioAcarreoInput = document.getElementById('precio_acarreo');
+        const precioEntradaInput = document.getElementById('precio_entrada');
+        const precioReconocimientoInput = document.getElementById('precio_reconocimiento');
+        const precioPermisosInput = document.getElementById('precio_permisos');
+        const precioPasaporteInput = document.getElementById('precio_pasaporte');
+        const precioOtros1PersonalesInput = document.getElementById('precio_otros1_personales');
+        const precioOtros2PersonalesInput = document.getElementById('precio_otros2_personales');
+        const precioOtros3PersonalesInput = document.getElementById('precio_otros3_personales');
+        const precioOtros4PersonalesInput = document.getElementById('precio_otros4_personales');
+
+
+        // Función para formatear moneda en colones
+        function formatCurrency(value) {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue)) {
+                return '¢0';
+            }
+            return '¢' + numValue.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        // Función para formatear moneda en dólares
+        function formatUSD(value) {
+            const numValue = parseFloat(value);
+            if (isNaN(numValue)) {
+                return '$0.00';
+            }
+            // Usar 'en-US' para el formato de dólares con separador de miles y dos decimales
+            return '$' + numValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Función para manejar el estado de los campos de guía
+        function toggleGuideInputs() {
+            console.log("toggleGuideInputs called");
+            const precioGuiaPorGrupo = parseFloat(precioGuiaPorGrupoInput.value) || 0;
+            const precioGuiaPorPersona = parseFloat(precioGuiaPorPersonaInput.value) || 0;
+
+            if (precioGuiaPorGrupo > 0) {
+                precioGuiaPorPersonaInput.value = 0;
+                precioGuiaPorPersonaInput.disabled = true;
+            } else if (precioGuiaPorPersona > 0) {
+                precioGuiaPorGrupoInput.value = 0;
+                precioGuiaPorGrupoInput.disabled = true;
+            } else {
+                precioGuiaPorGrupoInput.disabled = false;
+                precioGuiaPorPersonaInput.disabled = false;
+            }
+            calculateTotals();
+        }
+
+        // Función principal para calcular todos los totales
+        function calculateTotals() {
+            console.log("calculateTotals called");
+
+            const precio_paquete = parseFloat(precioPaqueteInput.value) || 0;
+            const capacidad = parseFloat(capacidadInput.value) || 0;
+            const tipo_cambio = parseFloat(tipoCambioInput.value) || 0;
+            
+            console.log("Capacidad:", capacidad);
+            const capacidad_val = capacidad > 0 ? capacidad : 1;
+
+            // TRANSPORTE
+            const precio_buseta = parseFloat(precioBusetaInput.value) || 0;
+            const cantidad_busetas = parseFloat(cantidadBusetasInput.value) || 0;
+            const precio_acuatico = parseFloat(precioAcuaticoInput.value) || 0;
+            const cantidad_acuatico = parseFloat(cantidadAcuaticoInput.value) || 0;
+            const precio_aereo = parseFloat(precioAereoInput.value) || 0;
+            const cantidad_aereo = parseFloat(cantidadAereoInput.value) || 0;
+            const precio_otros_transporte = parseFloat(precioOtrosTransporteInput.value) || 0;
+            const cantidad_otros_transporte = parseFloat(cantidadOtrosTransporteInput.value) || 0;
+
+            const total_general_transporte = (precio_buseta * cantidad_busetas) +
+                                             (precio_acuatico * cantidad_acuatico) +
+                                             (precio_aereo * cantidad_aereo) +
+                                             (precio_otros_transporte * cantidad_otros_transporte);
+            const total_individual_transporte = total_general_transporte / capacidad_val;
+            document.getElementById('total_general_transporte').innerText = formatCurrency(total_general_transporte);
+            document.getElementById('total_individual_transporte').innerText = formatCurrency(total_individual_transporte);
+            console.log("Total General Transporte:", total_general_transporte);
+            console.log("Total Individual Transporte:", total_individual_transporte);
+
+            // GUÍAS
+            let precio_guias_calc = 0;
+            let precio_guia_por_persona_calc = 0;
+            let total_general_guias = 0;
+            let total_individual_guias = 0;
+            const cantidad_guias = parseFloat(cantidadGuiasInput.value) || 0;
+
+            if (!precioGuiaPorGrupoInput.disabled && parseFloat(precioGuiaPorGrupoInput.value) > 0) {
+                precio_guias_calc = parseFloat(precioGuiaPorGrupoInput.value);
+                total_general_guias = precio_guias_calc * cantidad_guias;
+                total_individual_guias = total_general_guias / capacidad_val;
+            } else if (!precioGuiaPorPersonaInput.disabled && parseFloat(precioGuiaPorPersonaInput.value) > 0) {
+                precio_guia_por_persona_calc = parseFloat(precioGuiaPorPersonaInput.value);
+                total_individual_guias = precio_guia_por_persona_calc * cantidad_guias;
+                total_general_guias = total_individual_guias * capacidad_val;
+            }
+            
+            document.getElementById('total_general_guias').innerText = formatCurrency(total_general_guias);
+            document.getElementById('total_individual_guias').innerText = formatCurrency(total_individual_guias);
+            console.log("Total General Guías:", total_general_guias);
+            console.log("Total Individual Guías:", total_individual_guias);
+
+
+            // OTROS PERSONALES
+            const precio_estadia_base = parseFloat(precioEstadiaInput.value) || 0;
+            const precio_desayuno_base = parseFloat(precioDesayunoInput.value) || 0;
+            const precio_merienda_base = parseFloat(precioMeriendaInput.value) || 0;
+            const precio_almuerzo_base = parseFloat(precioAlmuerzoInput.value) || 0;
+            const precio_cafe_base = parseFloat(precioCafeInput.value) || 0;
+            const precio_cena_base = parseFloat(precioCenaInput.value) || 0;
+            
+            const precio_estadia_total = precio_estadia_base * (parseFloat(cantidadDiasEstadiaInput.value) || 0);
+            const precio_desayuno_total = precio_desayuno_base * (parseFloat(cantidadDiasDesayunoInput.value) || 0);
+            const precio_merienda_total = precio_merienda_base * (parseFloat(cantidadDiasMeriendaInput.value) || 0);
+            const precio_almuerzo_total = precio_almuerzo_base * (parseFloat(cantidadDiasAlmuerzoInput.value) || 0);
+            const precio_cafe_total = precio_cafe_base * (parseFloat(cantidadDiasCafeInput.value) || 0);
+            const precio_cena_total = precio_cena_base * (parseFloat(cantidadDiasCenaInput.value) || 0);
+
+            document.getElementById('display_precio_estadia').innerText = formatCurrency(precio_estadia_total).replace('¢', '');
+            document.getElementById('display_precio_desayuno').innerText = formatCurrency(precio_desayuno_total).replace('¢', '');
+            document.getElementById('display_precio_merienda').innerText = formatCurrency(precio_merienda_total).replace('¢', '');
+            document.getElementById('display_precio_almuerzo').innerText = formatCurrency(precio_almuerzo_total).replace('¢', '');
+            document.getElementById('display_precio_cafe').innerText = formatCurrency(precio_cafe_total).replace('¢', '');
+            document.getElementById('display_precio_cena').innerText = formatCurrency(precio_cena_total).replace('¢', '');
+
+
+            const precio_impuestos = parseFloat(precioImpuestosInput.value) || 0;
+            const precio_banos = parseFloat(precioBanosInput.value) || 0;
+            const precio_servicios_sanitarios = parseFloat(precioServiciosSanitariosInput.value) || 0;
+            const precio_acarreo = parseFloat(precioAcarreoInput.value) || 0;
+            const precio_entrada = parseFloat(precioEntradaInput.value) || 0;
+            const precio_reconocimiento = parseFloat(precioReconocimientoInput.value) || 0;
+            const precio_permisos = parseFloat(precioPermisosInput.value) || 0;
+            const precio_pasaporte = parseFloat(precioPasaporteInput.value) || 0;
+            const precio_otros1_personales = parseFloat(precioOtros1PersonalesInput.value) || 0;
+            const precio_otros2_personales = parseFloat(precioOtros2PersonalesInput.value) || 0;
+            const precio_otros3_personales = parseFloat(precioOtros3PersonalesInput.value) || 0;
+            const precio_otros4_personales = parseFloat(precioOtros4PersonalesInput.value) || 0;
+
+            const total_individual_personales = precio_estadia_total + precio_impuestos + precio_banos + precio_servicios_sanitarios +
+                                                precio_desayuno_total + precio_merienda_total + precio_almuerzo_total + precio_acarreo +
+                                                precio_cafe_total + precio_cena_total + precio_entrada + precio_reconocimiento +
+                                                precio_permisos + precio_pasaporte + precio_otros1_personales +
+                                                precio_otros2_personales + precio_otros3_personales + precio_otros4_personales;
+            document.getElementById('total_individual_personales').innerText = formatCurrency(total_individual_personales);
+            console.log("Total Individual Personales:", total_individual_personales);
+
+
+            // TOTALES FINALES
+            let total_guias_final = 0;
+            if (precio_guias_calc > 0) { 
+                total_guias_final = total_general_guias;
+            } else if (precio_guia_por_persona_calc > 0) { 
+                total_guias_final = total_individual_guias * capacidad_val; 
+            }
+            
+            const total_general_final = total_general_transporte + total_guias_final + (total_individual_personales * capacidad_val);
+            const total_individual_final = total_general_final / capacidad_val; 
+            document.getElementById('total_general_final').innerText = formatCurrency(total_general_final);
+            document.getElementById('total_individual_final').innerText = formatCurrency(total_individual_final);
+            console.log("Total General Final:", total_general_final);
+            console.log("Total Individual Final:", total_individual_final);
+
+            // Calcular TOTAL INDIVIDUAL $
+            let total_individual_usd = 0;
+            if (tipo_cambio > 0) {
+                total_individual_usd = total_individual_final / tipo_cambio;
+            }
+            document.getElementById('total_individual_usd').innerText = formatUSD(total_individual_usd);
+            console.log("Total Individual USD:", total_individual_usd);
+
+            // GANANCIA
+            const ganancia_pp = precio_paquete - total_individual_final;
+            const ganancia_gral = ganancia_pp * capacidad;
+            document.getElementById('ganancia_pp').innerText = formatCurrency(ganancia_pp);
+            document.getElementById('ganancia_gral').innerText = formatCurrency(ganancia_gral);
+            console.log("Ganancia por Persona:", ganancia_pp);
+            console.log("Ganancia General:", ganancia_gral);
+        }
+
+        // Adjuntar escuchadores de eventos a todos los inputs numéricos relevantes
+        // Se adjuntan a cada input individualmente para mayor robustez
+        precioPaqueteInput.addEventListener('input', calculateTotals);
+        capacidadInput.addEventListener('input', calculateTotals);
+        tipoCambioInput.addEventListener('input', calculateTotals);
+
+        // Transporte
+        precioBusetaInput.addEventListener('input', calculateTotals);
+        cantidadBusetasInput.addEventListener('input', calculateTotals);
+        precioAcuaticoInput.addEventListener('input', calculateTotals);
+        cantidadAcuaticoInput.addEventListener('input', calculateTotals);
+        precioAereoInput.addEventListener('input', calculateTotals);
+        cantidadAereoInput.addEventListener('input', calculateTotals);
+        precioOtrosTransporteInput.addEventListener('input', calculateTotals);
+        cantidadOtrosTransporteInput.addEventListener('input', calculateTotals);
+
+        // Guías (estos tienen su propia lógica de toggle)
+        precioGuiaPorGrupoInput.addEventListener('input', toggleGuideInputs);
+        precioGuiaPorPersonaInput.addEventListener('input', toggleGuideInputs);
+        cantidadGuiasInput.addEventListener('input', calculateTotals); // Cantidad de guías siempre recalcula
+
+        // Otros Personales (Precios y Cantidades de Días)
+        precioEstadiaInput.addEventListener('input', calculateTotals);
+        cantidadDiasEstadiaInput.addEventListener('input', calculateTotals);
+        precioDesayunoInput.addEventListener('input', calculateTotals);
+        cantidadDiasDesayunoInput.addEventListener('input', calculateTotals);
+        precioMeriendaInput.addEventListener('input', calculateTotals);
+        cantidadDiasMeriendaInput.addEventListener('input', calculateTotals);
+        precioAlmuerzoInput.addEventListener('input', calculateTotals);
+        cantidadDiasAlmuerzoInput.addEventListener('input', calculateTotals);
+        precioCafeInput.addEventListener('input', calculateTotals);
+        cantidadDiasCafeInput.addEventListener('input', calculateTotals);
+        precioCenaInput.addEventListener('input', calculateTotals);
+        cantidadDiasCenaInput.addEventListener('input', calculateTotals);
+
+        // Otros Inputs Personales
+        precioImpuestosInput.addEventListener('input', calculateTotals);
+        precioBanosInput.addEventListener('input', calculateTotals);
+        precioServiciosSanitariosInput.addEventListener('input', calculateTotals);
+        precioAcarreoInput.addEventListener('input', calculateTotals);
+        precioEntradaInput.addEventListener('input', calculateTotals);
+        precioReconocimientoInput.addEventListener('input', calculateTotals);
+        precioPermisosInput.addEventListener('input', calculateTotals);
+        precioPasaporteInput.addEventListener('input', calculateTotals);
+        precioOtros1PersonalesInput.addEventListener('input', calculateTotals);
+        precioOtros2PersonalesInput.addEventListener('input', calculateTotals);
+        precioOtros3PersonalesInput.addEventListener('input', calculateTotals);
+        precioOtros4PersonalesInput.addEventListener('input', calculateTotals);
+
+        // Llamar a calculateTotals y toggleGuideInputs al cargar la página para inicializar los valores
+        calculateTotals();
+        toggleGuideInputs(); 
+    });
+</script>
+{% endblock %}

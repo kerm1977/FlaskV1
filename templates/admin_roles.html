@@ -1,0 +1,140 @@
+<!-- Modified admin_roles.html -->
+{% extends 'base.html' %}
+
+{% block title %}Administración de Roles{% endblock %}
+
+{% block head_content %}
+{# Estilos específicos para esta página que no están en main.css o sobrescriben base.html #}
+<style>
+    /* Estilos específicos para el botón flotante (FAB) */
+    .fab-container {
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo */
+        left: 20px; /* CAMBIO: Distancia desde la izquierda */
+        right: auto; /* Asegurarse de que no haya conflicto con 'right' */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        /* MODIFICACIÓN: Eliminar box-shadow para quitar el borde oscuro */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        /* MODIFICACIÓN: Ajustar box-shadow al pasar el ratón para quitar el borde oscuro */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-9">
+            <div class="">
+                <h2 class="card-title text-center mb-4 text-warning">Administración de Roles de Usuario</h2>
+                <p class="text-muted text-center">Aquí puedes gestionar los roles de todos los usuarios. Solo los Superusuarios tienen acceso a esta sección.</p>
+                <p class="text-danger text-center fw-bold">Recordatorio: Solo puede haber hasta 2 Superusuarios en el sistema.</p>
+
+                <!-- Sección para Superusuarios y Administradores -->
+                <h3 class="mt-5 mb-3 text-primary">Superusuarios y Administradores</h3>
+                <div class="user-list mt-4">
+                    {% if admin_users %}
+                        {% for user in admin_users %}
+                            <div class="user-card border rounded p-3 mb-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">@{{ user.username }}</h5>
+                                    <span class="badge {% if user.role == 'Superuser' %}bg-danger{% elif user.role == 'Administrador' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ user.role }}</span>
+                                </div>
+                                <form action="{{ url_for('contactos.admin_manage_roles') }}" method="POST" class="d-flex align-items-center">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <div class="flex-grow-1 me-2">
+                                        <select name="new_role" class="form-select form-select-sm">
+                                            <option value="Usuario Regular" {% if user.role == 'Usuario Regular' %}selected{% endif %}>Usuario Regular</option>
+                                            <option value="Administrador" {% if user.role == 'Administrador' %}selected{% endif %}>Administrador</option>
+                                            <option value="Superuser" {% if user.role == 'Superuser' %}selected{% endif %}>Superuser</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        {# Bloquear el botón si el usuario actual intenta cambiar su propio rol de Superuser a otro #}
+                                        {% if session.get('user_id') == user.id and user.role == 'Superuser' %}
+                                            <button type="submit" class="btn btn-warning btn-sm w-100" disabled title="No puedes cambiar tu propio rol de Superuser.">Actualizar</button>
+                                        {% else %}
+                                            <button type="submit" class="btn btn-warning btn-sm w-100">Actualizar</button>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 border rounded bg-light">
+                            No hay Superusuarios o Administradores registrados.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sección para buscar y asignar roles a Usuarios Regulares -->
+                <h3 class="mt-5 mb-3 text-primary">Buscar y Asignar Roles a Usuarios Regulares</h3>
+                <p class="text-muted text-center">Usa el buscador para encontrar usuarios con el rol "Usuario Regular" y asignarles un nuevo rol.</p>
+
+                <form action="{{ url_for('contactos.admin_manage_roles') }}" method="GET" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="search_query_regular" class="form-control" placeholder="Buscar usuario regular por nombre de usuario, nombre, apellido o email..." value="{{ search_query_regular if search_query_regular }}">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </div>
+                </form>
+
+                <div class="user-list mt-4">
+                    {% if regular_users %}
+                        {% for user in regular_users %}
+                            <div class="user-card border rounded p-3 mb-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">@{{ user.username }}</h5>
+                                    <span class="badge {% if user.role == 'Superuser' %}bg-danger{% elif user.role == 'Administrador' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">{{ user.role }}</span>
+                                </div>
+                                <form action="{{ url_for('contactos.admin_manage_roles') }}" method="POST" class="d-flex align-items-center">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <div class="flex-grow-1 me-2">
+                                        <select name="new_role" class="form-select form-select-sm">
+                                            <option value="Usuario Regular" {% if user.role == 'Usuario Regular' %}selected{% endif %}>Usuario Regular</option>
+                                            <option value="Administrador" {% if user.role == 'Administrador' %}selected{% endif %}>Administrador</option>
+                                            <option value="Superuser" {% if user.role == 'Superuser' %}selected{% endif %}>Superuser</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button type="submit" class="btn btn-warning btn-sm w-100">Actualizar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        {% if search_query_regular %}
+                            <div class="text-center py-4 border rounded bg-light">
+                                No se encontraron usuarios regulares para "{{ search_query_regular }}".
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4 border rounded bg-light">
+                                Realiza una búsqueda para encontrar usuarios regulares.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para volver a inicio #}
+<div class="fab-container">
+    <a href="{{ url_for('home') }}" class="btn btn-primary fab-button" title="Volver a Inicio">
+        <i class="fas fa-arrow-left"></i> {# CAMBIO: Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

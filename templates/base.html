@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi App Flask{% endblock %}</title>
+    <!-- Incluye Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Incluye Font Awesome para íconos -->
+
+    {# Enlace al archivo CSS personalizado #}
+ 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head_content %}{% endblock %} {# Bloque para contenido adicional en el head #}
+
+    <style>
+        /* Ajuste para el contenido principal para evitar que el navbar fijo lo cubra */
+        body {
+            padding-top: 100px; /* Ajusta este valor según la altura de tu navbar. */
+        }
+
+        /* Ajuste para móviles: el contenido se mantendrá con 100px de padding-top,
+           acercándolo al navbar si previamente estaba a 200px. */
+        @media (max-width: 767.98px) { /* Para pantallas pequeñas (móviles) */
+            body {
+               margin-top: -150px; /* Se ajusta para que el contenido suba y esté cerca del navbar. */
+            }
+        }
+
+        /* Estilos para el banner de instalación automático (Chromium) */
+        #installBanner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #343a40; /* Color oscuro similar al navbar */
+            color: white;
+            text-align: center;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            z-index: 1050; /* Por encima de otros elementos */
+            display: none; /* Oculto por defecto */
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        #installBanner button {
+            background-color: #fe3000; /* Color de tu tema */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        #installBanner button:hover {
+            opacity: 0.9;
+        }
+
+        #installBanner .close-button {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        /* Estilos para el botón de instalación manual */
+        #showManualInstallInstructionsButton {
+            position: fixed;
+            bottom: 20px; /* Un poco más arriba que el banner automático */
+            right: 20px;
+            background-color: #007bff; /* Un color diferente para distinguirlo */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1040; /* Por debajo del banner automático, pero visible */
+            display: none; /* Oculto por defecto */
+            font-weight: bold;
+        }
+
+        #showManualInstallInstructionsButton:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
+    <!-- INICIO: Configuraciones PWA -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="La Tribu PWA">
+    <link rel="apple-touch-icon" href="/static/uploads/icons/icon-192x192.jpg"> {# Asegúrate de que esta ruta sea correcta #}
+    <meta name="msapplication-TileImage" content="/static/uploads/icons/icon-192x192.jpg"> {# Asegúrate de que esta ruta sea correcta #}
+    <meta name="msapplication-TileColor" content="#fe3000"> {# Usa el color de tu tema #}
+    <!-- FIN: Configuraciones PWA -->
+
+</head>
+<body>
+
+    {% include "navbar.html" %}
+
+    {# Contenedor principal para el contenido específico de cada página #}
+    <div class="container mt-4 main-content">
+        {% include "flash.html" %}
+
+        {% block content %}{# Aquí irá el contenido único de cada página #}{% endblock %}
+    </div>
+
+    {# INICIO: FOOTER #}
+    <footer class="footer py-2 text-center">
+        <div class="container">
+            <span class="text-muted">Hecho con ❤️ Por La Tribu de Los Libres - 2025</span>
+        </div>
+    </footer>
+    {# FIN: FOOTER #}
+
+    <!-- Banner de instalación PWA automático (para navegadores Chromium) -->
+    <div id="installBanner">
+        <button class="close-button text-center" id="closeInstallBanner">&times;</button>
+        ¿Quieres instalar "La Tribu" para una mejor experiencia?
+        <button id="installButton">Instalar App</button>
+    </div>
+
+    <!-- Botón para mostrar instrucciones de instalación manual -->
+    <button id="showManualInstallInstructionsButton" class="btn btn-primary">
+        <i class="fas fa-download text-center"></i> Instalar App
+    </button>
+
+    <!-- Modal de instrucciones de instalación manual -->
+    <div class="modal fade" id="manualInstallModal" tabindex="-1" aria-labelledby="manualInstallModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="manualInstallModalLabel">Cómo Instalar "La Tribu"</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Para instalar "La Tribu" como una aplicación en tu dispositivo, sigue las instrucciones según tu navegador:</p>
+                    <h6>Google Chrome / Brave (Android/Escritorio):</h6>
+                    <ul>
+                        <li>Busca el icono de "Instalar" (un monitor con una flecha hacia abajo) en la barra de direcciones del navegador.</li>
+                        <li>Haz clic en él y confirma la instalación.</li>
+                        <li>Si no lo ves, haz clic en el menú de los tres puntos (<i class="fas fa-ellipsis-v"></i>) y busca la opción "Instalar aplicación" o "Añadir a la pantalla de inicio".</li>
+                    </ul>
+                    <h6>Mozilla Firefox (Android/Escritorio):</h6>
+                    <ul>
+                        <li>En la barra de direcciones, busca un icono de "hogar" con un signo más (<i class="fas fa-plus-circle"></i>) o un icono de "monitor".</li>
+                        <li>Haz clic en él y sigue las indicaciones para añadir a la pantalla de inicio.</li>
+                        <li>También puedes ir al menú principal (tres líneas horizontales <i class="fas fa-bars"></i>) y buscar "Instalar aplicación".</li>
+                    </ul>
+                    <h6>Safari (iOS/iPadOS):</h6>
+                    <ul>
+                        <li>En la parte inferior de la pantalla, busca el icono de "Compartir" (<i class="fas fa-share-square"></i>).</li>
+                        <li>Desplázate hacia abajo y selecciona "Añadir a pantalla de inicio".</li>
+                        <li>Confirma el nombre y haz clic en "Añadir".</li>
+                    </ul>
+                    <h6>Microsoft Edge:</h6>
+                    <ul>
+                        <li>Busca el icono de "Instalar sitio como aplicación" en la barra de direcciones (un monitor con una flecha hacia abajo).</li>
+                        <li>Haz clic en él y sigue las indicaciones.</li>
+                        <li>También puedes ir al menú de los tres puntos (<i class="fas fa-ellipsis-h"></i>), luego "Aplicaciones" y "Instalar este sitio como una aplicación".</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JS de Bootstrap y otros JS globales -->
+        <script src="{{ url_for('static', filename='js/timezone_converter.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script> {# CKEditor si es global, si no, mantener en plantillas específicas #}
+    {% block scripts %}{% endblock %} {# Bloque para scripts adicionales de cada página #}
+
+    <!-- INICIO: Lógica para el registro del Service Worker y el prompt de instalación PWA -->
+    <script>
+        let deferredPrompt; // Variable para almacenar el evento de instalación
+        const installBanner = document.getElementById('installBanner');
+        const installButton = document.getElementById('installButton');
+        const closeInstallBanner = document.getElementById('closeInstallBanner');
+        const showManualInstallInstructionsButton = document.getElementById('showManualInstallInstructionsButton');
+        const manualInstallModal = new bootstrap.Modal(document.getElementById('manualInstallModal')); // Instancia del modal de Bootstrap
+
+        // 1. Registro del Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('{{ url_for('static', filename='js/service-worker.js') }}').then(function(registration) {
+                    console.log('ServiceWorker registrado con éxito:', registration.scope);
+                }, function(err) {
+                    console.log('Fallo el registro de ServiceWorker:', err);
+                });
+
+                // Establece un temporizador para mostrar el botón de instalación manual
+                // si el beforeinstallprompt no se dispara después de un tiempo razonable.
+                setTimeout(() => {
+                    if (!deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone) {
+                        // Solo muestra el botón manual si no hay prompt automático y la app no está instalada
+                        showManualInstallInstructionsButton.style.display = 'block';
+                        console.log('Mostrando botón de instalación manual.');
+                    }
+                }, 3000); // Espera 3 segundos
+            });
+        }
+
+        // 2. Captura del evento beforeinstallprompt (para navegadores Chromium)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previene que el navegador muestre su propio mini-banner
+            e.preventDefault();
+            // Almacena el evento para poder dispararlo más tarde
+            deferredPrompt = e;
+            // Oculta el botón de instalación manual si estaba visible
+            if (showManualInstallInstructionsButton) {
+                showManualInstallInstructionsButton.style.display = 'none';
+            }
+            // Muestra tu banner de instalación personalizado
+            if (installBanner) {
+                installBanner.style.display = 'flex'; // Usar flex para centrar contenido
+                installBanner.style.justifyContent = 'center';
+                installBanner.style.alignItems = 'center';
+            }
+            console.log('Evento beforeinstallprompt capturado.');
+        });
+
+        // 3. Manejo del clic en el botón de instalación automático
+        if (installButton) {
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    // Oculta el banner automático
+                    if (installBanner) {
+                        installBanner.style.display = 'none';
+                    }
+                    // Muestra el prompt de instalación del navegador
+                    deferredPrompt.prompt();
+                    // Espera a que el usuario responda al prompt
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`El usuario ${outcome} el prompt de instalación.`);
+                    // Limpia el evento deferredPrompt, ya que solo se puede usar una vez
+                    deferredPrompt = null;
+                }
+            });
+        }
+
+        // 4. Manejo del clic en el botón de cerrar del banner automático
+        if (closeInstallBanner) {
+            closeInstallBanner.addEventListener('click', () => {
+                if (installBanner) {
+                    installBanner.style.display = 'none';
+                }
+                // Si el usuario cierra el banner automático, ofrecemos la opción manual
+                if (!window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone) {
+                    showManualInstallInstructionsButton.style.display = 'block';
+                }
+                console.log('Banner de instalación automático cerrado por el usuario.');
+            });
+        }
+
+        // 5. Manejo del clic en el botón de mostrar instrucciones manuales
+        if (showManualInstallInstructionsButton) {
+            showManualInstallInstructionsButton.addEventListener('click', () => {
+                manualInstallModal.show(); // Muestra el modal de Bootstrap
+                console.log('Mostrando modal de instrucciones de instalación manual.');
+            });
+        }
+
+        // 6. Detectar si la PWA ya está instalada para no mostrar ningún banner
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada exitosamente.');
+            if (installBanner) {
+                installBanner.style.display = 'none';
+            }
+            if (showManualInstallInstructionsButton) {
+                showManualInstallInstructionsButton.style.display = 'none';
+            }
+            deferredPrompt = null; // Asegurarse de que no se pueda volver a disparar
+        });
+
+        // 7. Detectar si se está ejecutando como PWA (standalone) al cargar
+        if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+            console.log('La aplicación se está ejecutando en modo standalone (PWA instalada).');
+            if (installBanner) {
+                installBanner.style.display = 'none';
+            }
+            if (showManualInstallInstructionsButton) {
+                showManualInstallInstructionsButton.style.display = 'none';
+            }
+        }
+    </script>
+    <!-- FIN: Lógica para el registro del Service Worker y el prompt de instalación PWA -->
+
+</body>
+</html>

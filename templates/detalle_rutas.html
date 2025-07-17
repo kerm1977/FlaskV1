@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+{# --- INICIO DEL BLOQUE DEL VIDEO CON NUEVA ESTRUCTURA --- #}
+{% if embed_url %}
+<div class="video-player-wrapper"> {# ¡NUEVO DIV PARA EL MARGEN! #}
+    <div class="full-viewport-video-container">
+        <div class="video-container">
+            {# La condición para YouTube debe coincidir con cómo se genera la URL en rutas.py #}
+            {# La URL generada en rutas.py es f"https://www.youtube.com/embed/{video_id}" #}
+            {% if 'https://www.youtube.com/embed/' in embed_url %} {# ¡CORRECCIÓN: era '1' ahora es '0'! #}
+                <iframe class="frameVids" src="{{ embed_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            {% elif 'facebook.com' in embed_url %}
+                <iframe src="{{ embed_url }}" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-in-picture; web-share"></iframe>
+            {% else %}
+                {# Si no es YouTube ni Facebook, puedes manejarlo aquí o simplemente no mostrar el video #}
+                <p class="detail-value">Tipo de video no soportado o URL incorrecta.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="container">
+    <div class="content-wrapper">
+        <div class="detail-section">
+            <p class="detail-label">Enlace de Video:</p>
+            <p class="detail-value">No hay video disponible.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{# --- FIN DEL BLOQUE DEL VIDEO --- #}
+
+<div class="container">
+    <div class="content-wrapper">
+        <div class="detail-section">
+            <p class="text-warning">Provincia:</p>
+            <p class="">{{ ruta.provincia }}</p>
+        </div>
+        <div class="detail-section">
+            <p class="text-warning">Detalle de la Ruta:</p>
+            <div class="">{{ ruta.detalle | safe | title }}</div>
+        </div>
+    </div>
+</div>
+
+{# FAB buttons for actions - Reemplazando el bloque btn-floating #}
+<div class="fab-container-actions">
+    {% if session.get('role') == 'Superuser' %}
+    <a href="{{ url_for('rutas.editar_ruta', ruta_id=ruta.id) }}" class="fab-button-action fab-button-edit" title="Editar Ruta">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Ruta" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="{{ url_for('rutas.exportar_ruta_pdf', ruta_id=ruta.id) }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
+        <i class="fas fa-file-pdf"></i>
+    </a>
+    <a href="{{ url_for('rutas.exportar_ruta_txt', ruta_id=ruta.id) }}" class="fab-button-action fab-button-txt" title="Exportar a TXT">
+        <i class="fas fa-file-alt"></i>
+    </a>
+
+    {% endif %}
+</div>
+
+{# Nuevo botón flotante para volver atrás a la izquierda #}
+<div class="fab-container-back">
+    <a href="{{ url_for('rutas.ver_rutas') }}" class="btn btn-primary fab-button-back" title="Volver a Rutas">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+
+{# MODAL DE CONFIRMACIÓN DE ELIMINACIÓN #}
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar la ruta "<strong>{{ ruta.nombre }}</strong>"? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                {# El botón de eliminar activará el envío del formulario mediante JavaScript #}
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Formulario oculto para la eliminación de la ruta - Necesario para que JavaScript lo envíe #}
+<form id="deleteRutaForm" method="POST" action="{{ url_for('rutas.eliminar_ruta', ruta_id=ruta.id) }}" style="display: none;">
+    {# IMPORTANTE: Si estás usando Flask-WTF o similar para protección CSRF, DEBES incluir el token aquí. #}
+    {# Si usas Flask-WTF, la variable 'csrf_token' se inyecta automáticamente en el contexto de la plantilla. #}
+    {# Si no usas Flask-WTF, pero tienes otra forma de generar un token CSRF, asegúrate de pasarlo a la plantilla. #}
+    {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+    {# Se eliminan los atributos integrity y crossorigin ya que pueden causar problemas en algunos entornos #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmDeleteButton = document.getElementById('confirmDeleteBtn');
+            if (confirmDeleteButton) {
+                confirmDeleteButton.addEventListener('click', function() {
+                    // Envía el formulario de eliminación cuando se confirma en el modal
+                    const deleteForm = document.getElementById('deleteRutaForm');
+                    if (deleteForm) {
+                        console.log("Formulario de eliminación encontrado. Enviando...");
+                        deleteForm.submit();
+                    } else {
+                        console.error("Error: El formulario 'deleteRutaForm' no fue encontrado en el DOM.");
+                    }
+                });
+            } else {
+                console.warn("Advertencia: El botón 'confirmDeleteBtn' no fue encontrado. El script de eliminación no se adjuntará.");
+            }
+        });
+    </script>
+{% endblock %}

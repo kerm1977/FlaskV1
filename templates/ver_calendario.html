@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Ver Eventos del Calendario{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos adicionales para el botón flotante (FAB) */
+    .fab-container {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo (ajustado a 70px para consistencia) */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        /* MODIFICACIÓN: Eliminar box-shadow para quitar el borde oscuro */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        /* MODIFICACIÓN: Ajustar box-shadow al pasar el ratón para quitar el borde oscuro */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Eventos del Calendario</h1>
+    <hr class="text-warning">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        {# MODIFICACIÓN: Ocultar el botón original "Agregar Nuevo Evento" #}
+        <a href="{{ url_for('calendario.crear_calendario') }}" class="btn btn-primary d-none">
+            <i class="fas fa-plus-circle"></i> Agregar Nuevo Evento
+        </a>
+        <form method="GET" action="{{ url_for('calendario.ver_calendario') }}" class="d-flex">
+            <select name="tag" class="form-select me-2" aria-label="Buscar por Etiqueta">
+                <option value="">Todas las Etiquetas</option>
+                {% for tag in etiquetas_disponibles %}
+                    <option value="{{ tag }}" {% if tag == search_tag %}selected{% endif %}>{{ tag }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-outline-secondary">
+                <i class="fas fa-search"></i> Buscar
+            </button>
+            {% if search_tag %}
+                <a href="{{ url_for('calendario.ver_calendario') }}" class="btn btn-outline-secondaryutline-danger ms-2">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if eventos %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for evento in eventos %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    {% if evento.flyer_imagen_url %}
+                        <img src="{{ url_for('static', filename=evento.flyer_imagen_url) }}" class="card-img-top" alt="{{ evento.nombre_actividad }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/defaults/default_calendar.png') }}" class="card-img-top" alt="Imagen por defecto" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ evento.nombre_actividad }}</h5>
+                        <p class="card-text">
+                            <strong>Fecha:</strong> {{ evento.fecha_actividad.strftime('%d-%m-%Y') }}<br>
+                            <strong>Hora:</strong> 
+                            {% if evento.es_todo_el_dia %}
+                                Todo el día
+                            {% else %}
+                                {{ evento.hora_actividad.strftime('%I:%M %p') if evento.hora_actividad else 'N/A' }}
+                            {% endif %}<br>
+                            <strong>Etiqueta:</strong> <span class="badge bg-info text-dark">{{ evento.nombre_etiqueta }}</span>
+                        </p>
+                        <div class="mt-auto">
+                            <a href="{{ url_for('calendario.detalle_calendario', event_id=evento.id) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-eye"></i> Ver Más
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>Creado el: 
+                            <span class="utc-datetime" data-utc="{{ evento.fecha_creacion.isoformat() }}Z">
+                                {{ evento.fecha_creacion.strftime('%d-%m-%Y %H:%M') }}
+                            </span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No hay eventos de calendario registrados. <a href="{{ url_for('calendario.crear_calendario') }}">¡Crea uno ahora!</a>
+        </div>
+    {% endif %}
+</div>
+
+{# NUEVO: Botón flotante para agregar nuevo evento #}
+<div class="fab-container">
+    <a href="{{ url_for('calendario.crear_calendario') }}" class="btn btn-warning fab-button" title="Agregar Nuevo Evento">
+        <i class="fas fa-plus" style="color: black;"></i>
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('index') }}" class="fab-button-back" title="Volver al Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+{% endblock %}

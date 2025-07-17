@@ -1,0 +1,123 @@
+/* Variables CSS para colores */
+:root {
+    --navbar-bg-color: #ffc107; /* Naranja Oscuro para el fondo */
+    --navbar-link-color: #000000; /* Negro para el texto de los enlaces */
+    --navbar-hover-color: #4a4a4a; /* Gris oscuro para hover, para contraste */
+    --navbar-active-color: #333333; /* Gris más oscuro para activo */
+    --navbar-brand-color: #000000; /* Negro para el texto de la marca */
+    --navbar-toggler-icon-color: #000000; /* Color para el icono del botón de alternancia (negro) */
+    --footer-height: 60px; /* Altura estimada del footer para padding */
+    --main-content-top-margin: 150px; /* Margen superior para el contenido principal */
+}
+
+/* Estilos generales del Navbar */
+.custom-navbar {
+    background-color: var(--navbar-bg-color);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sutil sombra para profundidad */
+}
+
+/* Estilo del logo/nombre de la aplicación */
+.custom-navbar .navbar-brand {
+    color: var(--navbar-brand-color);
+    font-weight: bold;
+    font-size: 1.5rem; /* Tamaño de fuente más grande para el logo */
+    padding: 0; /* Eliminar padding por defecto de Bootstrap */
+    margin-right: 2rem; /* Espacio a la derecha del logo */
+}
+
+.custom-navbar .navbar-brand:hover,
+.custom-navbar .navbar-brand:focus {
+    color: var(--navbar-active-color);
+}
+
+/* Estilo de los enlaces de navegación */
+.custom-navbar .nav-link {
+    color: var(--navbar-link-color);
+    padding: 0.5rem 1rem; /* Padding para hacer clic más fácil */
+    transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    border-radius: 0.25rem; /* Bordes ligeramente redondeados */
+}
+
+.custom-navbar .nav-link:hover,
+.custom-navbar .nav-link:focus {
+    color: var(--navbar-hover-color);
+    background-color: rgba(0, 0, 0, 0.1); /* Fondo sutil al pasar el ratón */
+}
+
+.custom-navbar .nav-item .nav-link.active {
+    color: var(--navbar-active-color);
+    font-weight: bold;
+}
+
+/* Estilo para el botón de alternancia (toggler) en móviles */
+.custom-navbar .navbar-toggler {
+    border-color: rgba(0, 0, 0, 0.1); /* Borde sutil */
+}
+
+.custom-navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Estilos para el menú desplegable en pantallas pequeñas */
+@media (max-width: 991.98px) { /* breakpoint 'lg' de Bootstrap */
+    .custom-navbar .navbar-nav {
+        margin-top: 1rem; /* Espacio entre el toggler y los elementos de menú */
+        border-top: 1px solid rgba(0, 0, 0, 0.1); /* Separador superior */
+        padding-top: 1rem;
+    }
+
+    .custom-navbar .nav-item {
+        margin-bottom: 0.5rem; /* Espacio entre elementos del menú en móvil */
+    }
+
+    .custom-navbar .nav-link {
+        display: block; /* Asegurar que los enlaces ocupen todo el ancho */
+        width: 100%;
+        text-align: left; /* Alinear texto a la izquierda */
+        padding-left: 1.5rem; /* Indentación para mejor legibilidad */
+    }
+}
+
+/* Estilos para el Footer */
+.footer {
+    background-color: rgba(255, 193, 7, 0.8); /* Fondo color warning de Bootstrap (amarillo) con 80% de opacidad */
+    backdrop-filter: blur(6px); /* Efecto de desenfoque */
+    -webkit-backdrop-filter: blur(6px); /* Soporte para navegadores basados en WebKit */
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Línea superior sutil */
+    color: var(--navbar-link-color); /* Usar el mismo color de texto que los enlaces del navbar */
+    font-size: 0.9rem; /* Un poco más pequeño que el texto normal */
+
+    /* Propiedades para que sea sticky al fondo del viewport */
+    position: fixed; /* Lo fija al viewport */
+    bottom: 0; /* Lo pega al borde inferior */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    z-index: 1030; /* Asegura que esté por encima de otros elementos, ej. navbar z-index es 1030 por defecto */
+    left: 0; /* Asegura que esté pegado a la izquierda */
+    right: 0; /* Asegura que esté pegado a la derecha */
+    margin-top: 100px; /* Margen superior de 100px */
+}
+
+/* Espacio inferior para el body para evitar que el contenido sea cubierto por el footer fijo */
+/* Y margen superior para el contenido principal */
+html, body {
+    height: 100%;
+    margin: 0; /* Eliminar margen por defecto del body */
+    padding: 0; /* Eliminar padding por defecto del body */
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content { /* Clase aplicada al div container que envuelve el contenido principal */
+    flex: 1; /* Esto hace que el contenido ocupe todo el espacio disponible */
+    /* Aumenta el padding-bottom para dejar espacio para el footer y los botones flotantes */
+    padding-bottom: 150px; /* Ajusta el padding para el footer fijo + padding extra para los botones */
+    margin-top: var(--main-content-top-margin) !important; /* Margen superior solicitado para el contenido */
+}
+
+@media (max-width: 767.98px) { /* Para dispositivos extra pequeños y pequeños */
+    .footer .text-muted {
+        font-size: 0.8rem; /* Tamaño de fuente más pequeño para móvil */
+    }
+}

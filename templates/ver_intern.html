@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Viajes Internacionales{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Área Internacional</h2>
+    <hr>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Listado de Viajes Internacionales</h3>
+        <a href="{{ url_for('intern.crear_intern') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Crear Nuevo Viaje
+        </a>
+    </div>
+
+    {% if not travels %}
+        <div class="alert alert-info text-center" role="alert">
+            No hay viajes internacionales registrados aún. ¡Crea uno nuevo!
+        </div>
+    {% else %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Contacto</th>
+                        <th scope="col">País Destino</th>
+                        <th scope="col">Aerolínea Ida</th>
+                        <th scope="col">Fecha Ida</th>
+                        <th scope="col">Aerolínea Vuelta</th>
+                        <th scope="col">Fecha Vuelta</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for travel in travels %}
+                    <tr>
+                        <th scope="row">{{ travel.id }}</th>
+                        <td>
+                            {% if travel.contact %}
+                                {{ travel.contact.nombre }} {{ travel.contact.primer_apellido }}
+                            {% else %}
+                                {{ travel.nombre_contacto_manual }} {{ travel.apellido_contacto_manual }}
+                            {% endif %}
+                        </td>
+                        <td>{{ travel.pais_destino_america }}</td>
+                        <td>{{ travel.aerolinea_ida }}</td>
+                        <td>{{ travel.fecha_vuelo_ida.strftime('%d/%m/%Y') if travel.fecha_vuelo_ida else 'N/A' }}</td>
+                        <td>{{ travel.aerolinea_vuelta }}</td>
+                        <td>{{ travel.fecha_vuelo_vuelta.strftime('%d/%m/%Y') if travel.fecha_vuelo_vuelta else 'N/A' }}</td>
+                        <td>
+                            <a href="{{ url_for('intern.detalle_intern', travel_id=travel.id) }}" class="btn btn-info btn-sm" title="Ver Detalles">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ url_for('intern.editar_intern', travel_id=travel.id) }}" class="btn btn-warning btn-sm" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ travel.id }}" title="Eliminar">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+
+                            <div class="modal fade" id="deleteModal{{ travel.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ travel.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel{{ travel.id }}">Confirmar Eliminación</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            ¿Estás seguro de que quieres eliminar el viaje internacional a **{{ travel.pais_destino_america }}** de
+                                            {% if travel.contact %}
+                                                **{{ travel.contact.nombre }} {{ travel.contact.primer_apellido }}**
+                                            {% else %}
+                                                **{{ travel.nombre_contacto_manual }} {{ travel.apellido_contacto_manual }}**
+                                            {% endif %}? Esta acción no se puede deshacer.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <form action="{{ url_for('intern.eliminar_intern', travel_id=travel.id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

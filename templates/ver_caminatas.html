@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Listado de Caminatas{% endblock %}
+
+{% block head_content %}
+{# Estilos específicos para esta página que no están en main.css o sobrescriben base.html #}
+<style>
+    /* Los estilos para .custom-navbar ya deberían estar en main.css o base.html.
+       Si no están allí, considera moverlos para consistencia. */
+
+    /* Estilos específicos para el botón flotante (FAB) */
+    .fab-container {
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        /* MODIFICACIÓN: Eliminar box-shadow para quitar el borde oscuro */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        /* MODIFICACIÓN: Ajustar box-shadow al pasar el ratón para quitar el borde oscuro */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Estilos base para los dos tipos de contenido, por defecto, la tarjeta completa es visible */
+    .grid-list-content { display: block; }
+    .image-only-content { display: none; }
+
+    /* Estilos para la vista de lista */
+    /* MODIFICACIÓN: Removido display: block; para permitir que Bootstrap flex funcione */
+    #caminatasContent.list-view {
+        /* display: block; */
+    }
+
+    #caminatasContent.list-view > .col { /* Target the direct children for list view */
+        margin-top: 0 !important; /* Eliminar margen superior de las columnas en vista de lista */
+        padding-bottom: 0.5rem; /* Pequeño padding inferior */
+        border-bottom: 1px dashed #ddd; /* Separador para los elementos de la lista */
+        margin-bottom: 0.5rem; /* Espacio entre elementos de la lista */
+    }
+
+    #caminatasContent.list-view > .col:last-child {
+        border-bottom: none; /* Sin borde para el último elemento */
+    }
+
+    #caminatasContent.list-view .card { /* Card within list view */
+        flex-direction: row; /* Contenido de la tarjeta horizontal */
+        align-items: center;
+        box-shadow: none !important; /* Quitar sombra */
+        border: none !important; /* Quitar borde */
+        height: auto !important; /* Permitir que la altura se ajuste */
+        padding: 0.5rem; /* Padding compacto */
+        background-color: transparent !important; /* Fondo transparente */
+    }
+
+    .card-img-wrapper { /* Estilo base para el contenedor de la imagen */
+        position: relative;
+        width: 100%;
+        padding-top: calc(1920 / 1280 * 100%); /* Mantener relación de aspecto 2:3 (altura es 1.5x ancho) */
+        overflow: hidden;
+        border-radius: 8px 8px 0 0; /* Bordes redondeados superiores */
+    }
+
+    .card-img-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Asegura que la imagen quepa completamente en el contenedor */
+    }
+
+    /* MODIFICACIÓN: Mostrar imagen en vista de lista como miniatura */
+    #caminatasContent.list-view .card-img-wrapper {
+        display: block !important;
+        width: 60px; /* Tamaño de miniatura */
+        height: 60px; /* Altura fija para la miniatura */
+        padding-top: 0 !important; /* Anular padding-top para tamaño fijo */
+        flex-shrink: 0; /* Evitar que se encoja */
+        border-radius: 8px; /* Bordes redondeados para miniaturas */
+        margin-right: 1rem; /* Espacio a la derecha de la miniatura */
+    }
+    #caminatasContent.list-view .card-img-top {
+        position: static; /* Ajustar posicionamiento para el tamaño fijo */
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+
+
+    #caminatasContent.list-view .card-body {
+        flex-grow: 1; /* Permitir que el cuerpo ocupe el espacio disponible */
+        padding: 0.5rem 1rem !important; /* Padding compacto */
+        display: flex;
+        flex-direction: row; /* Diseño horizontal para título e info */
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Permitir que el contenido se ajuste en pantallas pequeñas */
+    }
+
+    #caminatasContent.list-view .card-body .card-title,
+    #caminatasContent.list-view .card-body .card-text {
+        margin-bottom: 0 !important; /* Eliminar márgenes verticales */
+    }
+
+    #caminatasContent.list-view .card-body hr {
+        display: none !important; /* Ocultar línea separadora */
+    }
+
+    #caminatasContent.list-view .card-body .mt-auto {
+        margin-top: 0 !important; /* Eliminar margen automático */
+        margin-left: auto; /* Empujar el botón "Más" a la derecha */
+    }
+
+    #caminatasContent.list-view .card-body .btn {
+        min-width: 80px; /* Asegurar un ancho mínimo para el botón */
+    }
+
+    /* Ajustar tamaño de texto en vista de lista */
+    #caminatasContent.list-view .card-title {
+        font-size: 1.1rem; /* Título más pequeño */
+    }
+
+    #caminatasContent.list-view .card-text small {
+        font-size: 0.75rem; /* Texto más pequeño */
+    }
+
+    /* Ajustes específicos para pantallas más pequeñas en vista de lista */
+    @media (max-width: 767.98px) {
+        #caminatasContent.list-view .card-body {
+            flex-direction: column; /* Apilar verticalmente en pantallas muy pequeñas */
+            align-items: flex-start;
+        }
+        #caminatasContent.list-view .card-body .mt-auto {
+            margin-left: 0; /* Resetear margen para el botón */
+            width: 100%; /* Botón de ancho completo */
+        }
+    }
+
+    /* ESTILOS PARA LA VISTA DE GALERÍA (solo imágenes) */
+    #caminatasContent.gallery-view {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas en móvil */
+        gap: 10px; /* Espacio entre imágenes */
+        margin-top: 2rem; /* Añadido margen superior para separar de los botones */
+    }
+
+    #caminatasContent.gallery-view > .col { /* Asegurar que la columna de Bootstrap se comporte como un ítem de grid */
+        margin-top: 0 !important; /* Eliminar margen superior de las columnas */
+        padding: 0 !important; /* Eliminar padding de las columnas */
+        flex: none !important; /* Anular propiedades flexbox de Bootstrap */
+        max-width: none !important; /* Anular max-width de Bootstrap */
+        width: auto !important; /* Permitir que el grid determine el ancho */
+    }
+
+    #caminatasContent.gallery-view .grid-list-content { /* Ocultar la card completa en vista de galería */
+        display: none !important;
+    }
+
+    #caminatasContent.gallery-view .image-only-content { /* Mostrar solo el contenido de imagen en vista de galería */
+        display: block !important;
+        height: 100%; /* Asegura que el contenedor ocupe el espacio de la cuadrícula */
+    }
+
+    .image-only-wrapper { /* Contenedor de la imagen en vista de galería */
+        position: relative;
+        width: 100%;
+        padding-top: calc(1920 / 1280 * 100%); /* Mantener la relación de aspecto 2:3 */
+        overflow: hidden;
+        border-radius: 8px; /* Bordes redondeados para las imágenes */
+        background-color: #f0f0f0; /* Fondo gris claro temporal para visibilidad */
+    }
+
+    .image-only-content img { /* Imagen dentro de la vista de galería */
+        position: absolute; /* Posicionar absolutamente dentro del wrapper para el padding-top trick */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Asegura que la imagen quepa completamente en el contenedor */
+        border-radius: 8px; /* Asegurar que las imágenes también tengan bordes redondeados */
+    }
+
+    /* Ajustes para pantallas más grandes en vista de galería */
+    @media (min-width: 768px) {
+        #caminatasContent.gallery-view {
+            grid-template-columns: repeat(4, 1fr); /* 4 columnas en tablet y PC */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container ">
+    <div class="mb-4 text-center">
+        <h2 class="text-warning">Próximas Caminatas</h2>
+        <p>Las siguientes caminatas ya estás asignadas en el calendario y definidas con sus respectivos precios. Cualquier caminatas puede sufrir variación por factores externos que afecten la seguridad de las mismas. </p>
+    </div>
+
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <form method="GET" action="{{ url_for('caminatas.ver_caminatas') }}" class="d-flex">
+                <select name="actividad" class="form-select me-2" aria-label="Buscar por Actividad">
+                    <option value="">Todas las Actividades</option>
+                    {% set actividad_opciones = [
+                        "El Camino de Costa Rica",
+                        "Parque Nacional",
+                        "Paseo",
+                        "Iniciante",
+                        "Básico",
+                        "Intermedio",
+                        "Dificil",
+                        "Avanzado",
+                        "Técnico"
+                    ] %}
+                    {% for option in actividad_opciones %}
+                    <option value="{{ option }}" {% if option == search_actividad %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                {% if search_actividad %}
+                    <a href="{{ url_for('caminatas.ver_caminatas') }}" class="btn btn-outline-danger ms-2">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    {% if caminatas %}
+       <hr class="text-warning">
+       
+    {# Botones para alternar vista #}
+    <div class="d-flex justify-content-end mb-3">
+        <button id="gridViewBtn" class="btn btn-sm btn-outline-secondary me-2" title="Vista de Cuadrícula">
+            <i class="fas fa-th-large"></i>
+        </button>
+        <button id="listViewBtn" class="btn btn-sm btn-outline-secondary me-2" title="Vista de Lista Compacta">
+            <i class="fas fa-list"></i>
+        </button>
+        <button id="galleryViewBtn" class="btn btn-sm btn-outline-secondary" title="Vista de Galería de Imágenes">
+            <i class="fas fa-image"></i>
+        </button>
+    </div>
+
+    {# Contenedor principal que gestiona el tipo de vista #}
+    {# MODIFICACIÓN: row-cols-md-4 y row-cols-lg-4 se aplicarán por JS al cargar la vista grid #}
+    <div id="caminatasContent">
+        {% for caminata in caminatas %}
+        <div class="col mt-5"> {# Mantener col para que Bootstrap maneje las columnas en vista de cuadrícula/lista #}
+            {# Contenido para vistas de Cuadrícula y Lista #}
+            <div class="grid-list-content">
+                <div class="card h-100 shadow-sm">
+                    {# La imagen completa es un enlace #}
+                    <a href="{{ url_for('caminatas.detalle_caminata', caminata_id=caminata.id) }}" class="card-img-link">
+                        <div class="card-img-wrapper">
+                            {% if caminata.imagen_caminata_url %}
+                            <img src="{{ url_for('static', filename=caminata.imagen_caminata_url) }}" class="card-img-top" alt="Imagen de la Caminata" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/defaults/no_image.png') }}'; console.error('Error al cargar imagen. URL esperada: {{ url_for('static', filename=caminata.imagen_caminata_url) }}');">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='images/defaults/no_image.png') }}" class="card-img-top" alt="Sin Imagen" onerror="this.onerror=null; console.error('Error al cargar imagen por defecto para {{ caminata.nombre }}. URL: {{ url_for('static', filename='images/defaults/no_image.png') }}');">
+                            {% endif %}
+                        </div>
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        {% if caminata.etapa %}
+                        <h4 class="card-title text-center mb-3">{{ caminata.etapa }}</h4>
+                        {% endif %}
+                        <h4 class="card-title text-truncate">{{ caminata.nombre }}</h4>
+                        
+                        <p class="card-text mb-1 text-truncate"><small class="text-muted"><strong>Actividad:</strong> {{ caminata.actividad }}</small></p>
+                        <p class="card-text mb-1 text-truncate"><small class="text-muted"><strong>Fecha:</strong> {{ caminata.fecha.strftime('%d de %B de %Y') }}</small></p>
+                        <h4 class="card-text mb-1 text-truncate text-end"><small class="text-muted "><strong>Precio:</strong> ¢{{ caminata.precio|int }}</small></h4>
+                        <hr class="my-2 border-warning">
+                                          
+                        <div class="mt-auto text-center">
+                            {# El botón "Más" también va al detalle #}
+                            <a href="{{ url_for('caminatas.detalle_caminata', caminata_id=caminata.id) }}" class="btn btn-warning btn-sm w-100">Más</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Contenido para la vista de solo imágenes (Galería) #}
+            <div class="image-only-content">
+                <a href="{{ url_for('caminatas.detalle_caminata', caminata_id=caminata.id) }}" class="image-only-link">
+                    <div class="image-only-wrapper">
+                        {% if caminata.imagen_caminata_url %}
+                        <img src="{{ url_for('static', filename=caminata.imagen_caminata_url) }}" alt="Imagen de la Caminata" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/defaults/no_image.png') }}'; console.error('Error al cargar imagen en Galería. URL esperada: {{ url_for('static', filename=caminata.imagen_caminata_url) }}');">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='images/defaults/no_image.png') }}" alt="Sin Imagen" onerror="this.onerror=null; console.error('Error al cargar imagen por defecto en Galería para {{ caminata.nombre }}. URL: {{ url_for('static', filename='images/defaults/no_image.png') }}');">
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" role="alert">
+        No hay caminatas registradas aún.
+    </div>
+    {% endif %}
+</div>
+
+
+
+{# Botón flotante para añadir nueva caminata - Visible solo para Superusers #}
+{% if session.role == 'Superuser' %}
+<div class="fab-container">
+    <a href="{{ url_for('caminatas.crear_caminata') }}" class="btn btn-warning fab-button" title="Agregar nueva caminata">
+        <i class="fas fa-plus" style="color: black;"></i>
+    </a>
+</div>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const gridViewBtn = document.getElementById('gridViewBtn');
+        const listViewBtn = document.getElementById('listViewBtn');
+        const galleryViewBtn = document.getElementById('galleryViewBtn'); // Renombrado a galleryViewBtn
+        const caminatasContent = document.getElementById('caminatasContent');
+
+        // Check local storage for preferred view
+        const savedView = localStorage.getItem('caminatasView') || 'grid'; // Default to grid
+
+        function setView(viewType) {
+            // Remove all custom view classes from caminatasContent
+            caminatasContent.classList.remove('list-view', 'gallery-view');
+
+            // Remove Bootstrap grid classes if they exist, to reapply correctly
+            caminatasContent.classList.remove('row', 'g-4', 'row-cols-1', 'row-cols-md-4', 'row-cols-lg-4');
+
+            // Select all content blocks for each caminata item
+            const gridListContents = document.querySelectorAll('.grid-list-content');
+            const imageOnlyContents = document.querySelectorAll('.image-only-content');
+
+            if (viewType === 'list') {
+                // MODIFICACIÓN CLAVE AQUÍ: Añadir row-cols-md-4 y row-cols-lg-4 para la vista de lista
+                caminatasContent.classList.add('list-view', 'row', 'g-4', 'row-cols-1', 'row-cols-md-4', 'row-cols-lg-4'); 
+                gridListContents.forEach(el => el.style.display = 'flex'); // Use flex for list item style
+                imageOnlyContents.forEach(el => el.style.display = 'none');
+            } else if (viewType === 'gallery') {
+                caminatasContent.classList.add('gallery-view'); // Custom CSS grid will handle this
+                gridListContents.forEach(el => el.style.display = 'none');
+                imageOnlyContents.forEach(el => el.style.display = 'block');
+            } else { // Default to grid
+                caminatasContent.classList.add('row', 'g-4', 'row-cols-1', 'row-cols-md-4', 'row-cols-lg-4'); // Standard Bootstrap grid
+                gridListContents.forEach(el => el.style.display = 'block');
+                imageOnlyContents.forEach(el => el.style.display = 'none');
+            }
+
+            // Update active button state
+            gridViewBtn.classList.remove('active');
+            listViewBtn.classList.remove('active');
+            galleryViewBtn.classList.remove('active');
+
+            if (viewType === 'list') {
+                listViewBtn.classList.add('active');
+            } else if (viewType === 'gallery') {
+                galleryViewBtn.classList.add('active');
+            } else {
+                gridViewBtn.classList.add('active');
+            }
+            localStorage.setItem('caminatasView', viewType);
+        }
+
+        // Apply saved view on load
+        setView(savedView);
+
+        // Event listeners for buttons
+        gridViewBtn.addEventListener('click', function() {
+            setView('grid');
+        });
+
+        listViewBtn.addEventListener('click', function() {
+            setView('list');
+        });
+
+        galleryViewBtn.addEventListener('click', function() { // Evento para el botón de galería
+            setView('gallery');
+        });
+    });
+</script>
+{% endblock %}

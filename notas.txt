@@ -1,0 +1,656 @@
+Genial ahora necesito crear un area nueva área
+
+REGLA OBLIGATORIA
+
+Sin modificar ni medio punto de lo ya est creado funciona y NO te estoy pidiendo que toques
+no recomiendes absolutamente nada fuera de lo que te estoy solicitando
+no diseñes areas que no te estoy solicitando
+no resumir ni borrar absolutamente nada ni eliminar comentarios ni descomentar nada
+solo me vas a dar módulos y vistas completos en el canvas
+me vas a dar cada modificación cada vez que te diga ok
+importar en app.py lo que sea necesario.. OJO no cambies nada,borres ni inventes nadamás lo que necesite importar todo funciona correctamente
+vas Analizar profundamente los archivos que te acaba de compartir para que no omitas ni medio punto
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+Dime si no tienes claro algo, necesito que quede totalmente integro este sistema y
+Nuevamente.. me vas a dar cada archivo cada vez que te diga ok
+
+
+En este caso solo vamos a realizar cambios 
+
+Estas son las vistas Las vistas
+
+Dentro de crear_caminatas.html y editar_caminatas.html vas a cambiar en el selector de actividad lo siguiente
+	vas a eliminar estas opciones
+		"Senderismo", "Montañismo", "Camping", "Exploración", "Trekking",
+	        "Rafting", "Ciclismo de Montaña", "Observación de Aves", "Fotografía de Naturaleza"
+	en cambio vas a poner
+		"El Camino de Costa Rica","Parque Nacional","Paseo","Iniciante","Básico","Intermedio","Avanzado","Técnico"
+
+
+El selector País vas a cambiar el nombre del selector y cambiarlo a Etapas  Dentro de crear_caminatas.html y editar_caminatas.html vas a cambiar el nombre de País a Etapa
+	vas agregar 
+	Etapa 1a - Parismina a Laguna Perlas 5.13k
+	Etapa 1b - Muelle Goshen a Cimarrones 24.02k
+	Etapa 2 - Cimarrones a Brisas 15.09k
+	Etapa 3 - Brisas de Pacuarito a Tsiobata 15.05k
+	Etapa 4 - Tsiobata a Tres Equis 6.85k
+	Etapa 5 - Tres Equis a Pacayitas 13.30k
+	Etapa 6 - Pacayitas a La Suiza 12.58k
+	Etapa 7 - La Suiza a Humo de Pejibaye 
+	Etapa 8 - Humo de Pejibaye a Tapanti 16.58k
+	Etapa 9 - Tapanti a Navarro del Muneco 24.40k
+	Etapa 10 - Navarro del Muneco a Palo Verde
+	Etapa 11 - Palo Verde a Cerro Alto 8.90k
+	Etapa 12 - Cerro Alto a San Pablo de Leon Cortes 18.28k
+	Etapa 13 - San Pablo de Leon Cortes a Napoles 16.41k
+	Etapa 14 - Napoles a Naranjillo 13.35k
+	Etapa 15 - Naranjillo a Esquipulas 12.01k
+	Etapa 16 - Esquipulas a Quepos 22.72k
+	--------------
+	Etapas 1a & 1b / 29.32k
+	Etapas 3 & 4 / 21.09k
+	Etapas 14 & 15 / 25.36k 
+
+
+El selector de Lugar de Salida de crear_caminatas.html y editar_caminatas.html vas agregar 
+	"Parque De Tres Ríos - Escuela",
+	"Parque De Tres Ríos - Cruz Roja",
+	"Parque De Tres Ríos - Letras",
+	"Plaza de San Diego",
+	"Iglesia San Diego"
+
+El selector de Dificultad de crear_caminatas.html y editar_caminatas.html vas agregar
+	"Iniciante",
+	"Básico",
+	"Intermedio",
+	"Avanzado",
+	"Técnico"
+
+En Capacidad Mínima y Capacidad Maxima de crear_caminatas.html y editar_caminatas.html vas convertirlo a text no numero
+
+En Provincia de crear_caminatas.html y editar_caminatas.html vas agregar
+	"Cartago",
+	"Alajuela",
+	"Heredia",
+	"San José",
+	"Puntarenas",
+	"Guanacaste",
+	"Limón"
+
+En Tipo de Terreno de crear_caminatas.html y editar_caminatas.html vas agregar
+	"Asfalto llano",
+	"Asfalto Pendiente Básico",
+	"Asfalto Pendiente Medio",
+	"Asfalto Pendiente Difícil",
+	"Lastre Pendiente Básico",
+	"Lastre Pendiente Medio",
+	"Lastre Pendiente Difícil",
+	"Sendero Pendiente Básico",
+	"Sendero Pendiente Medio",
+	"Sendero Pendiente Difícil",
+	"Montaña Pendiente Básico",
+	"Montaña Pendiente Medio", 
+	"Montaña Pendiente Difícil", 
+	"Montaña Técnica",
+	"Otros(Otras Señas de Terreno)"
+
+
+En Tipo de Transporte: de crear_caminatas.html y editar_caminatas.html vas agregar	
+	"Moto",
+	"Bus Público",
+	"Buseta",
+	"Automobil",
+	"Lancha",
+	"Ferry",
+	"Avion",
+
+
+En campo Incluye: de crear_caminatas.html y editar_caminatas.html vas agregar	
+	"Transporte",
+	"Transporte y Entrada",
+	"Transporte y Guía",
+	"Transporte y Alimentación",
+	"Transporte, Entrada y Guía",
+	"Transporte, Entrada y Alimentación",
+	"Transporte, y Alimentación",
+	"Transporte, Guía y Alimentación",
+	"Todo menos Alimentación"
+
+
+En Tipo de Clima de crear_caminatas.html y editar_caminatas.html vas agregar	
+
+	"Clima Tropical Húmedo",
+	"Clima Tropical Seco",
+	"Clima Tropical Muy Húmedo",
+	"Clima de Montaña"
+
+
+
+
+
+muy bien ahora necesito que al seleccionar en Etapa 
+Etapa 1a - Parismina a Laguna Perlas 5.13k 
+
+los campos de 
+Lugar de Salida: Parque De Tres Ríos - Escuela
+Dificultad: Facil 
+Distancia: 5.13
+Provincia: Limón
+Incluye: Transporte, Guia, Alimentación
+Tipo de Clima: Clima Tropical Humedo
+Altura Máxima: 6 m
+Altura Mínima: 3 m
+Altura Positiva: 1m
+Altura Negativa: 1m
+
+Se llenen con esa información
+
+
+
+ 
+
+
+Genial ahora necesito crear un area nueva área
+
+REGLA OBLIGATORIA
+
+Sin modificar ni medio punto de lo ya creado y que funciona
+no recomiendes absolutamente nada
+no crear areas que no te estoy solicitando
+no resumir ni borrar absolutamente nada ni descomentar nada
+no toques nada más lo que te pido
+solo me vas a dar módulos y vistas completos 
+me vas a dar cada modificación cada vez que te diga ok
+importar en app.py lo que sea necesario.. OJO no cambies nada,borres ni inventes nadamás lo que necesite importar todo funciona correctamente
+vas Analizar profundamente los archivos que te acaba de compartir para que no omitas ni medio punto
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+Dime si no tienes claro algo, necesito que quede totalmente integro este sistema y
+Nuevamente.. me vas a dar cada archivo cada vez que te diga ok
+Que los precios Jamás tengan Decimales y la moneda sea siempre ¢
+Solicitarme los archivos app.py, models.py y base.html antes de continuar
+
+En este caso solo vamos a realizar cambios 
+
+lógica
+pagos.py
+
+vistas
+
+ver_pagos.html
+editar_pagos.html
+crear_pagos.html
+detalle_pagos.html
+
+
+
+crear_pagos.html va a tener la siguiente información 
+
+Titulo llamado: 
+Información <-- Y va a contener lo siguiente
+
+	Flyer o Imagen
+	Nombre de la caminata
+	Precio del Paquete <-- Sin decimales
+	Capacidad
+	tipo de Cambio
+
+
+Titulo llamado: 
+Transporte  <-- Y va a contener lo siguiente
+
+	Precio de Buseta
+	Cantidad de Busetas 
+	Total General Busetas == Precio de Buseta * Cantidad de Busetas <-- En texto Plano y hacer operación en vivo automaticamente 
+	Total Individual Busetas == Total General Busetas / Capacidad <-- En texto Plano y hacer operación en vivo automaticamente
+
+	Precio de Acuatico 
+	Cantidad de Acuatico
+	Total Genera Acuatico == Precio de Acuatico * Total Individual Acuatico <-- En texto Plano y hacer operación en vivo automaticamente 
+	Total Individual Acuatico == Total Genera Acuatico / Capacidad <-- En texto Plano y hacer operación en vivo automaticamente  
+
+	Precio de Aereo
+	Cantidad de Aereo
+	Total General Aereo == Precio de Aereo * Cantidad de Aereo <-- En texto Plano y hacer operación en vivo automaticamente  
+	Total Individual Aereo == Total General Aereo / Capacidad <-- En texto Plano y hacer operación en vivo automaticamente  
+
+	Precio de Otros
+	Cantidad de Otros
+	Descripción de Otros
+	Total General Otros == Precio de Otros * Cantidad de Otros <-- En texto Plano y hacer operación en vivo automaticamente
+	Total Individual Otros == Total General Otros / Capacidad <-- En texto Plano y hacer operación en vivo automaticamente
+	
+	SEPARADOR 
+	
+	Total General Transporte == Total General Busetas + Total Genera Acuatico + Total General Aereo + Total General Otros
+	Total Individual Transporte == Total Individual Busetas + Total Individual Acuatico + Total Individual Aereo + Total Individual Otros
+
+
+
+Titulo llamado: 
+Otros Generales  <-- Y va a contener lo siguiente
+
+	Precio Guías
+	Cantidad de Guías
+	Total General Guías == Precio Guías * Cantidad de Guías <-- En texto Plano y hacer operación en vivo automaticamente
+	Total Individual Guías == Total General Guías / Capacidad
+
+Titulo llamado: 
+Otros Personales  <-- Y va a contener lo siguiente
+
+	Precio Estadía
+	Precio Impuestos
+	Precio Baños
+	Precio Servicios Sanitarios
+	Precio Desayuno
+	Precio Merienda
+	Precio Almuerzo
+	Precio Acarreo
+	Precio Café
+	Precio Cena
+	Precio Entrada
+	Precio Reconocimento
+	Precio Permisos
+	Precio Pasaporte
+	Precio Otros1 
+	Descripción Otros1
+	Precio Otros2 
+	Descripción Otros2
+	Precio Otros3 
+	Descripción Otros3
+	Precio Otros4 
+	Descripción Otros4
+	
+	Total General Personales == Precio Estadía + Precio Impuestos + Precio Baños + Precio Servicios Sanitarios + Precio Desayuno +	Precio Merienda +	Precio Almuerzo + 	Precio Acarreo +	Precio Café+	Precio Cena+	Precio Entrada+	Precio Reconocimento
+	+ Precio Permisos + Precio Pasaporte + Precio Otros1 + 	Precio Otros2 + Precio Otros3 +  Precio Otros4  <-- En texto Plano y hacer operación en vivo automaticamente 
+	
+	Total Individual Personales == Total General Personales / Capacidad <-- En texto Plano y hacer operación en vivo automaticamente  
+
+SEPARADOR 
+
+	TOTAL GENERAL == Total General Transporte + Total General Guías + Total General Personales
+	TOTAL INDIVIDUAL == TOTAL GENERAL / Capacidad
+
+
+
+editar_pagos.html En esta vista permitir editar el contenido de Pagos imagen y absolutamente todo
+
+En detalle_pagos.html se va ver toda la hoja de calculo creada desde crear_pagos.html y va a contener los botones de editar_pagos.html y borrar desde el backend con Flask y Flask. además de exportar  a JPG TXT PDF y excel
+
+En la vista de ver_pagos.html se va a ver 
+Imagen,
+Nombre de la caminata ,
+Precio del Paquete,
+Capacidad y un botón que diga ver más que va a llevar a detalle_pagos.html
+
+
+Además en base.html vas a crear en el navbar el enlace para ir directamente a ver_pagos.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Genial ahora necesito crear un area nueva área
+
+REGLA OBLIGATORIA
+
+Sin modificar ni medio punto de lo ya creado y que funciona
+no recomiendes absolutamente nada
+no crear areas que no te estoy solicitando
+no resumir ni borrar absolutamente nada ni descomentar nada
+no toques nada más lo que te pido
+solo me vas a dar módulos y vistas completos 
+me vas a dar cada modificación cada vez que te diga ok
+importar en app.py lo que sea necesario.. OJO no cambies nada,borres ni inventes nadamás lo que necesite importar todo funciona correctamente
+vas Analizar profundamente los archivos que te acaba de compartir para que no omitas ni medio punto
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+Dime si no tienes claro algo, necesito que quede totalmente integro este sistema y
+Nuevamente.. me vas a dar cada archivo cada vez que te diga ok
+Que los precios Jamás tengan Decimales y la moneda sea siempre ¢
+Solicitarme los archivos app.py, models.py y base.html antes de continuar
+
+En este caso solo vamos a realizar cambios 
+
+lógica
+calendario.py
+
+vistas
+
+ver_calendario.html
+editar_calendario.html
+crear_calendario.html
+detalle_calendario.html
+
+
+
+crear_calendario.html va a tener la siguiente información 
+
+Titulo llamado: 
+Agregar Evento <-- Y va a contener lo siguiente
+
+	Flyer o Imagen <--opcional
+	Nombre de La Actividad
+	Fecha de La Actividad
+	Hora de la Actividad 
+	Descripción:  <-- Usar ckeditor Full 
+	Nombre de Etiqueta (Evento de La Tribu, Evento Externo, Fechas de Cumpleaños, Celebraciones)
+	Un buscador por Etiqueta
+	un botón para agregar varios correos electrónicos y notificar el evento con Alerta a los correos ingresados
+	
+
+	Las reglas para esta área.. 
+	Si la Hora está ya fue asignada para cualquier evento Advertir que ya existe actividad para esa hora y no dejar seleccionar
+	agregar un selector que diga evento todo el día. SI se selecciona esta opción al intentar agregar un evento para ese día desde el datapicker advierte que esa fecha ya está ocupada
+
+	
+	SEPARADOR 
+	
+
+editar_calendario.html En esta vista permitir editar el contenido de calendario imagen y absolutamente todo
+
+En detalle_calendario.html va a contener absolutamente todo el contenido ingresado por medio de crear_calendario.html  y va a contener los botones de editar_calendario.html y borrar desde el backend con Flask y Flask. además de exportar  a JPG TXT PDF y excel
+
+En la vista de ver_calendario.html se va a ver  
+Flyer
+Nombre de La Actividad
+Fecha de La Actividad <-- datapicker
+Hora de la Actividad
+y un botón ver más que va a ingresar 
+
+
+
+Además en base.html vas a crear en el navbar el enlace para ir directamente a ver_calendario.html
+
+
+
+
+
+
+
+
+
+
+
+
+instrucciones y Normas
+Genial ahora necesito crear un area nueva área
+
+REGLA OBLIGATORIA
+
+Sin modificar ni medio punto de lo ya creado y que funciona
+no recomiendes absolutamente nada
+no crear areas que no te estoy solicitando
+no resumir ni borrar absolutamente nada ni descomentar nada
+no toques nada más lo que te pido
+solo me vas a dar módulos y vistas completos 
+me vas a dar cada modificación cada vez que te diga ok
+importar en app.py lo que sea necesario.. OJO no cambies nada,borres ni inventes nadamás lo que necesite importar todo funciona correctamente
+vas Analizar profundamente los archivos que te acaba de compartir para que no omitas ni medio punto
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+Dime si no tienes claro algo, necesito que quede totalmente integro este sistema y
+Nuevamente.. me vas a dar cada archivo cada vez que te diga ok
+Que los precios Jamás tengan Decimales y la moneda sea siempre ¢
+Solicitarme los archivos app.py, models.py y base.html antes de continuar
+
+En este caso solo vamos a realizar cambios 
+
+lógica
+instrucciones.py
+
+vistas
+
+ver_instrucciones.html
+editar_instrucciones.html
+crear_instrucciones.html
+detalle_instrucciones.html
+
+
+
+crear_instrucciones.html va a tener la siguiente información 
+
+Titulo llamado: 
+Instrucciones <-- Y va a contener lo siguiente
+
+	INSTRUCCIONES PARA LA CAMINATA (SELECT CON LAS CAMINATAS QUE EXISTEN ACTIVAS) 
+	SELECT LLAMADO DIFICULTAD CON LAS OPCIONES (Iniciante,Básico, Intermedio, Avanzado, Técnico)
+	DISTANCIA
+	SELECT LLAMADO CAPACIDAD CON LAS OPCIONES (14, 17, 28, 31, 42)
+	SELECT LLAMADO Salimos: CON LAS OPCIONES (Parque de Tres Ríos - Escuela, Parque de Tres Ríos - Cruz Roja, Plaza De San Diego, Iglesia de San Diego)
+	fecha de Salida
+	hora de salida
+	fecha de Caminata
+	hora de Inicio Caminata
+	AUTOFECHA DE CREADO
+	AUTOFECHA DE MODIFICADO SI HUBIERA MODIFICACIÓN
+
+	SEPARADOR
+
+
+	UN INPUT LLAMADO RECOGEMOS EN: QUE PERMITA IR AGREGANDO ELEMENTOS
+
+	SEPARADOR
+
+	PARA EL CAMINO:
+--------------------------
+	-SELECT LLAMADO Hidratación - CON LAS OPCIONES (SI, NO, OPCIONAL) + 2.lts
+	-SELECT LLAMADO Tennis ligera - CON LAS OPCIONES [ SI ]
+	-SELECT LLAMADO Tennis runner - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Tennis Hiking baja - CON LAS OPCIONES [ OPCIONAL ]
+	-SELECT LLAMADO Zarpato Caña media - CON LAS OPCIONES [ OPCIONAL ]
+	-SELECT LLAMADO Zapato Caña alta - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Bastones - [NO NECESARIOS]
+	-SELECT LLAMADO Foco o Head-lamp - CON LAS OPCIONES [ Siempre ]
+	-SELECT LLAMADO Snacks - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Repelente - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Poncho - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Guantes - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Repelente - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Bloqueador - CON LAS OPCIONES (SI, NO, OPCIONAL)
+	-SELECT LLAMADO Ropa de Cambio - CON LAS OPCIONES (SI, NO, OPCIONAL)
+
+
+	
+	OTRAS RECOMENDACIONES:
+--------------------------
+	TEXTAREA CON CKEDITOR
+	CON EL SIGUIENTE TEXTO DENTRO 
+
+	-Llevar Medicamentos personales (ES SU RESPONSABILIDAD)
+	-Avisar a un familiar, compañer@ o conocido que se va a rezagar momentaneamente por la razón que sea. No es nuestra obligación saber donde estarás metid@
+	-Desayunaremos al llegar para evitar llevar peso y así dejar las cosas en la buseta
+	-Siempre es opcional: pasar a comer a la salida y se decide en el camino Según La Mayoría o se programa previamente
+	-Evite arrecostarse a arboles, poner la mochila o prendas en el suelo y en caso de tener que hacerlo revise bien el equipo que no hayan insectos que pueden quedarse pegados y correr el riesgo de ser picados
+	-Si hay culebras🐍🐍 así que estar atentos.
+
+	NORMAS GENERALES
+	--------------------------
+	-Ser Puntuales por respeto a l@s compañer@s que nos esperan en el camino
+	-Nadie se queda atrás, ni se queda solo
+	-NO discutir por campos de la buseta... (Ya hemos tenido problemas debido a ello y es demasiado descortés y ensucia la armonía y el ambiente bonito). Respetar el campo de su compañer@ a la venida. Conversar si se necesita hacer un cambio por la razón que sea y queda a criterio de quien puede o desea ceder ese espacio_
+	-NO participar en estas caminatas si se siente mal
+	-NO participar si tiene otras actividades en la tarde
+	-NO criticar al rezagado ni al más rápido
+	-NO alterar ni dañar el entorno (arrancar plantas, ensuciar ni extraer animalitos)
+
+	OTRAS INDICACIONES GENERALES:
+	--------------------------
+	-En Caso de rayería y quedemos a la intemperie, no abracemos árboles y apaguemos todos los dispositivos que emitan señales (celulares, walkie-talkies).
+	Llevar Ropa de cambio y cosas personales no indispensables para caminar se quedan en la buseta
+	Es probable topemos con lluvias para estar preparado con poncho aún el clima es inestable.
+	-EN CASO DE DERRUMBE EN EL CAMINO, INUNDACIONES O SITUACIÓN QUE PONGA EN RIESGO LA INTEGRIDAD DE TOD@S SE SUSPENDE LA CAMINATA . NO DEPENDE DE QUIENES COORDINAMOS LAS CAMINATAS. NO ES RESPONSABILIDAD DE NADIE SI DEBEMOS TOMAR OTRA RUTA MÁS LEJANA O SI EL CAMINO ESTÁ BLOQUEADO POR ACCIDENTES, LLUVIAS, O LA RAZÓN QUE SEA.)
+	-Si es alérgico a picaduras y/o alimentos Puede llevar una pastilla de cetirizina, fexofenadina Allegra o loratadina (OJO A LAS CONTRA-INDICACIONES MEDICAS) POR SI ES ALÉRGICO ALGUNO DE ESTOS FÁRMACOS ES MEJOR CONSULTAR ANTES DE INGERIR CUALQUIERA DE ESTOS MEDICAMENTOS.
+	CADA UNO CAMINA LIBREMENTE CON NOSOTROS.*
+
+
+	Las reglas para esta área.. 
+	Si la Hora está ya fue asignada para cualquier evento Advertir que ya existe actividad para esa hora y no dejar seleccionar
+	agregar un selector que diga evento todo el día. SI se selecciona esta opción al intentar agregar un evento para ese día desde el datapicker advierte que esa fecha ya está ocupada
+
+	
+
+
+
+
+
+
+
+
+	
+
+editar_instrucciones.html En esta vista permitir editar el contenido de instrucciones absolutamente todo
+
+En detalle_instrucciones.html va a contener absolutamente todo el contenido ingresado por medio de crear_instrucciones.html  y va a contener los botones de editar_instrucciones.html y borrar desde el backend con Flask y Flask. además de exportar  a JPG TXT PDF y excel
+
+En la vista de ver_instrucciones.html se va a ver  
+INSTRUCCIONES PARA LA CAMINATA (SELECT CON LAS CAMINATAS QUE EXISTEN ACTIVAS)
+
+
+Además en la vista  detalle_caminatas.html vas a crear el enlace para ir directamente a ver_instrucciones.html
+
+
+
+
+
+
+
+
+
+
+TOTAL == Precio Estadía (¢)  * Cantidad de días
+TOTAL == Precio Desayuno (¢) * Cantidad de días
+TOTAL == Precio Merienda (¢) * Cantidad de días
+TOTAL == Precio Almuerzo (¢) * Cantidad de días
+TOTAL == Precio Café (¢) * Cantidad de días
+TOTAL == Precio Cena (¢) * Cantidad de días
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Genial ahora necesito crear un area nueva área
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+Solicitarme los archivos app.py, models.py y base.html antes de continuar
+
+
+vamos a construir un area de intinerario
+
+lógica
+en app.py solo vas a importar las lineas del archivo itinerario.py y en 
+itinerario.py absolutamente la lógica del  itinerario
+models.py las tablas como las demás áreas 
+base.html en el navbar vas a tener el enlace a ver_itinerario.html
+
+
+vistas
+
+ver_itinerario.html
+aqui va a estar todo el diseño del itinerario
+este va a contener
+
+
+crear_itinerario.html
+un selector con las caminatas activas de la base de datos
+lugar de salida hereda el de las instrucciones de la caminata activa seleccionada
+hora de salida hereda el de la caminata activa seleccionada
+Un espacio llamado Puntos de recogida exactamente identico a crear_instrucciones.html
+un ckedit completo con todas las opciones identico al de crear_caminatas.html
+pasaremos a comer algún lado select (No aplica, si, no)
+
+un enlace a las instrucciones de la caminata activa
+
+
+
+editar_itinerario.html En esta vista permitir editar el contenido de  absolutamente todo lo creado desde crear_itinerario.html
+
+
+ver_itinerario.html mostrará la imagen de la caminata activa seleccionada, la Plabra Itinerario de: el nombre de la caminata activa seleccionada y el botón ver más que va a detalle_itinerario.html  mostrár todo el itinerario completo 
+
+detalle_itinerario.html este mostrará absolutamente todo lo ingresado desde crear_itinerario.html con los botones de exportar a jpg, pdf, txt con utf-8 editar y eliminar como te indiqué al inicio construidos con Flask y Flash y el Modal con bootstrap
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Genial ahora necesito crear un area nueva área
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+las opciones de exportar a jpg, pdf, txt con utf-8 para que reconozca la ñ y las tildes (solo en caso de que existiera)
+cada archivo y cada vista vas a darmelo cuando te diga ok
+
+
+vamos a construir un area de acerca de rutas
+
+lógica
+en app.py solo vas a importar las lineas del archivo rutas.py y en 
+rutas.py absolutamente la lógica del  rutas
+models.py las tablas como las demás áreas 
+En el navbar.html vas a tener el enlace a ver_rutas.html
+
+
+
+vistas
+ver_rutas.html
+aqui va a estar todo el diseño del rutas
+este va a contener
+
+
+crear_rutas.html
+Nombre de la ruta
+Select llamado Provincia ("Alajuela","Cartago","Heredia","Puntarenas","Limón","Guanacaste","San José")
+Detalle de La Ruta
+Area para subir un enlace compatible con facebook y Youtube
+
+
+editar_rutas.html En esta vista permitir editar el contenido de  absolutamente todo lo creado desde crear_rutas.html
+
+
+ver_rutas.html mostrará la lista con número consecutivo y el Nombre de la ruta seguido de la provincia y un enlace que va a detalle_rutas.html
+con un separador con el nombre de la provincia
+
+detalle_rutas.html va a contener absolutamente toda la información de la ruta y el video 1280x720 del enlace de youtube o facebook subido desde crear_rutas.html el adicional el botón flotante de  borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap, además de editar y volver atrás
+
+
+

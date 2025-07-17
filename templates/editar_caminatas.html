@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Estilos adicionales para el botón flotante (FAB) */
+    .fab-container {
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo - MODIFICADO para coincidir con crear_caminatas.html */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-container.left { /* Contenedor para el botón flotante de la izquierda */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        /* MODIFICACIÓN: Eliminar box-shadow para quitar el borde oscuro en estado normal */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra para que se vea flotante al pasar el ratón */
+    }
+</style>
+
+{# MODIFICACIÓN: Se eliminó 'mt-4' del contenedor principal para que coincida con ver_caminatas #}
+<div class="container">
+    {# MODIFICACIÓN: Se reincorporaron 'p-4' y 'mb-5' para mantener un espaciado adecuado dentro del formulario #}
+    <div class="p-4 mb-5">
+        <h2 class="card-title text-center mb-4 text-warning">Editar Caminata: {{ caminata.nombre }}</h2>
+        {# MODIFICACIÓN: Añadir ID al formulario para el FAB #}
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('caminatas.editar_caminata', caminata_id=caminata.id) }}" id="editCaminataForm">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="imagen_caminata" class="form-label">Imagen de la Caminata:</label>
+                    <input type="file" class="form-control" id="imagen_caminata" name="imagen_caminata" accept="image/png, image/jpeg, image/jpg, image/gif">
+                    <small class="form-text text-muted">Formatos permitidos: PNG, JPG, JPEG, GIF. Dejar en blanco para mantener la imagen actual.</small>
+                    {% if caminata.imagen_caminata_url %}
+                        <img src="{{ url_for('static', filename=caminata.imagen_caminata_url) }}" alt="Imagen actual" class="img-thumbnail mt-2" style="max-height: 100px;">
+                        <input type="hidden" name="current_imagen_caminata_url" value="{{ caminata.imagen_caminata_url }}">
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="actividad" class="form-label">Actividad <span class="text-danger">*</span>:</label>
+                    <select class="form-select" id="actividad" name="actividad" required>
+                        <option value="">Seleccionar Actividad</option>
+                        {% set actividad_opciones = [
+                            "El Camino de Costa Rica",
+                            "Parque Nacional",
+                            "Paseo",
+                            "Iniciante",
+                            "Básico",
+                            "Intermedio",
+                            "Avanzado",
+                            "Técnico"
+                        ] %}
+                        {% for option in actividad_opciones %}
+                        <option value="{{ option }}" {% if caminata.actividad == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="etapa" class="form-label">Etapa:</label>
+                    <select class="form-select" id="etapa" name="etapa">
+                        <option value="">Seleccionar Etapa</option>
+                        {% set etapa_opciones = [
+                            "Etapa 1a - Parismina a Laguna Perlas 5.13k",
+                            "Etapa 1b - Muelle Goshen a Cimarrones 24.02k",
+                            "Etapa 2 - Cimarrones a Brisas 15.09k",
+                            "Etapa 3 - Brisas de Pacuarito a Tsiobata 15.05k",
+                            "Etapa 4 - Tsiobata a Tres Equis 6.85k",
+                            "Etapa 5 - Tres Equis a Pacayitas 13.30k",
+                            "Etapa 6 - Pacayitas a La Suiza 12.58k",
+                            "Etapa 7 - La Suiza a Humo de Pejibaye",
+                            "Etapa 8 - Humo de Pejibaye a Tapanti 16.58k",
+                            "Etapa 9 - Tapanti a Navarro del Muneco 24.40k",
+                            "Etapa 10 - Navarro del Muneco a Palo Verde",
+                            "Etapa 11 - Palo Verde a Cerro Alto 8.90k",
+                            "Etapa 12 - Cerro Alto a San Pablo de Leon Cortes 18.28k",
+                            "Etapa 13 - San Pablo de Leon Cortes a Napoles 16.41k",
+                            "Etapa 14 - Napoles a Naranjillo 13.35k",
+                            "Etapa 15 - Naranjillo a Esquipulas 12.01k",
+                            "Etapa 16 - Esquipulas a Quepos 22.72k",
+                            "--------------",
+                            "Etapas 1a & 1b / 29.32k",
+                            "Etapas 3 & 4 / 21.09k",
+                            "Etapas 14 & 15 / 25.36k"
+                        ] %}
+                        {% for option in etapa_opciones %}
+                        <option value="{{ option }}" {% if caminata.etapa == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="nombre" class="form-label">Nombre o Detalle <span class="text-danger">*</span>:</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ caminata.nombre or '' }}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="precio" class="form-label">Precio <span class="text-danger">*</span>:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">¢</span>
+                        <input type="number" step="0.01" class="form-control" id="precio" name="precio" value="{{ caminata.precio or '' }}" required min="0">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="fecha" class="form-label">Fecha <span class="text-danger">*</span>:</label>
+                    <input type="date" class="form-control" id="fecha" name="fecha" value="{{ caminata.fecha.strftime('%Y-%m-%d') if caminata.fecha else '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="hora_salida" class="form-label">Hora de Salida <span class="text-danger">*</span>:</label>
+                    <input type="time" class="form-control" id="hora_salida" name="hora_salida" value="{{ caminata.hora_salida.strftime('%H:%M') if caminata.hora_salida else '' }}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="lugar_salida" class="form-label">Lugar de Salida:</label>
+                    <select class="form-select" id="lugar_salida" name="lugar_salida">
+                        <option value="">Seleccionar Lugar de Salida</option>
+                        {% set lugar_salida_opciones = [
+                            "Parque De Tres Ríos - Escuela",
+                            "Parque De Tres Ríos - Cruz Roja",
+                            "Parque De Tres Ríos - Letras",
+                            "Plaza de San Diego",
+                            "Iglesia San Diego"
+                        ] %}
+                        {% for option in lugar_salida_opciones %}
+                        <option value="{{ option }}" {% if caminata.lugar_salida == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="dificultad" class="form-label">Dificultad:</label>
+                    <select class="form-select" id="dificultad" name="dificultad">
+                        <option value="">Seleccionar Dificultad</option>
+                        {% set dificultad_opciones = [
+                            "Iniciante",
+                            "Básico",
+                            "Intermedio",
+                            "Dificil",
+                            "Avanzado",
+                            "Técnico"
+                        ] %}
+                        {% for option in dificultad_opciones %}
+                        <option value="{{ option }}" {% if caminata.dificultad == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="distancia" class="form-label">Distancia (km):</label>
+                    <input type="number" step="0.1" class="form-control" id="distancia" name="distancia" value="{{ caminata.distancia or '' }}" min="0">
+                </div>
+                <div class="col-md-4">
+                    <label for="capacidad_minima" class="form-label">Capacidad Mínima:</label>
+                    <input type="text" class="form-control" id="capacidad_minima" name="capacidad_minima" value="{{ caminata.capacidad_minima or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="capacidad_maxima" class="form-label">Capacidad Máxima:</label>
+                    <input type="text" class="form-control" id="capacidad_maxima" name="capacidad_maxima" value="{{ caminata.capacidad_maxima or '' }}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="nombre_guia" class="form-label">Nombre del Guía:</label>
+                    <input type="text" class="form-control" id="nombre_guia" name="nombre_guia" value="{{ caminata.nombre_guia or '' }}">
+                </div>
+                {# Se eliminó el campo "Se Requiere" #}
+                <div class="col-md-6">
+                    <label for="provincia" class="form-label">Provincia:</label>
+                    <select class="form-select" id="provincia" name="provincia">
+                        <option value="">Seleccionar Provincia</option>
+                        {% set provincia_opciones = [
+                            "Cartago",
+                            "Alajuela",
+                            "Heredia",
+                            "San José",
+                            "Puntarenas",
+                            "Guanacaste",
+                            "Limón"
+                        ] %}
+                        {% for option in provincia_opciones %}
+                        <option value="{{ option }}" {% if caminata.provincia == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="tipo_terreno" class="form-label">Tipo de Terreno:</label>
+                    <select class="form-select" id="tipo_terreno" name="tipo_terreno" multiple>
+                        {% set tipo_terreno_opciones = [
+                            "Asfalto llano",
+                            "Asfalto Pendiente Básico",
+                            "Asfalto Pendiente Medio",
+                            "Asfalto Pendiente Difícil",
+                            "Lastre Pendiente Básico",
+                            "Lastre Pendiente Medio",
+                            "Lastre Pendiente Difícil",
+                            "Sendero Pendiente Básico",
+                            "Sendero Pendiente Medio",
+                            "Sendero Pendiente Difícil",
+                            "Montaña Pendiente Básico",
+                            "Montaña Pendiente Medio",
+                            "Montaña Pendiente Difícil",
+                            "Montaña Técnica",
+                            "Otros(Otras Señas de Terreno)"
+                        ] %}
+                        {% set selected_terrenos = caminata.tipo_terreno | from_json %}
+                        {% for option in tipo_terreno_opciones %}
+                        <option value="{{ option }}" {% if option in selected_terrenos %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples.</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="otras_senas_terreno" class="form-label">Otras Señas de Terreno:</label>
+                    <textarea class="form-control" id="otras_senas_terreno" name="otras_senas_terreno" rows="2">{{ caminata.otras_senas_terreno or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="tipo_transporte" class="form-label">Tipo de Transporte:</label>
+                    <select class="form-select" id="tipo_transporte" name="tipo_transporte" multiple>
+                        {% set tipo_transporte_opciones = [
+                            "Moto",
+                            "Bus Público",
+                            "Buseta",
+                            "Automobil",
+                            "Lancha",
+                            "Ferry",
+                            "Avion"
+                        ] %}
+                        {% set selected_transportes = caminata.tipo_transporte | from_json %}
+                        {% for option in tipo_transporte_opciones %}
+                        <option value="{{ option }}" {% if option in selected_transportes %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples.</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="incluye" class="form-label">Incluye:</label>
+                    <select class="form-select" id="incluye" name="incluye" multiple>
+                        {% set incluye_opciones = [
+                            "Transporte",
+                            "Transporte y Entrada",
+                            "Transporte y Guía",
+                            "Transporte y Alimentación",
+                            "Transporte, Entrada y Guía",
+                            "Transporte, Entrada y Alimentación",
+                            "Transporte, y Alimentación",
+                            "Transporte, Guía y Alimentación",
+                            "Todo menos Alimentación"
+                        ] %}
+                        {% set selected_incluye = caminata.incluye | from_json %}
+                        {% for option in incluye_opciones %}
+                        <option value="{{ option }}" {% if option in selected_incluye %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples.</small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="cuenta_con" class="form-label">Cuenta con:</label>
+                    <select class="form-select" id="cuenta_con" name="cuenta_con" multiple>
+                        {% set cuenta_con_opciones = [
+                            "Baños",
+                            "Agua Potable",
+                            "Área de picnic",
+                            "Parqueo",
+                            "Senderos marcados",
+                            "Miradores",
+                            "Áreas de acampar",
+                            "Comida disponible"
+                        ] %}
+                        {% set selected_cuenta_con = caminata.cuenta_con | from_json %}
+                        {% for option in cuenta_con_opciones %}
+                        <option value="{{ option }}" {% if option in selected_cuenta_con %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples.</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="tipo_clima" class="form-label">Tipo de Clima:</label>
+                    <select class="form-select" id="tipo_clima" name="tipo_clima">
+                        <option value="">Seleccionar Tipo de Clima</option>
+                        {% set tipo_clima_opciones = [
+                            "Clima Tropical Húmedo",
+                            "Clima Tropical Seco",
+                            "Clima Tropical Muy Húmedo",
+                            "Clima de Montaña"
+                        ] %}
+                        {% for option in tipo_clima_opciones %}
+                        <option value="{{ option }}" {% if caminata.tipo_clima == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label for="altura_maxima" class="form-label">Altura Máxima (m):</label>
+                    <input type="number" step="0.1" class="form-control" id="altura_maxima" name="altura_maxima" value="{{ caminata.altura_maxima or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="altura_minima" class="form-label">Altura Mínima (m):</label>
+                    <input type="number" step="0.1" class="form-control" id="altura_minima" name="altura_minima" value="{{ caminata.altura_minima or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="altura_positiva" class="form-label">Altura Positiva (m):</label>
+                    <input type="number" step="0.1" class="form-control" id="altura_positiva" name="altura_positiva" value="{{ caminata.altura_positiva or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="altura_negativa" class="form-label">Altura Negativa (m):</label>
+                    <input type="number" step="0.1" class="form-control" id="altura_negativa" name="altura_negativa" value="{{ caminata.altura_negativa or '' }}">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="otros_datos_ckeditor" class="form-label">Otros Datos:</label>
+                <textarea class="form-control" id="otros_datos_ckeditor" name="otros_datos_ckeditor">{{ caminata.otros_datos or '' }}</textarea>
+            </div>
+
+            <div class="d-grid gap-2">
+                {# MODIFICACIÓN: Se oculta el botón "Actualizar Caminata" original #}
+                <button type="submit" class="btn btn-warning btn-lg d-none" style="color: black;">Actualizar Caminata</button>
+                {# Se eliminó el botón "Cancelar" cuadrado #}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script>
+    function from_json_parse(json_string) {
+        try {
+            return JSON.parse(json_string);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    CKEDITOR.replace('otros_datos_ckeditor');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const multiSelectIds = ['tipo_terreno', 'tipo_transporte', 'incluye', 'cuenta_con'];
+
+        multiSelectIds.forEach(id => {
+            const selectElement = document.getElementById(id);
+            if (selectElement) {
+                let selectedValues = [];
+                try {
+                    if (caminata && caminata[id]) {
+                        if (typeof caminata[id] === 'string') {
+                            selectedValues = from_json_parse(caminata[id]);
+                        } else if (Array.isArray(caminata[id])) {
+                            selectedValues = caminata[id];
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error parsing JSON for " + id + ":", e);
+                    selectedValues = [];
+                }
+
+                Array.from(selectElement.options).forEach(option => {
+                    if (selectedValues.includes(option.value)) {
+                        option.selected = true;
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+{# NUEVO: Botón flotante para guardar cambios #}
+<div class="fab-container">
+    <a href="#" class="btn btn-warning fab-button" title="Guardar Cambios" onclick="document.getElementById('editCaminataForm').submit(); return false;">
+        <i class="fas fa-save" style="color: black;"></i>
+    </a>
+</div>
+
+{# Nuevo botón flotante para volver atrás a la izquierda #}
+<div class="fab-container left">
+    <a href="{{ url_for('caminatas.detalle_caminata', caminata_id=caminata.id) }}" class="btn btn-primary fab-button" title="Volver a Detalle de Caminata">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+{% endblock %}

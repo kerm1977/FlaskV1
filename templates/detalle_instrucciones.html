@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Instrucción - {{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}{% endblock %}
+
+{% block head_content %}
+<style>
+    /* FAB buttons for actions - Copied from detalle_itinerario.html */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Higher z-index for action buttons */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    .fab-button-edit { background-color: #ffc107; color: black; } /* Warning */
+    .fab-button-delete { background-color: #dc3545; color: white; } /* Danger */
+    .fab-button-pdf { background-color: #6f42c1; color: white; } /* Purple */
+    .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark */
+    .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange */
+    .fab-button-whatsapp { background-color: #25D366; color: white; } /* WhatsApp green */
+
+    /* Modal styles - Copied from detalle_itinerario.html */
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+        background-color: #dc3545; /* Danger red */
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .modal-footer .btn {
+        border-radius: 8px;
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Detalle de Instrucción: {{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}</h1>
+    <hr class="text-warning">
+
+    <div class="mb-4 mt-5">
+        <div class="bg-warning text-white p-3 rounded-top">
+            <h2 class="card-title mb-0">Información General de la Caminata</h2>
+        </div>
+        <div class="p-3 border rounded-bottom">
+         
+            <p><strong>Caminata:</strong> {{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}
+                {% if instruction.caminata and instruction.caminata.etapa %}
+                    (Etapa: {{ instruction.caminata.etapa }})
+                {% endif %}
+            </p>
+            <p><strong>Dificultad:</strong> {{ instruction.dificultad }}</p>
+            <p><strong>Distancia:</strong> {{ instruction.distancia }} km</p>
+            <p><strong>Capacidad:</strong> {{ instruction.capacidad }}</p>
+            <p><strong>Salimos desde:</strong> {{ instruction.lugar_salida }}</p>
+            <p><strong>Fecha de Salida:</strong> {{ instruction.fecha_salida.strftime('%d-%m-%Y') }}</p>
+            <p><strong>Hora de Salida:</strong> {{ instruction.hora_salida.strftime('%I:%M %p') }}</p>
+            {% if instruction.fecha_caminata %}
+            <p><strong>Fecha de Caminata:</strong> {{ instruction.fecha_caminata.strftime('%d-%m-%Y') }}</p>
+            {% endif %}
+            {% if instruction.hora_inicio_caminata %}
+            <p><strong>Hora de Inicio Caminata:</strong> {{ instruction.hora_inicio_caminata.strftime('%I:%M %p') }}</p>
+            {% endif %}
+            
+            <h4 class="mt-4">Puntos de Recogida:</h4>
+            {% set recogemos_list = instruction.recogemos_en|from_json %}
+            {% if recogemos_list %}
+                <ul class="list-group mb-3" id="recogemos-list">
+                    {% for item in recogemos_list %}
+                        <li class="list-group-item">{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p id="recogemos-list-empty">No hay puntos de recogida especificados.</p>
+            {% endif %}
+
+            <h4 class="mt-4">Para el Camino:</h4>
+            <ul class="list-group mb-3">
+                {% if instruction.hidratacion and instruction.hidratacion != 'N/A' %}
+                <li class="list-group-item"><strong>Hidratación:</strong> <span id="hidratacion-text">{{ instruction.hidratacion }} ({{ instruction.litros_hidratacion }})</span></li>
+                {% endif %}
+                {% if instruction.tennis_ligera and instruction.tennis_ligera != 'N/A' %}
+                <li class="list-group-item"><strong>Tennis ligera:</strong> <span id="tennis-ligera-text">{{ instruction.tennis_ligera }}</span></li>
+                {% endif %}
+                {% if instruction.tennis_runner and instruction.tennis_runner != 'N/A' %}
+                <li class="list-group-item"><strong>Tennis runner:</strong> <span id="tennis-runner-text">{{ instruction.tennis_runner }}</span></li>
+                {% endif %}
+                {% if instruction.tennis_hiking_baja and instruction.tennis_hiking_baja != 'N/A' %}
+                <li class="list-group-item"><strong>Tennis Hiking baja:</strong> <span id="tennis-hiking-baja-text">{{ instruction.tennis_hiking_baja }}</span></li>
+                {% endif %}
+                {% if instruction.zapato_cana_media and instruction.zapato_cana_media != 'N/A' %}
+                <li class="list-group-item"><strong>Zapato Caña media:</strong> <span id="zapato-cana-media-text">{{ instruction.zapato_cana_media }}</span></li>
+                {% endif %}
+                {% if instruction.zapato_cana_alta and instruction.zapato_cana_alta != 'N/A' %}
+                <li class="list-group-item"><strong>Zapato Caña alta:</strong> <span id="zapato-cana-alta-text">{{ instruction.zapato_cana_alta }}</span></li>
+                {% endif %}
+                {% if instruction.bastones and instruction.bastones != 'N/A' %}
+                <li class="list-group-item"><strong>Bastones:</strong> <span id="bastones-text">{{ instruction.bastones }}</span></li>
+                {% endif %}
+                {% if instruction.foco_headlamp and instruction.foco_headlamp != 'N/A' %}
+                <li class="list-group-item"><strong>Foco o Head-lamp:</strong> <span id="foco-headlamp-text">{{ instruction.foco_headlamp }}</span></li>
+                {% endif %}
+                {% if instruction.snacks and instruction.snacks != 'N/A' %}
+                <li class="list-group-item"><strong>Snacks:</strong> <span id="snacks-text">{{ instruction.snacks }}</span></li>
+                {% endif %}
+                {% if instruction.repelente and instruction.repelente != 'N/A' %}
+                <li class="list-group-item"><strong>Repelente:</strong> <span id="repelente-text">{{ instruction.repelente }}</span></li>
+                {% endif %}
+                {% if instruction.poncho and instruction.poncho != 'N/A' %}
+                <li class="list-group-item"><strong>Poncho:</strong> <span id="poncho-text">{{ instruction.poncho }}</span></li>
+                {% endif %}
+                {% if instruction.guantes and instruction.guantes != 'N/A' %}
+                <li class="list-group-item"><strong>Guantes:</strong> <span id="guantes-text">{{ instruction.guantes }}</span></li>
+                {% endif %}
+                {% if instruction.bloqueador and instruction.bloqueador != 'N/A' %}
+                <li class="list-group-item"><strong>Bloqueador:</strong> <span id="bloqueador-text">{{ instruction.bloqueador }}</span></li>
+                {% endif %}
+                {% if instruction.ropa_cambio and instruction.ropa_cambio != 'N/A' %}
+                <li class="list-group-item"><strong>Ropa de Cambio:</strong> <span id="ropa-cambio-text">{{ instruction.ropa_cambio }}</span></li>
+                {% endif %}
+            </ul>
+
+            <h4 class="mt-4">Otras Recomendaciones:</h4>
+            <div class="bg-light mb-3 p-3 rounded border" id="otras-recomendaciones-content">
+                {{ instruction.otras_recomendaciones|replace('-', '<br>-')|safe }}
+            </div>
+
+            <h4 class="mt-4">Normas Generales:</h4>
+            <div class="bg-light mb-3 p-3 rounded border" id="normas-generales-content">
+                {{ instruction.normas_generales|replace('-', '<br>-')|safe }}
+            </div>
+
+            <h4 class="mt-4">Otras Indicaciones Generales:</h4>
+            <div class="bg-light mb-3 p-3 rounded border" id="otras-indicaciones-generales-content">
+                {{ instruction.otras_indicaciones_generales|replace('-', '<br>-')|safe }}
+            </div>
+
+            <p class="text-muted mt-3">
+                <strong>Creada:</strong> {{ instruction.fecha_creacion.strftime('%d-%m-%Y %H:%M') }}
+                {% if instruction.fecha_modificacion %}
+                    | <strong>Modificada:</strong> {{ instruction.fecha_modificacion.strftime('%d-%m-%Y %H:%M') }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="fab-container-actions">
+        <a href="{{ url_for('instrucciones.editar_instrucciones', instruction_id=instruction.id) }}" class="fab-button-action fab-button-edit" title="Editar Instrucción">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Instrucción" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ instruction.id }}">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        <a href="{{ url_for('instrucciones.exportar_excel', instruction_id=instruction.id) }}" class="fab-button-action fab-button-excel" title="Exportar a Excel">
+            <i class="fas fa-file-excel"></i>
+        </a>
+        <a href="{{ url_for('instrucciones.exportar_pdf', instruction_id=instruction.id) }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
+            <i class="fas fa-file-pdf"></i>
+        </a>
+        <a href="{{ url_for('instrucciones.exportar_jpg', instruction_id=instruction.id) }}" class="fab-button-action fab-button-jpg" title="Exportar a JPG">
+            <i class="fas fa-image"></i>
+        </a>
+        <button type="button" class="fab-button-action fab-button-whatsapp" onclick="shareInstructionsViaWhatsApp()" title="Compartir por WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </button>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación - Copied from detalle_itinerario.html -->
+    <div class="modal fade" id="confirmDeleteModal{{ instruction.id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ instruction.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel{{ instruction.id }}">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar las instrucciones para la caminata "{{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}" del {{ instruction.fecha_caminata.strftime('%d-%m-%Y') if instruction.fecha_caminata else 'N/A' }}? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="{{ url_for('instrucciones.eliminar_instrucciones', instruction_id=instruction.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('instrucciones.ver_instrucciones') }}" class="fab-button-back" title="Volver al Listado de Instrucciones">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+function shareInstructionsViaWhatsApp() {
+    console.log("shareInstructionsViaWhatsApp called");
+
+    const caminataNombre = "{{ instruction.caminata.nombre if instruction.caminata else '' }}";
+    const dificultad = "{{ instruction.dificultad or '' }}";
+    const distancia = "{{ instruction.distancia or '' }}";
+    const capacidad = "{{ instruction.capacidad or '' }}";
+    const lugarSalida = "{{ instruction.lugar_salida or '' }}";
+    const fechaSalida = "{{ instruction.fecha_salida.strftime('%d-%m-%Y') if instruction.fecha_salida else '' }}";
+    const horaSalida = "{{ instruction.hora_salida.strftime('%I:%M %p') if instruction.hora_salida else '' }}";
+    const fechaCaminata = "{{ instruction.fecha_caminata.strftime('%d-%m-%Y') if instruction.fecha_caminata else '' }}";
+    const horaInicioCaminata = "{{ instruction.hora_inicio_caminata.strftime('%I:%M %p') if instruction.hora_inicio_caminata else '' }}";
+
+    // Directly use the Python-generated recogemos_list for WhatsApp
+    // This assumes recogemos_list is correctly passed and JSON decoded in the template context
+    const recogemosListPython = {{ recogemos_list | tojson | safe }}; // This is a JS array
+    let recogemosText = "";
+    if (recogemosListPython && recogemosListPython.length > 0) {
+        recogemosText = recogemosListPython.map(item => "- " + item.trim()).join('\\n');
+    } else {
+        recogemosText = "No hay puntos de recogida especificados.";
+    }
+    console.log("recogemosText:", recogemosText);
+
+    // Helper to clean HTML content and format for WhatsApp
+    function cleanAndFormatCKEditorContent(elementId) {
+        let content = document.getElementById(elementId).textContent.trim(); // Get plain text
+        if (!content || content === 'N/A') {
+            return '';
+        }
+        // Replace hyphens not at the start of a line with newline + hyphen
+        // This regex ensures that if a line starts with '-', it's not affected,
+        // but if a '-' appears mid-line, it gets a newline before it.
+        let formattedContent = content.replace(/([^\n])-/g, '$1\n-').trim();
+        return formattedContent;
+    }
+
+    const otrasRecomendaciones = cleanAndFormatCKEditorContent('otras-recomendaciones-content');
+    const normasGenerales = cleanAndFormatCKEditorContent('normas-generales-content');
+    const otrasIndicacionesGenerales = cleanAndFormatCKEditorContent('otras-indicaciones-generales-content');
+
+    let message = `*INSTRUCCIONES PARA LA CAMINATA: ${caminataNombre}*\n\n`;
+    
+    message += `*INFORMACIÓN DE LA CAMINATA:*\n`;
+    if (dificultad && dificultad !== 'N/A') message += `  *Dificultad:* ${dificultad}\n`;
+    if (distancia && distancia !== 'N/A') message += `  *Distancia:* ${distancia} km\n`;
+    if (capacidad && capacidad !== 'N/A') message += `  *Capacidad:* ${capacidad}\n`;
+    if (lugarSalida && lugarSalida !== 'N/A') message += `  *Lugar de Salida:* ${lugarSalida}\n`;
+    if (fechaSalida && fechaSalida !== 'N/A') message += `  *Fecha de Salida:* ${fechaSalida}\n`;
+    if (horaSalida && horaSalida !== 'N/A') message += `  *Hora de Salida:* ${horaSalida}\n`;
+    if (fechaCaminata && fechaCaminata !== 'N/A') message += `  *Fecha de Caminata:* ${fechaCaminata}\n`;
+    if (horaInicioCaminata && horaInicioCaminata !== 'N/A') message += `  *Hora Inicio Caminata:* ${horaInicioCaminata}\n`;
+    message += `\n`; // Two newlines after the info section
+
+    if (recogemosText && recogemosText !== "No hay puntos de recogida especificados.") {
+        message += `*PUNTOS DE RECOGIDA:*\n${recogemosText}\n`; // Single newline after text content
+    } else {
+        message += `*PUNTOS DE RECOGIDA:*\nNo hay puntos de recogida especificados.\n`;
+    }
+    message += `\n`; // Add second newline explicitly for sections ending with *
+
+    message += `*PARA EL CAMINO:*\n`;
+    // These are simple key-value pairs, so just check for non-empty values
+    const itemsParaElCamino = [
+        { label: 'Hidratación', value: "{{ instruction.hidratacion or '' }}", extra: "{{ instruction.litros_hidratacion or '' }}" },
+        { label: 'Tennis ligera', value: "{{ instruction.tennis_ligera or '' }}" },
+        { label: 'Tennis runner', value: "{{ instruction.tennis_runner or '' }}" },
+        { label: 'Tennis Hiking baja', value: "{{ instruction.tennis_hiking_baja or '' }}" },
+        { label: 'Zapato Caña media', value: "{{ instruction.zapato_cana_media or '' }}" },
+        { label: 'Zapato Caña alta', value: "{{ instruction.zapato_cana_alta or '' }}" },
+        { label: 'Bastones', value: "{{ instruction.bastones or '' }}" },
+        { label: 'Foco o Head-lamp', value: "{{ instruction.foco_headlamp or '' }}" },
+        { label: 'Snacks', value: "{{ instruction.snacks or '' }}" },
+        { label: 'Repelente', value: "{{ instruction.repelente or '' }}" },
+        { label: 'Poncho', value: "{{ instruction.poncho or '' }}" },
+        { label: 'Guantes', value: "{{ instruction.guantes or '' }}" },
+        { label: 'Bloqueador', value: "{{ instruction.bloqueador or '' }}" },
+        { label: 'Ropa de Cambio', value: "{{ instruction.ropa_cambio or '' }}" }
+    ];
+
+    itemsParaElCamino.forEach(item => {
+        if (item.value && item.value !== 'N/A') {
+            let line = `  *${item.label}:* ${item.value}`;
+            if (item.extra && item.extra !== 'N/A') { // Also check extra for N/A
+                line += ` (${item.extra})`;
+            }
+            message += line + '\n';
+        }
+    });
+    message += `\n`; // Two newlines after "Para el Camino" section
+
+    if (otrasRecomendaciones) {
+        message += `*OTRAS RECOMENDACIONES:*\n${otrasRecomendaciones}\n`;
+    }
+    message += `\n`; // Add second newline explicitly
+
+    if (normasGenerales) {
+        message += `*NORMAS GENERALES:*\n${normasGenerales}\n`;
+    }
+    message += `\n`; // Add second newline explicitly
+
+    if (otrasIndicacionesGenerales) {
+        message += `*OTRAS INDICACIONES GENERALES:*\n${otrasIndicacionesGenerales}\n`;
+    }
+    message += `\n`; // Add second newline explicitly
+
+    console.log("Generated message:", message);
+
+    // Codificar el mensaje para la URL
+    const encodedMessage = encodeURIComponent(message);
+    console.log("Encoded message:", encodedMessage);
+    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+    console.log("WhatsApp URL:", whatsappUrl);
+
+    // Abrir en una nueva ventana/tab
+    window.open(whatsappUrl, '_blank');
+}
+</script>
+{% endblock %}

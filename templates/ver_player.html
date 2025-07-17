@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor de Música</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffc107; /* Fondo naranja (warning color de Bootstrap) */
+        }
+        .music-player-container {
+            padding: 2rem;
+            margin-top: 5rem; /* Margen superior aumentado */
+            width: 90%; /* Más responsivo */
+            max-width: 960px; /* Aumentado para hacerlo más ancho */
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 20px; /* Se solicitó mantener este borde redondeado */
+        }
+        /* Nuevo wrapper para la carátula o el texto de reemplazo */
+        .cover-art-wrapper {
+            width: 80%; /* Más pequeña */
+            max-width: 300px; /* Establece un tamaño máximo para la carátula */
+            aspect-ratio: 1 / 1; /* Mantiene una relación de aspecto 1:1 (cuadrada) */
+            display: flex; /* Para centrar el contenido */
+            justify-content: center;
+            align-items: center;
+            border-radius: 1rem;
+            margin: 0 auto 1.5rem auto; /* Centra y mantiene el margen inferior */
+            overflow: hidden; /* Asegura que la imagen o el texto no se salgan */
+            background-color: #ffc927; /* Nuevo color de fondo hexadecimal para la carátula */
+        }
+        .cover-art { /* Estilo para la imagen de la carátula */
+            width: 100%;
+            height: 100%; /* Ocupa todo el alto del wrapper */
+            object-fit: cover;
+            border-radius: 1rem;
+        }
+        .no-cover-text {
+            color: white; /* Texto blanco */
+            font-size: 0.8rem; /* Texto pequeño */
+            text-align: center;
+        }
+
+        /* Remueve todas las sombras de los botones para un look plano */
+        .btn, .modal-content {
+            box-shadow: none !important;
+        }
+
+        /* Clase específica para el botón de play/pause, que será el más grande */
+        .play-button-large {
+            font-size: 3rem; /* Aumentado el tamaño del icono */
+            padding: 1.2rem 1.8rem;
+            border-radius: 50px;
+            margin: 0 0.1rem; /* Margen horizontal reducido para acercar los botones */
+            transition: all 0.2s ease-in-out;
+            display: inline-flex; /* Para centrar el contenido dentro del botón */
+            align-items: center;
+            justify-content: center;
+            background-color: transparent; /* Fondo transparente */
+            border: 2px solid white; /* Borde blanco sutil */
+            color: white; /* Color del icono blanco para que se vea */
+        }
+        .play-button-large:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Clase para botones de rebobinar/adelantar (tamaño mediano, forma de píldora) */
+        .control-button-medium {
+            font-size: 1.1rem; /* Hecho más pequeño */
+            padding: 0.7rem 1rem; /* Hecho más pequeño */
+            border-radius: 50px;
+            margin: 0 0.1rem; /* Margen horizontal reducido para acercar los botones */
+            transition: all 0.2s ease-in-out;
+            margin-top: 12px; /* Ajustado para mantener el desplazamiento */
+            display: inline-flex; /* Para centrar el contenido dentro del botón */
+            align-items: center;
+            justify-content: center;
+            background-color: transparent; /* Fondo transparente */
+            border: 2px solid #efb300; /* Borde naranja más oscuro */
+            color: #343a40; /* Texto más oscuro para contraste */
+        }
+        .control-button-medium:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Clase para botones de canción anterior/siguiente (tamaño pequeño, perfectamente redondos) */
+        .control-button-small {
+            font-size: 1rem; /* Hecho más pequeño */
+            width: 45px; /* Hecho más pequeño */
+            height: 45px; /* Hecho más pequeño */
+            padding: 0; /* Eliminar padding para que el tamaño sea controlado por width/height */
+            border-radius: 50%; /* Perfectamente redondo */
+            margin: 0 0.1rem; /* Margen horizontal reducido para acercar los botones */
+            transition: all 0.2s ease-in-out;
+            margin-top: 17px; /* Ajustado para mantener el desplazamiento */
+            display: inline-flex; /* Para centrar el contenido dentro del botón */
+            align-items: center;
+            justify-content: center;
+            background-color: transparent; /* Fondo transparente */
+            border: 2px solid #fccf46; /* Borde naranja más claro */
+            color: #343a40; /* Texto más oscuro para contraste */
+        }
+        .control-button-small:hover {
+            transform: translateY(-1px);
+        }
+
+        .player-small-btn { /* Clase para botones de repetir canción/lista */
+            font-size: 1rem;
+            padding: 0.5rem 0.8rem;
+            border-radius: 50px; /* Botones redondos/píldora */
+            margin: 0.2rem;
+            transition: all 0.2s ease-in-out;
+            background-color: transparent; /* Fondo transparente */
+            border: 2px solid #ffffff; /* Borde blanco */
+            color: #343a40; /* Color de ícono oscuro */
+        }
+        .player-small-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Ajustes para botones de gestión (Subir, Eliminar, Cambiar Carátula) */
+        .btn-success {
+            background-color: transparent;
+            border: 2px solid #198754; /* Color verde de Bootstrap */
+            color: #198754;
+        }
+        .btn-success:hover {
+            background-color: #198754;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            border: 2px solid #dc3545; /* Color rojo de Bootstrap */
+            color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-outline-dark { /* Ya eran transparentes, solo ajustar el color del texto si es necesario */
+            background-color: transparent;
+            border: 2px solid #212529; /* Color oscuro de Bootstrap */
+            color: #212529;
+        }
+        .btn-outline-dark:hover {
+            background-color: #212529;
+            color: white;
+        }
+
+        .btn-warning { /* Para el botón "Subir Canción" del modal */
+            background-color: transparent;
+            border: 2px solid #ffc107; /* Color naranja de Bootstrap */
+            color: #ffc107;
+        }
+        .btn-warning:hover {
+            background-color: #ffc107;
+            color: white;
+        }
+
+        .btn-secondary { /* Para los botones "Cancelar" en los modales */
+            background-color: transparent;
+            border: 2px solid #6c757d; /* Color gris de Bootstrap */
+            color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        /* Estilos para los botones dentro de la lista de canciones */
+        .list-group-item .btn-outline-primary {
+            background-color: transparent;
+            border: 2px solid #0d6efd; /* Color azul de Bootstrap */
+            color: #0d6efd;
+        }
+        .list-group-item .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .list-group-item .btn-outline-danger {
+            background-color: transparent;
+            border: 2px solid #dc3545; /* Color rojo de Bootstrap */
+            color: #dc3545;
+        }
+        .list-group-item .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+
+        .progress-bar-container {
+            height: 8px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%; /* Se actualizará con JS */
+            background-color: #0d6efd;
+            border-radius: 5px;
+            transition: width 0.1s linear;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            color: white; /* Color cambiado a blanco */
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Nuevo estilo para el contenedor de la lista de canciones */
+        .songs-list-card {
+            background-color: #ffc927; /* Color solicitado */
+            padding: 1.5rem;
+            border-radius: 1rem; /* Bordes redondeados para el cuadro */
+            margin-bottom: 3rem; /* Espacio debajo del cuadro */
+        }
+
+        /* Estilo para los ítems individuales dentro del nuevo contenedor */
+        .songs-list-card .list-group {
+            margin-bottom: 0; /* Eliminar margen inferior del list-group dentro del card */
+        }
+
+        .songs-list-card .list-group-item {
+            background-color: transparent; /* Fondo transparente para los ítems */
+            border: none; /* Sin borde entre los ítems */
+            padding: 0.5rem 0; /* Reducir un poco el padding vertical */
+            border-radius: 0; /* Sin bordes redondeados en los ítems */
+            margin-bottom: 0; /* Eliminar margen inferior entre ítems */
+        }
+
+        .songs-list-card hr {
+            border-top: 1px solid rgba(0, 0, 0, 0.1); /* Línea divisoria suave */
+            margin: 0.5rem 0; /* Espacio vertical para la línea */
+        }
+
+        .songs-list-card .list-group-item:last-child hr {
+            display: none; /* No mostrar la línea después del último ítem */
+        }
+
+        .list-group-item { /* Mantener estos estilos generales */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.25rem; /* Esto podría ser sobreescrito por el estilo más específico */
+        }
+        .list-group-item button {
+            margin-left: 0.5rem;
+        }
+        .form-control-file {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--bs-body-color);
+            background-color: var(--bs-form-control-bg);
+            background-clip: padding-box;
+            border: var(--bs-border-width) solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius);
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+
+        /* Nuevo estilo para el botón de "Volver a Caminatas" */
+        .back-to-walks-btn {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            margin-bottom: 2rem; /* Añade espacio debajo del botón */
+            transition: all 0.2s ease-in-out;
+        }
+        .back-to-walks-btn:hover {
+            transform: translateY(-2px);
+            background-color: white;
+            color: #ffc107; /* Coincide con el color de fondo del body al pasar el ratón */
+        }
+    </style>
+</head>
+<body>
+    <div class="container music-player-container">
+        <div class="mb-5">
+            <div class="card-body text-center">
+                <button class="btn back-to-walks-btn mb-4" onclick="goToWalks()" title="Volver a Caminatas">
+                    <i class="fas fa-home me-2"></i> Volver a Caminatas
+                </button>
+
+                <div class="cover-art-wrapper">
+                    <img id="current-cover-art" src="" alt="Carátula del Álbum" class="img-fluid cover-art">
+                    <div id="no-cover-text" class="no-cover-text" style="display: none;">la tribu de los libres</div>
+                </div>
+                <h3 id="current-song-title" class="mb-1 text-primary">Nombre de la Canción Actual</h3>
+                <p id="current-song-artist" class="text-muted mb-3">Artista - Álbum</p>
+
+                <div class="d-flex justify-content-center align-items-center player-controls mb-4">
+                    <button class="btn control-button-small" id="prev-song-btn" title="Canción Anterior"><i class="fas fa-step-backward"></i></button>
+                    <button class="btn control-button-medium" id="rewind-btn" title="Rebobinar"><i class="fas fa-backward"></i></button>
+                    <button class="btn mx-1 play-button-large" id="play-pause-btn" title="Reproducir/Pausar"><i class="fas fa-play"></i></button>
+                    <button class="btn control-button-medium" id="forward-btn" title="Adelantar"><i class="fas fa-forward"></i></button>
+                    <button class="btn control-button-small" id="next-song-btn" title="Siguiente Canción"><i class="fas fa-step-forward"></i></button>
+                </div>
+
+                <div class="d-flex justify-content-center align-items-center player-controls mb-4">
+                    <button class="btn player-small-btn me-2" id="repeat-song-btn" title="Repetir Canción"><i class="fas fa-redo-alt"></i></button>
+                    <button class="btn player-small-btn" id="repeat-list-btn" title="Repetir Lista"><i class="fas fa-sync-alt"></i></button>
+                </div>
+
+                <div class="progress-bar-container" id="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title text-center">Canciones de La Tribu</h3>
+        <div class="songs-list-card">
+            <div class="list-group">
+                {% if songs %}
+                    {% for song in songs %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ song.title }}</strong>{% if song.artist and song.artist.strip() %} - <span class="text-muted">{{ song.artist }}</span>{% endif %}
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" id="play-button-{{ song.id }}" data-song-id="{{ song.id }}" onclick="playSong({{ song.id }})"><i class="fas fa-play"></i></button>
+                                {% if user_email == 'kenth1977@gmail.com' or user_email == 'jceciliano69@gmail.com' %}
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteSongModal" data-song-id="{{ song.id }}" data-song-title="{{ song.title }}"><i class="fas fa-trash-alt"></i></button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if not loop.last %}
+                            <hr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted p-3 mb-0">Aún no hay canciones. ¡Sube algunas!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user_email == 'kenth1977@gmail.com' or user_email == 'jceciliano69@gmail.com' %}
+        <h3 class="section-title">Gestión de Canciones</h3>
+        <div class="row mb-5">
+            <div class="col-12 col-md-6 mb-3">
+                <button type="button" class="btn btn-success w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#uploadSongModal">
+                    <i class="fas fa-upload me-2"></i> Subir Canción
+                </button>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <button type="button" class="btn btn-danger w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#deleteSongSelectionModal">
+                    <i class="fas fa-minus-circle me-2"></i> Eliminar Canción
+                </button>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12 col-md-6 mb-3">
+                <button type="button" class="btn btn-outline-dark w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#changeCoverModal">
+                    <i class="fas fa-image me-2"></i> Cambiar Carátula
+                </button>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <button type="button" class="btn btn-outline-danger w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#deleteCoverModal">
+                    <i class="fas fa-trash-alt me-2"></i> Borrar Carátula
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal para Confirmación de Eliminación de Canción Específica (usado por botones de la lista) -->
+    <div class="modal fade" id="deleteSongModal" tabindex="-1" aria-labelledby="deleteSongModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title" id="deleteSongModalLabel">Eliminar Canción</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que quieres eliminar la canción <strong id="song-title-to-delete"></strong>?</p>
+                    <p class="text-muted">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="delete-song-form" method="POST" action="">
+                        <button type="submit" class="btn btn-danger rounded-pill">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nuevo Modal para Selección de Canción a Eliminar (usado por el botón de gestión) -->
+    <div class="modal fade" id="deleteSongSelectionModal" tabindex="-1" aria-labelledby="deleteSongSelectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title" id="deleteSongSelectionModalLabel">Seleccionar Canción para Eliminar</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="delete-song-selection-form" method="POST" action="">
+                    <div class="modal-body">
+                        <p>Selecciona la canción que deseas eliminar:</p>
+                        <select class="form-select rounded-pill mb-3" id="selectSongToDelete" name="song_id">
+                            <option value="">Selecciona una canción</option>
+                            {% for song in songs %}
+                                <option value="{{ song.id }}">{{ song.title }} - {{ song.artist }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-muted">Esta acción eliminará la canción y su carátula asociada.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill">Eliminar Canción</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="uploadSongModal" tabindex="-1" aria-labelledby="uploadSongModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header bg-warning text-white rounded-top-4"> <h5 class="modal-title" id="uploadSongModalLabel">Subir Nueva Canción</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="upload-song-form" method="POST" action="{{ url_for('player.upload_song') }}" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="songTitle" class="form-label">Título:</label>
+                            <input type="text" class="form-control rounded-pill" id="songTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="songAlbum" class="form-label">Álbum:</label>
+                            <input type="text" class="form-control rounded-pill" id="songAlbum" name="album">
+                        </div>
+                        <div class="mb-3">
+                            <label for="songFile" class="form-label">Archivo de Audio:</label>
+                            <input type="file" class="form-control-file rounded-pill" id="songFile" name="file" accept="audio/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="coverImage" class="form-label">Carátula (Opcional):</label>
+                            <input type="file" class="form-control-file rounded-pill" id="coverImage" name="cover_image" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-warning rounded-pill">Subir Canción</button> </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changeCoverModal" tabindex="-1" aria-labelledby="changeCoverModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header bg-dark text-white rounded-top-4">
+                    <h5 class="modal-title" id="changeCoverModalLabel">Cambiar Carátula</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="change-cover-form" method="POST" action="" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <p>Seleccionar una canción para cambiar su carátula:</p>
+                        <select class="form-select rounded-pill mb-3" id="selectSongChangeCover" name="song_id">
+                            <option value="">Selecciona una canción</option>
+                            {% for song in songs %}
+                                <option value="{{ song.id }}">{{ song.title }} - {{ song.artist }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="mb-3">
+                            <label for="newCoverFile" class="form-label">Nueva Imagen de Carátula:</label>
+                            <input type="file" class="form-control-file rounded-pill" id="newCoverFile" name="new_cover_image" accept="image/*" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-dark rounded-pill">Cambiar Carátula</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteCoverModal" tabindex="-1" aria-labelledby="deleteCoverModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title" id="deleteCoverModalLabel">Eliminar Carátula</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="delete-cover-form" method="POST" action="">
+                    <div class="modal-body">
+                        <p>Seleccionar la canción de la cual deseas eliminar la carátula:</p>
+                        <select class="form-select rounded-pill mb-3" id="selectSongDeleteCover" name="song_id">
+                            <option value="">Selecciona una canción</option>
+                            {% for song in songs %}
+                                <option value="{{ song.id }}">{{ song.title }} - {{ song.artist }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-muted">Esto eliminará solo la carátula, no la canción.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill">Eliminar</button>
+                    </div >
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" xintegrity="sha384-I7E8VVD/ismYTF4hNIPjVpZVjmwvEKzXq5kK4d1x+YQ6b+Vw6oTzWrzfMxJcE89n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" xintegrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <script>
+        // JavaScript para manejar la lógica del reproductor y los modales
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const rewindBtn = document.getElementById('rewind-btn');
+        const forwardBtn = document.getElementById('forward-btn');
+        const prevSongBtn = document.getElementById('prev-song-btn');
+        const nextSongBtn = document.getElementById('next-song-btn');
+        const repeatSongBtn = document.getElementById('repeat-song-btn');
+        const repeatListBtn = document.getElementById('repeat-list-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+        const currentTimeSpan = document.getElementById('current-time');
+        const durationSpan = document.getElementById('duration');
+        const currentSongTitle = document.getElementById('current-song-title');
+        const currentSongArtist = document.getElementById('current-song-artist');
+        
+        // Referencias a los nuevos elementos de la carátula/texto
+        const currentCoverArtImg = document.getElementById('current-cover-art');
+        const noCoverTextDiv = document.getElementById('no-cover-text');
+
+        let audio = new Audio(); // Objeto de audio HTML5
+        let currentSongIndex = 0;
+        let songs = []; // Se llenará con datos de Flask
+        let isPlaying = false;
+        let repeatSong = false;
+        let repeatList = false;
+
+        // Función para cargar los datos de las canciones desde Jinja
+        function loadSongs(flaskSongs) {
+            songs = flaskSongs;
+            if (songs.length > 0) {
+                loadSong(currentSongIndex);
+            } else {
+                // Si no hay canciones, mostrar el texto por defecto
+                currentCoverArtImg.style.display = 'none';
+                noCoverTextDiv.style.display = 'flex';
+            }
+        }
+
+        // Función para cargar una canción específica
+        function loadSong(index) {
+            if (index >= 0 && index < songs.length) {
+                currentSongIndex = index;
+                const song = songs[currentSongIndex];
+                audio.src = song.file_path; // Asume que file_path es la URL o ruta accesible
+
+                currentSongTitle.textContent = song.title;
+                
+                // Lógica mejorada para mostrar artista y álbum
+                let artistText = song.artist ? song.artist.trim() : '';
+                let albumText = song.album ? song.album.trim() : '';
+                let displayArtistAlbum = '';
+
+                if (artistText && albumText) {
+                    displayArtistAlbum = `${artistText} - ${albumText}`;
+                } else if (artistText) {
+                    displayArtistAlbum = artistText;
+                } else if (albumText) {
+                    displayArtistAlbum = albumText;
+                }
+                currentSongArtist.textContent = displayArtistAlbum;
+
+
+                if (song.cover_image_path) {
+                    currentCoverArtImg.src = song.cover_image_path;
+                    currentCoverArtImg.style.display = 'block';
+                    noCoverTextDiv.style.display = 'none';
+                } else {
+                    currentCoverArtImg.src = ''; // Limpiar la URL de la imagen
+                    currentCoverArtImg.style.display = 'none';
+                    noCoverTextDiv.style.display = 'flex'; // Mostrar el texto por defecto
+                }
+
+                audio.load(); // Carga la canción
+                updatePlayPauseButton();
+                updateSongListPlayPauseButtons(); // Actualizar los botones de la lista
+            } else {
+                console.warn("Índice de canción fuera de rango.");
+                // Restablecer el reproductor si no hay canciones o el índice es inválido
+                audio.src = '';
+                currentSongTitle.textContent = 'Sin Canción';
+                currentSongArtist.textContent = '';
+
+                // Mostrar el texto por defecto para la carátula
+                currentCoverArtImg.src = '';
+                currentCoverArtImg.style.display = 'none';
+                noCoverTextDiv.style.display = 'flex';
+
+                currentTimeSpan.textContent = '0:00';
+                durationSpan.textContent = '0:00';
+                progressBar.style.width = '0%';
+                isPlaying = false;
+                updatePlayPauseButton();
+                updateSongListPlayPauseButtons(); // Actualizar los botones de la lista
+            }
+        }
+
+        // Función para reproducir/pausar
+        function togglePlayPause() {
+            if (songs.length === 0) {
+                flashMessage('No hay canciones para reproducir. Sube una canción primero.', 'warning');
+                return;
+            }
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+            updatePlayPauseButton();
+            updateSongListPlayPauseButtons(); // Actualizar los botones de la lista
+        }
+
+        // Función para detener la reproducción
+        function stopPlayback() {
+            audio.pause();
+            audio.currentTime = 0;
+            isPlaying = false;
+            updatePlayPauseButton();
+            updateProgressBar();
+            updateTimeDisplay();
+            updateSongListPlayPauseButtons(); // Actualizar los botones de la lista
+        }
+
+        // Función para actualizar el botón de play/pausa principal
+        function updatePlayPauseButton() {
+            if (isPlaying) {
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        }
+
+        // Nueva función para actualizar los iconos de play/pausa en la lista de canciones
+        function updateSongListPlayPauseButtons() {
+            const allPlayButtons = document.querySelectorAll('.list-group-item button[id^="play-button-"]');
+            allPlayButtons.forEach(button => {
+                const songId = parseInt(button.getAttribute('data-song-id'));
+                if (isPlaying && songs[currentSongIndex] && songs[currentSongIndex].id === songId) {
+                    button.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    button.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+        }
+
+        // Event Listeners para los controles del reproductor
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        rewindBtn.addEventListener('click', () => audio.currentTime = Math.max(0, audio.currentTime - 10)); // Rebobinar 10 segundos
+        forwardBtn.addEventListener('click', () => audio.currentTime = Math.min(audio.duration, audio.currentTime + 10)); // Adelantar 10 segundos
+
+        prevSongBtn.addEventListener('click', () => {
+            if (songs.length === 0) {
+                flashMessage('No hay canciones en la lista.', 'info');
+                return;
+            }
+            let newIndex = currentSongIndex - 1;
+            if (newIndex < 0) {
+                newIndex = songs.length - 1; // Volver al final de la lista
+            }
+            loadSong(newIndex);
+            if (isPlaying) audio.play();
+        });
+
+        nextSongBtn.addEventListener('click', () => {
+            if (songs.length === 0) {
+                flashMessage('No hay canciones en la lista.', 'info');
+                return;
+            }
+            let newIndex = currentSongIndex + 1;
+            if (newIndex >= songs.length) {
+                newIndex = 0; // Volver al inicio de la lista
+            }
+            loadSong(newIndex);
+            if (isPlaying) audio.play();
+        });
+
+        repeatSongBtn.addEventListener('click', () => {
+            repeatSong = !repeatSong;
+            repeatSongBtn.classList.toggle('btn-primary', repeatSong);
+            repeatSongBtn.classList.toggle('btn-light', !repeatSong);
+            flashMessage(`Repetir canción: ${repeatSong ? 'Activado' : 'Desactivado'}`, 'info');
+            if (repeatSong && repeatList) {
+                repeatList = false; // Desactiva repetir lista si se activa repetir canción
+                repeatListBtn.classList.remove('btn-primary');
+                repeatListBtn.classList.add('btn-light');
+            }
+        });
+
+        repeatListBtn.addEventListener('click', () => {
+            repeatList = !repeatList;
+            repeatListBtn.classList.toggle('btn-primary', repeatList);
+            repeatListBtn.classList.toggle('btn-light', !repeatList);
+            flashMessage(`Repetir lista: ${repeatList ? 'Activado' : 'Desactivado'}`, 'info');
+            if (repeatList && repeatSong) {
+                repeatSong = false; // Desactiva repetir canción si se activa repetir lista
+                repeatSongBtn.classList.remove('btn-primary');
+                repeatSongBtn.classList.add('btn-light');
+            }
+        });
+
+        // Eventos de Audio
+        audio.addEventListener('timeupdate', () => {
+            updateProgressBar();
+            updateTimeDisplay();
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            updateTimeDisplay(true); // Actualiza la duración cuando se carga la metadata
+        });
+
+        audio.addEventListener('ended', () => {
+            if (repeatSong) {
+                audio.currentTime = 0;
+                audio.play();
+            } else if (repeatList) {
+                let newIndex = currentSongIndex + 1;
+                if (newIndex >= songs.length) {
+                    newIndex = 0;
+                }
+                loadSong(newIndex);
+                audio.play();
+            } else {
+                // Ir a la siguiente canción si no se repite
+                let newIndex = currentSongIndex + 1;
+                if (newIndex < songs.length) {
+                    loadSong(newIndex);
+                    audio.play();
+                } else {
+                    // Si es la última canción y no se repite la lista, detener
+                    stopPlayback(); // Se mantiene esta llamada por si la lógica de "stop" es útil al final de una lista no repetida
+                }
+            }
+        });
+
+        // Actualizar barra de progreso
+        function updateProgressBar() {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Manejar click en la barra de progreso
+        progressBarContainer.addEventListener('click', (e) => {
+            const width = progressBarContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        });
+
+        // Formatear tiempo
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Actualizar la visualización del tiempo
+        function updateTimeDisplay(initial = false) {
+            if (initial || !isNaN(audio.duration)) {
+                durationSpan.textContent = formatTime(audio.duration || 0);
+            }
+            currentTimeSpan.textContent = formatTime(audio.currentTime);
+        }
+
+        // Inicializar el reproductor con las canciones de Flask
+        document.addEventListener('DOMContentLoaded', () => {
+            const flaskSongs = JSON.parse('{{ songs | tojson }}'); // Pasa las canciones como JSON
+            loadSongs(flaskSongs);
+
+            // Obtener referencias a los botones de gestión
+            const deleteSongButton = document.querySelector('button[data-bs-target="#deleteSongSelectionModal"]');
+            const deleteCoverButton = document.querySelector('button[data-bs-target="#deleteCoverModal"]');
+
+            // Deshabilitar "Eliminar Canción" si no hay canciones
+            if (songs.length === 0) {
+                if (deleteSongButton) {
+                    deleteSongButton.disabled = true;
+                    deleteSongButton.title = 'No hay canciones para eliminar.';
+                }
+            }
+
+            // Deshabilitar "Borrar Carátula" si no hay carátulas
+            const songsWithCovers = songs.filter(song => song.cover_image_path);
+            if (songsWithCovers.length === 0) {
+                if (deleteCoverButton) {
+                    deleteCoverButton.disabled = true;
+                    deleteCoverButton.title = 'No hay carátulas para borrar.';
+                }
+            }
+        });
+
+        // Funciones para los modales de eliminar/renombrar
+        const deleteSongModal = document.getElementById('deleteSongModal');
+        deleteSongModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Botón que activó el modal
+            const songId = button.getAttribute('data-song-id');
+            const songTitle = button.getAttribute('data-song-title');
+
+            const modalTitleElement = deleteSongModal.querySelector('#song-title-to-delete');
+            modalTitleElement.textContent = songTitle;
+
+            const deleteForm = deleteSongModal.querySelector('#delete-song-form');
+            deleteForm.action = `/player/delete_song/${songId}`; // Ruta de Flask para eliminar
+        });
+
+        // Lógica para el nuevo modal de selección de canción a eliminar
+        const deleteSongSelectionModal = document.getElementById('deleteSongSelectionModal');
+        deleteSongSelectionModal.addEventListener('show.bs.modal', function (event) {
+            const selectSong = deleteSongSelectionModal.querySelector('#selectSongToDelete');
+            const deleteForm = deleteSongSelectionModal.querySelector('#delete-song-selection-form');
+            const submitButton = deleteForm.querySelector('button[type="submit"]');
+
+            // Limpiar opciones existentes
+            selectSong.innerHTML = '';
+            
+            if (songs.length === 0) {
+                flashMessage('No hay canciones para borrar.', 'info');
+                event.preventDefault(); // Prevenir que el modal se muestre
+                return;
+            }
+
+            // Añadir la opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Selecciona una canción';
+            selectSong.appendChild(defaultOption);
+
+            // Llenar el select con las canciones disponibles
+            songs.forEach(song => {
+                const option = document.createElement('option');
+                option.value = song.id;
+                option.textContent = `${song.title} - ${song.artist || 'Desconocido'}`;
+                selectSong.appendChild(option);
+            });
+
+            // Actualizar la acción del formulario y el estado del botón cuando cambia la selección
+            const updateFormActionAndButton = () => {
+                const selectedSongId = selectSong.value;
+                if (selectedSongId) {
+                    deleteForm.action = `/player/delete_song/${selectedSongId}`;
+                    submitButton.disabled = false; // Habilitar el botón
+                } else {
+                    deleteForm.action = ''; // Deshabilita la acción si no hay canción seleccionada
+                    submitButton.disabled = true; // Deshabilitar el botón
+                }
+            };
+
+            selectSong.addEventListener('change', updateFormActionAndButton);
+            updateFormActionAndButton(); // Llamar al cargar para establecer la acción inicial y el estado del botón
+        });
+
+
+        const changeCoverModal = document.getElementById('changeCoverModal');
+        changeCoverModal.addEventListener('show.bs.modal', function (event) {
+            const changeCoverForm = changeCoverModal.querySelector('#change-cover-form');
+            const selectSong = changeCoverModal.querySelector('#selectSongChangeCover');
+
+            // Set default selected song if a song is currently playing
+            if (songs.length > 0 && typeof currentSongIndex !== 'undefined') {
+                const currentSongId = songs[currentSongIndex].id;
+                selectSong.value = currentSongId;
+            } else {
+                selectSong.value = ''; // Ensure no song is selected if none playing
+            }
+
+            // Update form action based on initial or changed selection
+            const updateFormAction = () => {
+                const selectedSongId = selectSong.value;
+                if (selectedSongId) {
+                    changeCoverForm.action = `/player/change_cover/${selectedSongId}`;
+                } else {
+                    changeCoverForm.action = ''; // Deshabilita la acción si no hay canción seleccionada
+                    flashMessage('Por favor, selecciona una canción para cambiar su carátula.', 'warning');
+                }
+            };
+            
+            selectSong.addEventListener('change', updateFormAction); // Listener for changes
+            updateFormAction(); // Call immediately to set initial action
+        });
+
+        const deleteCoverModal = document.getElementById('deleteCoverModal');
+        deleteCoverModal.addEventListener('show.bs.modal', function (event) {
+            const deleteCoverForm = deleteCoverModal.querySelector('#delete-cover-form');
+            const selectSong = deleteCoverModal.querySelector('#selectSongDeleteCover');
+            const submitButton = deleteCoverForm.querySelector('button[type="submit"]'); // Obtener el botón de submit
+
+            // Limpiar opciones existentes
+            selectSong.innerHTML = '';
+
+            // Filtrar canciones que realmente tienen una carátula
+            const songsWithCovers = songs.filter(song => song.cover_image_path);
+
+            if (songsWithCovers.length === 0) {
+                flashMessage('No hay carátulas para borrar.', 'info');
+                event.preventDefault(); // Prevenir que el modal se muestre
+                return;
+            }
+
+            // Añadir la opción por defecto
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Selecciona una canción';
+            selectSong.appendChild(defaultOption);
+
+            // Llenar el select con las canciones que tienen carátula
+            songsWithCovers.forEach(song => {
+                const option = document.createElement('option');
+                option.value = song.id;
+                option.textContent = `${song.title} - ${song.artist || 'Desconocido'}`;
+                selectSong.appendChild(option);
+            });
+            
+            // Actualizar la acción del formulario y el estado del botón cuando cambia la selección
+            const updateFormActionAndButton = () => {
+                const selectedSongId = selectSong.value;
+                if (selectedSongId) {
+                    deleteCoverForm.action = `/player/delete_cover/${selectedSongId}`;
+                    submitButton.disabled = false; // Habilitar el botón
+                } else {
+                    deleteCoverForm.action = ''; // Deshabilita la acción si no hay canción seleccionada
+                    submitButton.disabled = true; // Deshabilitar el botón
+                }
+            };
+
+            selectSong.addEventListener('change', updateFormActionAndButton);
+            updateFormActionAndButton(); // Llamar al cargar para establecer la acción inicial y el estado del botón
+        });
+
+
+        // Función para mostrar mensajes flash (replica el comportamiento de Flask-Flash)
+        function flashMessage(message, category = 'info') {
+            const alertContainer = document.querySelector('.alert-container');
+            if (!alertContainer) { // Crear contenedor si no existe
+                const newContainer = document.createElement('div');
+                newContainer.classList.add('alert-container', 'fixed-top', 'p-3', 'text-center');
+                document.body.prepend(newContainer);
+                alertContainer = newContainer;
+            }
+            const alertHtml = `
+                <div class="alert alert-${category} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+            setTimeout(() => {
+                const newAlert = alertContainer.lastElementChild;
+                if (newAlert) {
+                    const bsAlert = new bootstrap.Alert(newAlert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+
+        // Esto es un placeholder para las funciones de reproducción.
+        // La implementación real requeriría un sistema de archivos para acceder a los archivos de audio
+        // o una forma de servir esos archivos a través de Flask.
+        function playSong(songId) {
+            const songToPlay = songs.find(s => s.id === songId);
+            if (songToPlay) {
+                const index = songs.indexOf(songToPlay);
+                loadSong(index);
+                togglePlayPause(); // Reproducir la canción al seleccionarla
+                flashMessage(`Reproduciendo: ${songToPlay.title}`, 'info');
+            } else {
+                flashMessage('Canción no encontrada.', 'danger');
+            }
+        }
+
+        // Función para el botón "Volver a Caminatas"
+        function goToWalks() {
+            window.location.href = '{{ url_for("caminatas.ver_caminatas") }}'; // Redirige a la ruta definida en Flask
+        }
+
+    </script>
+</body>
+</html>

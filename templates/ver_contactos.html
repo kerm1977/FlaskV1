@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Ver Contactos{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos adicionales si fueran necesarios */
+  
+    .fab-container {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-container.left { /* Contenedor para el botón flotante de la izquierda */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+    }
+    .fab-button {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+/* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para que se vea flotante */
+*/        transition: all 0.3s ease;
+    }
+    .fab-button:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    /* Estilos para las nuevas tarjetas de usuario en móvil */
+    .contact-card .contact-detail {
+        margin-bottom: 0.5rem;
+    }
+    .contact-card .contact-detail strong {
+        display: block; /* Asegura que la etiqueta de la característica ocupe su propia línea */
+        color: #555;
+        font-size: 0.9em;
+    }
+    .contact-card .contact-detail span {
+        display: block; /* Asegura que el valor de la característica ocupe su propia línea */
+        font-size: 1em;
+        color: #333;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-9">
+            {# Se eliminaron las clases 'card', 'shadow-lg' y 'p-4' para quitar los efectos de tarjeta y sombra #}
+            <div class="">
+                <h2 class="card-title text-center mb-4 text-warning">Lista de Contactos</h2>
+
+                {# Formulario de búsqueda #}
+                <div class="mb-4">
+                    <form action="{{ url_for('contactos.ver_contactos') }}" method="GET" class="d-flex">
+                        <input type="text" class="form-control me-2" name="search_query" placeholder="Buscar por nombre, teléfono, email, empresa, etc." value="{{ search_query if search_query else '' }}">
+                        <button type="submit" class="btn btn-outline-warning">Buscar</button>
+                        {% if search_query %}
+                            <a href="{{ url_for('contactos.ver_contactos') }}" class="btn btn-outline-secondary ms-2">Limpiar</a>
+                        {% endif %}
+                    </form>
+                </div>
+
+                <div class="contact-list mt-4">
+                    {% if users %}
+                        {% for user in users %}
+                            <div class="contact-card border rounded p-3 mb-3 bg-light"> {# Tarjeta para cada contacto #}
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="{{ url_for('static', filename=user.avatar_url if user.avatar_url else 'images/defaults/default_avatar.png') }}"
+                                         alt="Avatar de {{ user.username }}"
+                                         class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div>
+                                        <h5 class="mb-0">{{ user.nombre }} {{ user.primer_apellido }} {{ user.segundo_apellido if user.segundo_apellido else '' }}</h5>
+                                        <small class="text-muted">@{{ user.username }}</small>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 col-md-auto contact-detail">
+                                        <strong>Teléfono:</strong>
+                                        <span>{{ user.telefono }}</span>
+                                    </div>
+                                    <div class="col-6 col-md-auto contact-detail">
+                                        <strong>Rol:</strong>
+                                        <span>{{ user.role }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-3"> {# Alineación a la derecha para el botón #}
+                                    <a href="{{ url_for('contactos.ver_detalle', user_id=user.id) }}" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-eye me-1"></i> Ver más
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 border rounded bg-light">
+                            {% if search_query %}
+                                No se encontraron contactos para la búsqueda "{{ search_query }}".
+                            {% else %}
+                                No hay contactos para mostrar.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {# Se eliminó el botón "Volver a Inicio" cuadrado #}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para añadir nuevo contacto (Visible solo para Superuser y Administrador) #}
+{% if current_role == 'Superuser' or current_role == 'Administrador' %}
+<div class="fab-container">
+    <a href="{{ url_for('register') }}" class="btn btn-warning fab-button" title="Agregar nuevo contacto">
+        <i class="fas fa-plus"></i>
+    </a>
+</div>
+{% endif %}
+
+{# Nuevo botón flotante para volver atrás a la izquierda #}
+<div class="fab-container left">
+    <a href="{{ url_for('home') }}" class="btn btn-primary fab-button" title="Volver a Inicio">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+{% endblock %}

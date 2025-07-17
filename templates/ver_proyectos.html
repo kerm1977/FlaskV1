@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Ver Proyectos{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el botón flotante (FAB) de crear */
+    .fab-container-create {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-create {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro para contraste */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-create:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 70px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos para el botón flotante de exportar todo - ELIMINADO SEGÚN SOLICITUD */
+    /*
+    .fab-container-export-all {
+        position: fixed;
+        bottom: 140px;
+        right: 20px;
+        z-index: 1000;
+    }
+    .fab-button-export-all {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        line-height: 1;
+        transition: all 0.3s ease;
+        background-color: #17a2b8;
+        color: #ffffff;
+        border: none;
+        text-decoration: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .fab-button-export-all:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        background-color: #138496;
+    }
+    */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-warning text-center">Gestor de Proyectos</h1>
+    <hr class="text-warning">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        {# Ocultar el botón original para crear un nuevo proyecto #}
+        <a href="{{ url_for('proyecto.crear_proyecto') }}" class="btn btn-primary d-none">
+            <i class="fas fa-plus"></i> Crear Nuevo Proyecto
+        </a>
+
+        {# Formulario de búsqueda #}
+        <form class="d-flex w-100 me-2" method="GET" action="{{ url_for('proyecto.ver_proyectos') }}">
+            <input class="form-control me-2" type="search" placeholder="Buscar proyectos..." aria-label="Search" name="search_query" value="{{ search_query if search_query }}">
+            <button class="btn btn-outline-success" type="submit">Buscar</button>
+            {% if search_query %}
+                <a href="{{ url_for('proyecto.ver_proyectos') }}" class="btn btn-outline-secondary ms-2">Limpiar</a>
+            {% endif %}
+        </form>
+
+        {# Ocultar el botón original para exportar todos los proyectos #}
+        <div class="dropdown d-none">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="exportAllProjects" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-file-export"></i> Exportar Todo
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportAllProjects">
+                <li><a class="dropdown-item" href="{{ url_for('proyecto.exportar_todos_txt') }}">Exportar a TXT</a></li>
+                {# La exportación a JPG no es soportada directamente en el servidor sin librerías complejas. #}
+            </ul>
+        </div>
+    </div>
+
+    {% if projects %}
+        <div class="row">
+            {% for project in projects %}
+            <div class="col-md-6 col-lg-4 mb-4"> {# Diseño responsivo: 2 columnas en md, 3 en lg #}
+                <div class="card shadow-sm h-100 d-flex flex-column">
+                    {% if project.imagen_proyecto_url %}
+                        <img src="{{ url_for('static', filename=project.imagen_proyecto_url) }}" class="card-img-top rounded-top" alt="Imagen del Proyecto" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/defaults/default_project.png') }}" class="card-img-top rounded-top" alt="Sin imagen de proyecto" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ project.nombre_proyecto }}</h5>
+                        {# Solo mostrar Nombre del Proyecto, Provincia y Fecha de Actividad Propuesta #}
+                        <p class="card-text mb-1"><strong>Provincia:</strong> {{ project.provincia if project.provincia else 'N/A' }}</p>
+                        <p class="card-text mb-1"><strong>Fecha Actividad:</strong> {{ project.fecha_actividad_propuesta.strftime('%d/%m/%Y') if project.fecha_actividad_propuesta else 'N/A' }}</p>
+                        
+                        <div class="mt-auto d-grid gap-2 pt-3"> {# Empuja las acciones al final de la tarjeta y usa grid para el botón #}
+                            <a href="{{ url_for('proyecto.detalle_proyecto', project_id=project.id) }}" class="btn btn-info w-100" title="Ver Más">
+                                Ver Más
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Modal de Confirmación de Eliminación - ELIMINADO SEGÚN SOLICITUD (ya que el botón de eliminar de la tarjeta se quitó) #}
+            {#
+            <div class="modal fade" id="confirmDeleteModal{{ project.id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ project.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmDeleteModalLabel{{ project.id }}">Confirmar Eliminación</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que quieres eliminar el proyecto "<strong>{{ project.nombre_proyecto }}</strong>"? Esta acción no se puede deshacer.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form action="{{ url_for('proyecto.eliminar_proyecto', project_id=project.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            #}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No hay proyectos registrados aún. ¡Crea uno nuevo!
+        </div>
+    {% endif %}
+</div>
+
+{# Botón flotante para crear nuevo proyecto #}
+<div class="fab-container-create">
+    <a href="{{ url_for('proyecto.crear_proyecto') }}" class="btn btn-warning fab-button-create" title="Crear Nuevo Proyecto">
+        <i class="fas fa-plus" style="color: black;"></i> {# Icono de más y color negro explícito #}
+    </a>
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('home') }}" class="fab-button-back" title="Volver a Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+
+{# Botón flotante para exportar todo - ELIMINADO SEGÚN SOLICITUD #}
+{#
+<div class="fab-container-export-all">
+    <a href="{{ url_for('proyecto.exportar_todos_txt') }}" class="btn btn-info" title="Exportar Todos a TXT">
+        <span class="">txt</span>
+    </a>
+</div>
+#}
+{% endblock %}

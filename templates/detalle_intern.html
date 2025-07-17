@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Viaje Internacional{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+        .card-header h4 {
+            font-weight: bold;
+        }
+        .detail-row {
+            margin-bottom: 0.5rem;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .detail-value {
+            color: #212529;
+        }
+        /* Estas reglas CSS ya no son necesarias si se elimina la sección de checklist */
+        /* .checklist-item {
+            display: flex;
+            align-items: center;
+        }
+        .checklist-item.completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        } */
+
+        /* FAB buttons for actions - Copied from detalle_itinerario.html */
+        .fab-container-actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050; /* Higher z-index for action buttons */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .fab-button-action {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .fab-button-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .fab-button-edit { background-color: #ffc107; color: black; } /* Warning */
+        .fab-button-delete { background-color: #dc3545; color: white; } /* Danger */
+        .fab-button-pdf { background-color: #6f42c1; color: white; } /* Purple */
+        .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark */
+        .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange */
+
+        /* Modal styles - Copied from detalle_itinerario.html */
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+        }
+        .modal-header {
+            background-color: #dc3545; /* Danger red */
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .modal-footer .btn {
+            border-radius: 8px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="international-travel-details">
+    <h2 class="mb-4 text-center">Detalle del Viaje Internacional #{{ travel.id }}</h2>
+    <hr>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Botones de Acción - Originalmente aquí, ahora movidos a FAB -->
+    <div class="d-flex justify-content-between align-items-center mb-4 d-none">
+        <div>
+            <a href="{{ url_for('intern.editar_intern', travel_id=travel.id) }}" class="btn btn-warning me-2">
+                <i class="fas fa-edit"></i> Editar Viaje
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                <i class="fas fa-trash-alt"></i> Borrar Viaje
+            </button>
+        </div>
+        <div>
+            <a href="{{ url_for('intern.exportar_jpg', travel_id=travel.id) }}" class="btn btn-info me-2">
+                <i class="fas fa-file-image"></i> Exportar JPG
+            </a>
+            <a href="{{ url_for('intern.exportar_pdf', travel_id=travel.id) }}" class="btn btn-primary me-2">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </a>
+            <a href="{{ url_for('intern.exportar_txt', travel_id=travel.id) }}" class="btn btn-secondary">
+                <i class="fas fa-file-alt"></i> Exportar TXT
+            </a>
+        </div>
+    </div>
+
+    <!-- Sección de Contacto -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Contacto del Viaje</h4>
+        </div>
+        <div class="card-body">
+            {% if travel.contact %}
+                <div class="detail-row">
+                    <span class="detail-label">Contacto Registrado:</span>
+                    <span class="detail-value">{{ travel.contact.nombre }} {{ travel.contact.primer_apellido }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Teléfono:</span>
+                    <span class="detail-value">{{ travel.contact.telefono }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value">{{ travel.contact.email or 'N/A' }}</span>
+                </div>
+            {% else %}
+                <div class="detail-row">
+                    <span class="detail-label">Nombre Contacto Manual:</span>
+                    <span class="detail-value">{{ travel.nombre_contacto_manual or 'N/A' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Apellido Contacto Manual:</span>
+                    <span class="detail-value">{{ travel.apellido_contacto_manual or 'N/A' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Teléfono Contacto Manual:</span>
+                    <span class="detail-value">{{ travel.telefono_contacto_manual or 'N/A' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email Contacto Manual:</span>
+                    <span class="detail-value">{{ travel.email_contacto_manual or 'N/A' }}</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Información General del Viaje -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Información General del Viaje</h4>
+        </div>
+        <div class="card-body">
+            <div class="detail-row">
+                <span class="detail-label">Informar la Declaración de Tarjetas:</span>
+                <span class="detail-value">{{ selected_declaracion_tarjetas | join(', ') or 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Fecha de Reporte:</span>
+                <span class="detail-value">{{ travel.fecha_reporte.strftime('%Y-%m-%d') if travel.fecha_reporte else 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Código de Reporte:</span>
+                <span class="detail-value">{{ travel.vigencia_pasaporte or 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">País Destino América:</span>
+                <span class="detail-value">{{ selected_pais_destino_america | join(', ') or 'N/A' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vuelo de IDA -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Datos del Vuelo de IDA</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Aerolínea Ida:</span> <span class="detail-value">{{ travel.aerolinea_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Fecha de Vuelo Ida:</span> <span class="detail-value">{{ travel.fecha_vuelo_ida.strftime('%Y-%m-%d') if travel.fecha_vuelo_ida else 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Hora de Salida:</span> <span class="detail-value">{{ travel.hora_salida_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Hora de Llegada:</span> <span class="detail-value">{{ travel.hora_llegada_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Número de Vuelo:</span> <span class="detail-value">{{ travel.numero_vuelo_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Código de Confirmación:</span> <span class="detail-value">{{ travel.codigo_confirmacion_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Número de Asiento:</span> <span class="detail-value">{{ travel.numero_asiento_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Check-In:</span> <span class="detail-value">{{ travel.check_in_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Check-Out:</span> <span class="detail-value">{{ travel.check_out_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Total Ticket:</span> <span class="detail-value">{{ travel.total_tickete_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Impuesto Incluido:</span> <span class="detail-value">{{ travel.impuesto_incluido_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre del Aeropuerto:</span> <span class="detail-value">{{ travel.nombre_aeropuerto_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Países de Escala:</span> <span class="detail-value">{{ travel.paises_escala_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Aeropuerto de Escala:</span> <span class="detail-value">{{ travel.aeropuerto_escala_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Carga Permitida Maleta de Mano:</span> <span class="detail-value">{{ travel.carga_permitida_maleta_mano_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Precio por Maleta de Mano:</span> <span class="detail-value">{{ travel.precio_maleta_mano_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Necesita VISA:</span> <span class="detail-value">{{ travel.necesita_visa_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Aeropuerto:</span> <span class="detail-value">{{ travel.telefono1_aeropuerto_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Aeropuerto:</span> <span class="detail-value">{{ travel.telefono2_aeropuerto_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Aerolínea:</span> <span class="detail-value">{{ travel.telefono1_aerolinea_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Aerolínea:</span> <span class="detail-value">{{ travel.telefono2_aerolinea_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Embajada - Consulado:</span> <span class="detail-value">{{ travel.telefono1_embajada_consulado_ida or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Embajada - Consulado:</span> <span class="detail-value">{{ travel.telefono2_embajada_consulado_ida or 'N/A' }}</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vuelo de VUELTA -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Datos del Vuelo de VUELTA</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Aerolínea Vuelta:</span> <span class="detail-value">{{ travel.aerolinea_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Fecha de Vuelo Vuelta:</span> <span class="detail-value">{{ travel.fecha_vuelo_vuelta.strftime('%Y-%m-%d') if travel.fecha_vuelo_vuelta else 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Hora de Salida:</span> <span class="detail-value">{{ travel.hora_salida_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Hora de Llegada:</span> <span class="detail-value">{{ travel.hora_llegada_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Cantidad de Días:</span> <span class="detail-value">{{ travel.cantidad_dias_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Número de Vuelo:</span> <span class="detail-value">{{ travel.numero_vuelo_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Código de Confirmación:</span> <span class="detail-value">{{ travel.codigo_confirmacion_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Número de Asiento:</span> <span class="detail-value">{{ travel.numero_asiento_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Check-In:</span> <span class="detail-value">{{ travel.check_in_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Check-Out:</span> <span class="detail-value">{{ travel.check_out_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Total Ticket P.P:</span> <span class="detail-value">{{ travel.total_tickete_pp_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Impuesto Incluido:</span> <span class="detail-value">{{ travel.impuesto_incluido_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre del Aeropuerto:</span> <span class="detail-value">{{ travel.nombre_aeropuerto_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Países de Escala:</span> <span class="detail-value">{{ travel.paises_escala_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Aeropuerto de Escala:</span> <span class="detail-value">{{ travel.aeropuerto_escala_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Carga Permitida Maleta de Mano:</span> <span class="detail-value">{{ travel.carga_permitida_maleta_mano_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Precio por Maleta de Mano:</span> <span class="detail-value">{{ travel.precio_maleta_mano_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Necesita VISA:</span> <span class="detail-value">{{ travel.necesita_visa_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Aeropuerto:</span> <span class="detail-value">{{ travel.telefono1_aeropuerto_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Aeropuerto:</span> <span class="detail-value">{{ travel.telefono2_aeropuerto_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Aerolínea:</span> <span class="detail-value">{{ travel.telefono1_aerolinea_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Aerolínea:</span> <span class="detail-value">{{ travel.telefono2_aerolinea_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Embajada - Consulado:</span> <span class="detail-value">{{ travel.telefono1_embajada_consulado_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Embajada - Consulado:</span> <span class="detail-value">{{ travel.telefono2_embajada_consulado_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Otro Teléfono:</span> <span class="detail-value">{{ travel.otro_telefono_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre Estadía:</span> <span class="detail-value">{{ travel.nombre_estadia_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Estadía:</span> <span class="detail-value">{{ travel.telefono1_estadia_vuelta or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Estadía:</span> <span class="detail-value">{{ travel.telefono2_estadia_vuelta or 'N/A' }}</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vuelo de ESCALA -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">Datos del Vuelo de ESCALA <span class="badge bg-light text-dark"> (Llenar solo en caso que tenga vuelo con escala)</span></h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Otra Aerolínea Escala:</span> <span class="detail-value">{{ travel.otra_aerolinea_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Fecha de Vuelo Escala:</span> <span class="detail-value">{{ travel.fecha_vuelo_escala.strftime('%Y-%m-%d') if travel.fecha_vuelo_escala else 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Hora de Salida:</span> <span class="detail-value">{{ travel.hora_salida_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Hora de Llegada:</span> <span class="detail-value">{{ travel.hora_llegada_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Número de Vuelo:</span> <span class="detail-value">{{ travel.numero_vuelo_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Código de Confirmación:</span> <span class="detail-value">{{ travel.codigo_confirmacion_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Número de Asiento:</span> <span class="detail-value">{{ travel.numero_asiento_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Enlace o Teléfono Check-In:</span> <span class="detail-value">{{ travel.enlace_telefono_check_in_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Enlace o Teléfono Check-Out:</span> <span class="detail-value">{{ travel.enlace_telefono_check_out_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Total Ticket P.P:</span> <span class="detail-value">{{ travel.total_tickete_pp_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Impuesto Incluido:</span> <span class="detail-value">{{ travel.impuesto_incluido_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre del Aeropuerto:</span> <span class="detail-value">{{ travel.nombre_aeropuerto_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Países de Escala:</span> <span class="detail-value">{{ travel.paises_escala_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Aeropuerto de Escala:</span> <span class="detail-value">{{ travel.aeropuerto_escala_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Carga Permitida Maleta de Mano:</span> <span class="detail-value">{{ travel.carga_permitida_maleta_mano_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Precio por Maleta de Mano:</span> <span class="detail-value">{{ travel.precio_maleta_mano_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Necesita VISA:</span> <span class="detail-value">{{ travel.necesita_visa_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Aeropuerto:</span> <span class="detail-value">{{ travel.telefono1_aeropuerto_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Aeropuerto:</span> <span class="detail-value">{{ travel.telefono2_aeropuerto_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Aerolínea:</span> <span class="detail-value">{{ travel.telefono1_aerolinea_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Aerolínea:</span> <span class="detail-value">{{ travel.telefono2_aerolinea_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Embajada - Consulado:</span> <span class="detail-value">{{ travel.telefono1_embajada_consulado_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Embajada - Consulado:</span> <span class="detail-value">{{ travel.telefono2_embajada_consulado_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Otro Teléfono:</span> <span class="detail-value">{{ travel.otro_telefono_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre Estadía:</span> <span class="detail-value">{{ travel.nombre_estadia_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Estadía:</span> <span class="detail-value">{{ travel.telefono1_estadia_escala or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Estadía:</span> <span class="detail-value">{{ travel.telefono2_estadia_escala or 'N/A' }}</span></div></div>
+                <div class="col-12"><div class="detail-row"><span class="detail-label">Otros Detalles:</span> <span class="detail-value">{{ travel.otros_detalles_escala or 'N/A' }}</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información Adicional de Contacto y Estadía -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Contactos y Estadía Adicional</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Otro Teléfono (General):</span> <span class="detail-value">{{ travel.otro_telefono or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre Estadía (General):</span> <span class="detail-value">{{ travel.nombre_estadia or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Estadía (General):</span> <span class="detail-value">{{ travel.telefono1_estadia or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Estadía (General):</span> <span class="detail-value">{{ travel.telefono2_estadia or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Estadía Email:</span> <span class="detail-value">{{ travel.estadia_email or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre Otra Estadía:</span> <span class="detail-value">{{ travel.otra_estadia_nombre or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Otra Estadía:</span> <span class="detail-value">{{ travel.telefono1_otra_estadia or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Otra Estadía:</span> <span class="detail-value">{{ travel.telefono2_otra_estadia or 'N/A' }}</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Operador / Guía -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Tour Operador / Guía</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre de Tour Operador / Guía:</span> <span class="detail-value">{{ travel.nombre_tour_operador or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 1 Tour Operador / Guía:</span> <span class="detail-value">{{ travel.telefono_tour_operador1 or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono 2 Tour Operador / Guía:</span> <span class="detail-value">{{ travel.telefono2_tour_operador2 or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Email Tour Operador / Guía:</span> <span class="detail-value">{{ travel.email_tour_operador or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Total Operador P.P:</span> <span class="detail-value">{{ travel.total_operador_pp or 'N/A' }}</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contacto de Transporte -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Contacto de Transporte</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Nombre del Responsable:</span> <span class="detail-value">{{ travel.contacto_transporte_responsable or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Teléfono del Responsable:</span> <span class="detail-value">{{ travel.contacto_transporte_telefono or 'N/A' }}</span></div></div>
+                <div class="col-md-6"><div class="detail-row"><span class="detail-label">Otro Teléfono:</span> <span class="detail-value">{{ travel.contacto_transporte_otro_telefono or 'N/A' }}</span></div></div>
+                <div class="col-12"><div class="detail-row"><span class="detail-label">Otros Detalles:</span> <span class="detail-value">{{ travel.contacto_transporte_otros_detalles or 'N/A' }}</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTA: Se ha eliminado la sección de Recordatorios (Checklist) según tu solicitud. -->
+
+    <!-- Notas Generales -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Notas Generales</h4>
+        </div>
+        <div class="card-body">
+            <div class="detail-value">{{ travel.notas_generales_ckeditor | safe or 'N/A' }}</div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4 d-none"> {# Hidden original buttons #}
+        <a href="{{ url_for('intern.index') }}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i> Volver a la Lista
+        </a>
+    </div>
+</div>
+
+{# FAB buttons for actions - Copied from detalle_itinerario.html #}
+<div class="fab-container-actions">
+    <a href="{{ url_for('intern.editar_intern', travel_id=travel.id) }}" class="fab-button-action fab-button-edit" title="Editar Viaje">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="fab-button-action fab-button-delete" title="Borrar Viaje" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="{{ url_for('intern.exportar_jpg', travel_id=travel.id) }}" class="fab-button-action fab-button-jpg" title="Exportar JPG">
+        <i class="fas fa-image"></i>
+    </a>
+    <a href="{{ url_for('intern.exportar_pdf', travel_id=travel.id) }}" class="fab-button-action fab-button-pdf" title="Exportar PDF">
+        <i class="fas fa-file-pdf"></i>
+    </a>
+    <a href="{{ url_for('intern.exportar_txt', travel_id=travel.id) }}" class="fab-button-action fab-button-txt" title="Exportar TXT">
+        <i class="fas fa-file-alt"></i>
+    </a>
+</div>
+
+<!-- Modal de Confirmación de Borrado - Copied from detalle_itinerario.html -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Borrado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres borrar este viaje internacional? Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('intern.eliminar_intern', travel_id=travel.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Borrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}

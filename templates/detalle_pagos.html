@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Pago - {{ pago.nombre_caminata }}{% endblock %}
+
+{% block head_content %}
+{# Estilos específicos para esta página que no están en main.css o sobrescriben base.html #}
+<style>
+    /* FAB buttons for actions - Copied from detalle_itinerario.html */
+    .fab-container-actions {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1050; /* Higher z-index for action buttons */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fab-button-action {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .fab-button-action:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    .fab-button-edit { background-color: #ffc107; color: black; } /* Warning */
+    .fab-button-delete { background-color: #dc3545; color: white; } /* Danger */
+    .fab-button-excel { background-color: #28a745; color: white; } /* Success for Excel */
+    .fab-button-pdf { background-color: #6f42c1; color: white; } /* Purple for PDF */
+    .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange for JPG */
+    .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark for TXT */
+
+    /* Modal styles - Copied from detalle_itinerario.html */
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+        background-color: #dc3545; /* Danger red */
+        color: white;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    .modal-footer .btn {
+        border-radius: 8px;
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás, idénticos a crear_caminatas.html */
+    .fab-container-back {
+        position: fixed;
+        bottom: 50px; /* Distancia desde abajo */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        /* Los colores de btn-primary se aplican directamente de Bootstrap,
+           pero se especifican aquí para asegurar la consistencia si Bootstrap cambia */
+        background-color: #007bff; /* Color de fondo primary */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-1 text-warning text-center">Detalle de Pago:</h1> {# Separado el título principal #}
+    <h2 class="mb-4 text-center">{{ pago.nombre_caminata }}</h2> {# Nombre de la caminata en una línea separada #}
+    <hr class="text-warning">
+
+    <div class="mb-4 mt-5">
+        <div class="p-3"> {# Eliminado card-body, añadido padding #}
+            {% if pago.flyer_imagen_url %}
+                {# Clases d-block y mx-auto para centrar, style para border-radius #}
+                <img src="{{ url_for('static', filename=pago.flyer_imagen_url) }}" class="img-fluid rounded mb-3 d-block mx-auto" alt="{{ pago.nombre_caminata }}" style="max-height: 300px; object-fit: contain; border-radius: 15px;">
+            {% else %}
+                {# Clases d-block y mx-auto para centrar, style para border-radius #}
+                <img src="{{ url_for('static', filename='images/defaults/default_caminata.png') }}" class="img-fluid rounded mb-3 d-block mx-auto" alt="Imagen por defecto" style="max-height: 300px; object-fit: contain; border-radius: 15px;">
+            {% endif %}
+            
+            <h3>Información</h3>
+            <p><strong>Nombre de la Caminata:</strong> {{ pago.nombre_caminata }}</p>
+            <p><strong>Precio del Paquete:</strong> ¢{{ "{:,.0f}".format(pago.precio_paquete | int) }}</p>
+            <p><strong>Capacidad:</strong> {{ pago.capacidad }}</p>
+            {# Se eliminó la condición para que siempre se muestre el tipo de cambio #}
+            <p><strong>Tipo de Cambio:</strong> ¢{{ "{:,.0f}".format(pago.tipo_cambio | int) }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h2 class="card-title mb-0">Transporte</h2>
+        </div>
+        <div class="card-body">
+            {% if pago.precio_buseta is not none and pago.precio_buseta != 0 %}
+                <p><strong>Precio Buseta:</strong> ¢{{ "{:,.0f}".format(pago.precio_buseta | int) }}</p>
+            {% endif %}
+            {% if pago.cantidad_busetas is not none and pago.cantidad_busetas != 0 %}
+                <p><strong>Cantidad Busetas:</strong> {{ pago.cantidad_busetas }}</p>
+            {% endif %}
+            {% if pago.precio_acuatico is not none and pago.precio_acuatico != 0 %}
+                <p><strong>Precio Acuático:</strong> ¢{{ "{:,.0f}".format(pago.precio_acuatico | int) }}</p>
+            {% endif %}
+            {% if pago.cantidad_acuatico is not none and pago.cantidad_acuatico != 0 %}
+                <p><strong>Cantidad Acuático:</strong> {{ pago.cantidad_acuatico }}</p>
+            {% endif %}
+            {% if pago.precio_aereo is not none and pago.precio_aereo != 0 %}
+                <p><strong>Precio Aéreo:</strong> ¢{{ "{:,.0f}".format(pago.precio_aereo | int) }}</p>
+            {% endif %}
+            {% if pago.cantidad_aereo is not none and pago.cantidad_aereo != 0 %}
+                <p><strong>Cantidad Aéreo:</strong> {{ pago.cantidad_aereo }}</p>
+            {% endif %}
+            {% if (pago.precio_otros_transporte is not none and pago.precio_otros_transporte != 0) or (pago.cantidad_otros_transporte is not none and pago.cantidad_otros_transporte != 0) or pago.descripcion_otros_transporte %}
+                {% if pago.precio_otros_transporte is not none and pago.precio_otros_transporte != 0 %}
+                    <p><strong>Precio Otros Transporte:</strong> ¢{{ "{:,.0f}".format(pago.precio_otros_transporte | int) }}</p>
+                {% endif %}
+                {% if pago.cantidad_otros_transporte is not none and pago.cantidad_otros_transporte != 0 %}
+                    <p><strong>Cantidad Otros Transporte:</strong> {{ pago.cantidad_otros_transporte }}</p>
+                {% endif %}
+                {% if pago.descripcion_otros_transporte %}
+                    <p><strong>Descripción Otros Transporte:</strong> {{ pago.descripcion_otros_transporte }}</p>
+                {% endif %}
+            {% endif %}
+            {% if total_general_transporte_display is not none and total_general_transporte_display != 0 %}
+                <hr>
+                <p><strong>Total General Transporte:</strong> ¢{{ "{:,.0f}".format(total_general_transporte_display | int) }}</p>
+            {% endif %}
+            {% if total_individual_transporte_display is not none and total_individual_transporte_display != 0 %}
+                <p><strong>Total Individual Transporte:</strong> ¢{{ "{:,.0f}".format(total_individual_transporte_display | int) }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0">Otros Generales (Guías)</h2>
+        </div>
+        <div class="card-body">
+            {% if pago.precio_guias is not none and pago.precio_guias != 0 %}
+                <p><strong>Precio Guía por Grupo:</strong> ¢{{ "{:,.0f}".format(pago.precio_guias | int) }}</p>
+            {% endif %}
+            {% if pago.precio_guia_por_persona is not none and pago.precio_guia_por_persona != 0 %}
+                <p><strong>Precio Guía por Persona:</strong> ¢{{ "{:,.0f}".format(pago.precio_guia_por_persona | int) }}</p>
+            {% endif %}
+            {% if pago.cantidad_guias is not none and pago.cantidad_guias != 0 %}
+                <p><strong>Cantidad Guías:</strong> {{ pago.cantidad_guias }}</p>
+            {% endif %}
+            {% if total_general_guias_display is not none and total_general_guias_display != 0 %}
+                <hr>
+                <p><strong>Total General Guías:</strong> ¢{{ "{:,.0f}".format(total_general_guias_display | int) }}</p>
+            {% endif %}
+            {% if total_individual_guias_display is not none and total_individual_guias_display != 0 %}
+                <p><strong>Total Individual Guías:</strong> ¢{{ "{:,.0f}".format(total_individual_guias_display | int) }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-white">
+            <h2 class="card-title mb-0">Otros Personales</h2>
+        </div>
+        <div class="card-body">
+            {# Se cambió la condición para mostrar solo si el precio base o la cantidad de días es diferente de 0 #}
+            {% if (pago.precio_estadia is not none and pago.precio_estadia != 0) or (pago.cantidad_dias_estadia is not none and pago.cantidad_dias_estadia != 0) %}
+                <p><strong>Precio Estadía:</strong> ¢{{ "{:,.0f}".format(pago.precio_estadia | int) }} (x{{ pago.cantidad_dias_estadia | int }} días) = ¢{{ "{:,.0f}".format(precio_estadia_calc | int) }}</p>
+            {% endif %}
+            {% if pago.precio_impuestos is not none and pago.precio_impuestos != 0 %}
+                <p><strong>Precio Impuestos:</strong> ¢{{ "{:,.0f}".format(pago.precio_impuestos | int) }}</p>
+            {% endif %}
+            {% if pago.precio_banos is not none and pago.precio_banos != 0 %}
+                <p><strong>Precio Baños:</strong> ¢{{ "{:,.0f}".format(pago.precio_banos | int) }}</p>
+            {% endif %}
+            {% if pago.precio_servicios_sanitarios is not none and pago.precio_servicios_sanitarios != 0 %}
+                <p><strong>Precio Servicios Sanitarios:</strong> ¢{{ "{:,.0f}".format(pago.precio_servicios_sanitarios | int) }}</p>
+            {% endif %}
+            {# Se cambió la condición para mostrar solo si el precio base o la cantidad de días es diferente de 0 #}
+            {% if (pago.precio_desayuno is not none and pago.precio_desayuno != 0) or (pago.cantidad_dias_desayuno is not none and pago.cantidad_dias_desayuno != 0) %}
+                <p><strong>Precio Desayuno:</strong> ¢{{ "{:,.0f}".format(pago.precio_desayuno | int) }} (x{{ pago.cantidad_dias_desayuno | int }} días) = ¢{{ "{:,.0f}".format(precio_desayuno_calc | int) }}</p>
+            {% endif %}
+            {# Se cambió la condición para mostrar solo si el precio base o la cantidad de días es diferente de 0 #}
+            {% if (pago.precio_merienda is not none and pago.precio_merienda != 0) or (pago.cantidad_dias_merienda is not none and pago.cantidad_dias_merienda != 0) %}
+                <p><strong>Precio Merienda:</strong> ¢{{ "{:,.0f}".format(pago.precio_merienda | int) }} (x{{ pago.cantidad_dias_merienda | int }} días) = ¢{{ "{:,.0f}".format(precio_merienda_calc | int) }}</p>
+            {% endif %}
+            {# Se cambió la condición para mostrar solo si el precio base o la cantidad de días es diferente de 0 #}
+            {% if (pago.precio_almuerzo is not none and pago.precio_almuerzo != 0) or (pago.cantidad_dias_almuerzo is not none and pago.cantidad_dias_almuerzo != 0) %}
+                <p><strong>Precio Almuerzo:</strong> ¢{{ "{:,.0f}".format(pago.precio_almuerzo | int) }} (x{{ pago.cantidad_dias_almuerzo | int }} días) = ¢{{ "{:,.0f}".format(precio_almuerzo_calc | int) }}</p>
+            {% endif %}
+            {% if pago.precio_acarreo is not none and pago.precio_acarreo != 0 %}
+                <p><strong>Precio Acarreo:</strong> ¢{{ "{:,.0f}".format(pago.precio_acarreo | int) }}</p>
+            {% endif %}
+            {# Se cambió la condición para mostrar solo si el precio base o la cantidad de días es diferente de 0 #}
+            {% if (pago.precio_cafe is not none and pago.precio_cafe != 0) or (pago.cantidad_dias_cafe is not none and pago.cantidad_dias_cafe != 0) %}
+                <p><strong>Precio Café:</strong> ¢{{ "{:,.0f}".format(pago.precio_cafe | int) }} (x{{ pago.cantidad_dias_cafe | int }} días) = ¢{{ "{:,.0f}".format(precio_cafe_calc | int) }}</p>
+            {% endif %}
+            {# Se cambió la condición para mostrar solo si el precio base o la cantidad de días es diferente de 0 #}
+            {% if (pago.precio_cena is not none and pago.precio_cena != 0) or (pago.cantidad_dias_cena is not none and pago.cantidad_dias_cena != 0) %}
+                <p><strong>Precio Cena:</strong> ¢{{ "{:,.0f}".format(pago.precio_cena | int) }} (x{{ pago.cantidad_dias_cena | int }} días) = ¢{{ "{:,.0f}".format(precio_cena_calc | int) }}</p>
+            {% endif %}
+            {% if pago.precio_entrada is not none and pago.precio_entrada != 0 %}
+                <p><strong>Precio Entrada:</strong> ¢{{ "{:,.0f}".format(pago.precio_entrada | int) }}</p>
+            {% endif %}
+            {% if pago.precio_reconocimiento is not none and pago.precio_reconocimiento != 0 %}
+                <p><strong>Precio Reconocimiento:</strong> ¢{{ "{:,.0f}".format(pago.precio_reconocimiento | int) }}</p>
+            {% endif %}
+            {% if pago.precio_permisos is not none and pago.precio_permisos != 0 %}
+                <p><strong>Precio Permisos:</strong> ¢{{ "{:,.0f}".format(pago.precio_permisos | int) }}</p>
+            {% endif %}
+            {% if pago.precio_pasaporte is not none and pago.precio_pasaporte != 0 %}
+                <p><strong>Precio Pasaporte:</strong> ¢{{ "{:,.0f}".format(pago.precio_pasaporte | int) }}</p>
+            {% endif %}
+            {% if (pago.precio_otros1_personales is not none and pago.precio_otros1_personales != 0) or pago.descripcion_otros1_personales %}
+                <p><strong>Precio Otros 1 Personales:</strong> ¢{{ "{:,.0f}".format(pago.precio_otros1_personales | int) }} {% if pago.descripcion_otros1_personales %}({{ pago.descripcion_otros1_personales }}){% endif %}</p>
+            {% endif %}
+            {% if (pago.precio_otros2_personales is not none and pago.precio_otros2_personales != 0) or pago.descripcion_otros2_personales %}
+                <p><strong>Precio Otros 2 Personales:</strong> ¢{{ "{:,.0f}".format(pago.precio_otros2_personales | int) }} {% if pago.descripcion_otros2_personales %}({{ pago.descripcion_otros2_personales }}){% endif %}</p>
+            {% endif %}
+            {% if (pago.precio_otros3_personales is not none and pago.precio_otros3_personales != 0) or pago.descripcion_otros3_personales %}
+                <p><strong>Precio Otros 3 Personales:</strong> ¢{{ "{:,.0f}".format(pago.precio_otros3_personales | int) }} {% if pago.descripcion_otros3_personales %}({{ pago.descripcion_otros3_personales }}){% endif %}</p>
+            {% endif %}
+            {% if (pago.precio_otros4_personales is not none and pago.precio_otros4_personales != 0) or pago.descripcion_otros4_personales %}
+                <p><strong>Precio Otros 4 Personales:</strong> ¢{{ "{:,.0f}".format(pago.precio_otros4_personales | int) }} {% if pago.descripcion_otros4_personales %}({{ pago.descripcion_otros4_personales }}){% endif %}</p>
+            {% endif %}
+            {% if total_individual_personales_display is not none and total_individual_personales_display != 0 %}
+                <hr>
+                <p><strong>Total Individual Personales:</strong> ¢{{ "{:,.0f}".format(total_individual_personales_display | int) }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h2 class="card-title mb-0">Totales Finales</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>TOTAL GENERAL:</strong> ¢{{ "{:,.0f}".format(total_general_total_display | int) }}</p>
+            <p><strong>TOTAL INDIVIDUAL:</strong> ¢{{ "{:,.0f}".format(total_individual_total_display | int) }}</p>
+            {% if pago.tipo_cambio is not none and pago.tipo_cambio != 0 %}
+                <p><strong>TOTAL INDIVIDUAL USD:</strong> ${{ "{:,.2f}".format(total_individual_usd) }}</p>
+            {% endif %}
+            <hr>
+            <p><strong>GANANCIA POR PERSONA:</strong> ¢{{ "{:,.0f}".format(ganancia_pp_display | int) }}</p>
+            <p><strong>GANANCIA GENERAL:</strong> ¢{{ "{:,.0f}".format(ganancia_gral_display | int) }}</p>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-3 d-none"> {# Hidden original buttons #}
+        <a href="{{ url_for('pagos.editar_pagos', pago_id=pago.id) }}" class="btn btn-warning"><i class="fas fa-edit"></i> Editar</a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"><i class="fas fa-trash"></i> Eliminar</button>
+        <div class="dropdown">
+            <button class="btn btn-info dropdown-toggle" type="button" id="exportMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="exportMenuButton">
+                <li><a class="dropdown-item" href="{{ url_for('pagos.exportar_excel', pago_id=pago.id) }}"><i class="fas fa-file-excel"></i> Exportar Excel</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('pagos.exportar_pdf', pago_id=pago.id) }}"><i class="fas fa-file-pdf"></i> Exportar PDF</a></li>
+                {# La exportación a JPG ahora usa JavaScript, eliminando el enlace directo del backend #}
+                <li><a class="dropdown-item" href="#" onclick="exportPageToJPG('{{ pago.nombre_caminata | replace(' ', '_') | lower }}'); return false;"><i class="fas fa-file-image"></i> Exportar JPG</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('pagos.exportar_txt', pago_id=pago.id) }}"><i class="fas fa-file-alt"></i> Exportar TXT</a></li>
+            </ul>
+        </div>
+    </div>
+
+    {# FAB buttons for actions - Copied from detalle_itinerario.html #}
+    <div class="fab-container-actions">
+        <a href="{{ url_for('pagos.editar_pagos', pago_id=pago.id) }}" class="fab-button-action fab-button-edit" title="Editar Pago">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Pago" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        <a href="{{ url_for('pagos.exportar_excel', pago_id=pago.id) }}" class="fab-button-action fab-button-excel" title="Exportar Excel">
+            <i class="fas fa-file-excel"></i>
+        </a>
+        <a href="{{ url_for('pagos.exportar_pdf', pago_id=pago.id) }}" class="fab-button-action fab-button-pdf" title="Exportar PDF">
+            <i class="fas fa-file-pdf"></i>
+        </a>
+        <a href="#" onclick="exportPageToJPG('{{ pago.nombre_caminata | replace(' ', '_') | lower }}'); return false;" class="fab-button-action fab-button-jpg" title="Exportar JPG">
+            <i class="fas fa-image"></i>
+        </a>
+        <a href="{{ url_for('pagos.exportar_txt', pago_id=pago.id) }}" class="fab-button-action fab-button-txt" title="Exportar TXT">
+            <i class="fas fa-file-alt"></i>
+        </a>
+    </div>
+
+    {# El botón "Volver al Listado de Pagos" normal ha sido eliminado, ya que el flotante lo reemplaza. #}
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar el pago de la caminata "{{ pago.nombre_caminata }}"? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="{{ url_for('pagos.eliminar_pagos', pago_id=pago.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Botón flotante para volver atrás, idéntico al de crear_caminatas.html y crear_pagos.html #}
+<div class="fab-container-back">
+    <a href="{{ url_for('pagos.ver_pagos') }}" class="btn btn-primary fab-button-back" title="Volver a Pagos">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
+</div>
+
+{# Script para exportar a JPG #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener referencias a los inputs de guía
+        const precioGuiaPorGrupoInput = document.getElementById('precio_guias');
+        const precioGuiaPorPersonaInput = document.getElementById('precio_guia_por_persona');
+
+        // Función para manejar el estado de los campos de guía
+        function toggleGuideInputs(event) { // Se pasa el evento para saber qué input lo disparó
+            const precioGuiaPorGrupo = parseFloat(precioGuiaPorGrupoInput.value) || 0;
+            const precioGuiaPorPersona = parseFloat(precioGuiaPorPersonaInput.value) || 0;
+
+            // Habilitar ambos campos por defecto
+            precioGuiaPorGrupoInput.disabled = false;
+            precioGuiaPorPersonaInput.disabled = false;
+
+            // Si el input de "Precio Guía por Grupo" es el que cambió
+            if (event && event.target === precioGuiaPorGrupoInput) {
+                if (precioGuiaPorGrupo > 0) {
+                    precioGuiaPorPersonaInput.value = 0; // Poner a 0 el otro campo
+                    precioGuiaPorPersonaInput.disabled = true; // Deshabilitar el otro campo
+                }
+            } 
+            // Si el input de "Precio Guía por Persona" es el que cambió
+            else if (event && event.target === precioGuiaPorPersonaInput) {
+                if (precioGuiaPorPersona > 0) {
+                    precioGuiaPorGrupoInput.value = 0; // Poner a 0 el otro campo
+                    precioGuiaPorGrupoInput.disabled = true; // Deshabilitar el otro campo
+                }
+            } 
+            // Esto se ejecuta en la carga inicial o si la llamada no viene de un evento directo
+            else {
+                if (precioGuiaPorGrupo > 0) {
+                    precioGuiaPorPersonaInput.value = 0;
+                    precioGuiaPorPersonaInput.disabled = true;
+                } else if (precioGuiaPorPersona > 0) {
+                    precioGuiaPorGrupoInput.value = 0;
+                    precioGuiaPorGrupoInput.disabled = true;
+                }
+            }
+            // No llamar a calculateTotals aquí, ya que este script es para detalle_pagos.html
+            // donde no hay cálculos dinámicos de formulario.
+        }
+
+        // Adjuntar escuchadores de eventos a los inputs de guía
+        // Se pasa el evento para que toggleGuideInputs sepa cuál input lo disparó
+        precioGuiaPorGrupoInput.addEventListener('input', toggleGuideInputs);
+        precioGuiaPorPersonaInput.addEventListener('input', toggleGuideInputs);
+
+        // Llamar a toggleGuideInputs al cargar la página para inicializar los estados
+        // Se pasa un objeto simulado de evento para la inicialización
+        toggleGuideInputs({ target: precioGuiaPorGrupoInput }); // Simular que el primer campo es el que activa la inicialización
+    });
+
+
+    function exportPageToJPG(filename) {
+        // Mostrar mensaje de carga
+        const loadingMessage = document.createElement('div');
+        loadingMessage.className = 'alert alert-info text-center mt-3';
+        loadingMessage.textContent = 'Generando imagen JPG, por favor espera...';
+        document.querySelector('.container.mt-4').prepend(loadingMessage);
+
+        html2canvas(document.querySelector(".container.mt-4"), { 
+            scale: 2, // Aumenta la resolución
+            useCORS: true, // Importante si tienes imágenes de diferentes orígenes
+            scrollY: -window.scrollY, // Captura desde la parte superior de la página
+            windowWidth: document.documentElement.offsetWidth, // Ajusta el ancho de la ventana
+            windowHeight: document.documentElement.scrollHeight // Ajusta la altura de la ventana
+        }).then(function(canvas) {
+            loadingMessage.remove(); // Eliminar mensaje de carga
+
+            const link = document.createElement('a');
+            link.download = filename + '.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.9); // 0.9 es la calidad JPEG
+            link.click(); // Simula un clic para descargar la imagen
+
+            // Opcional: mostrar un mensaje de éxito
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success text-center mt-3';
+            successMessage.textContent = '¡Imagen exportada con éxito!';
+            document.querySelector('.container.mt-4').prepend(successMessage);
+            setTimeout(() => successMessage.remove(), 3000); // Quitar el mensaje después de 3 segundos
+
+        }).catch(function(error) {
+            loadingMessage.remove(); // Eliminar mensaje de carga en caso de error
+            console.error('Error al generar la imagen:', error);
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'alert alert-danger text-center mt-3';
+            errorMessage.textContent = 'Error al exportar la imagen. Por favor, inténtelo de nuevo. Revise la consola del navegador para más detalles.'; // Mensaje mejorado
+            document.querySelector('.container.mt-4').prepend(errorMessage);
+            setTimeout(() => errorMessage.remove(), 5000); // Quitar el mensaje después de 5 segundos
+        });
+    }
+</script>
+{% endblock %}

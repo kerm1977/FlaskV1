@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Editar Ruta</title>
+    <!-- CKEditor 5 CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+    <style>
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-back {
+            background-color: #6c757d; /* Gris para el botón de volver */
+            border-color: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h1 class="mb-0">Editar Ruta: {{ ruta.nombre }}</h1>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('rutas.editar_ruta', ruta_id=ruta.id) }}">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre de la Ruta <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ ruta.nombre }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="provincia" class="form-label">Provincia <span class="text-danger">*</span></label>
+                    <select class="form-select" id="provincia" name="provincia" required>
+                        <option value="">Seleccione una provincia</option>
+                        {% for provincia_opcion in provincias %}
+                            <option value="{{ provincia_opcion }}" {% if provincia_opcion == ruta.provincia %}selected{% endif %}>{{ provincia_opcion }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="detalle" class="form-label">Detalle de la Ruta</label>
+                    <textarea class="form-control" id="detalle" name="detalle" rows="8">{{ ruta.detalle }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="enlace_video" class="form-label">Enlace de Video (Facebook o YouTube)</label>
+                    <input type="url" class="form-control" id="enlace_video" name="enlace_video" value="{{ ruta.enlace_video if ruta.enlace_video else '' }}" placeholder="Ej: https://www.youtube.com/watch?v=VIDEO_ID o https://www.facebook.com/watch/?v=VIDEO_ID">
+                    <small class="form-text text-muted">Asegúrate de que el enlace sea compatible con incrustación.</small>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="btn btn-back">Volver al Detalle</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Inicializa CKEditor 5 en el campo 'detalle'
+        ClassicEditor
+            .create( document.querySelector( '#detalle' ), {
+                // Configuración opcional del editor
+                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote' ],
+                heading: {
+                    options: [
+                        { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                        { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                        { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' }
+                    ]
+                }
+            } )
+            .catch( error => {
+                console.error( error );
+            } );
+    </script>
+{% endblock %}

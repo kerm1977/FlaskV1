@@ -1,0 +1,683 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Viaje Internacional{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <!-- CKEditor 5 CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+    <style>
+        /* Estas reglas CSS ya no son necesarias si se elimina la sección de checklist */
+        /* .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 0.5rem 0;
+        }
+        .checklist-item.completed label {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            align-self: flex-start;
+            margin-top: 0.25rem;
+        }
+        .checklist-item label {
+            flex-grow: 1;
+            margin-bottom: 0;
+        } */
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Editar Viaje Internacional #{{ travel.id }}</h2>
+    <hr>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('intern.editar_intern', travel_id=travel.id) }}">
+
+        <!-- Sección de Contacto -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Contacto del Viaje</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="contact_selector" class="form-label">Seleccionar Contacto Registrado:</label>
+                    <select class="form-select" id="contact_selector" name="contact_id">
+                        <option value="">-- Seleccionar Contacto --</option>
+                        {% for contact in contact_options %}
+                            <option value="{{ contact.id }}" {% if travel.contact_id == contact.id %}selected{% elif form_data and form_data.contact_id == contact.id|string %}selected{% endif %}>
+                                {{ contact.nombre }} {{ contact.primer_apellido }} ({{ contact.email or contact.telefono }})
+                            </option>
+                        {% endfor %}
+                        <option value="manual" {% if travel.contact_id is none %}selected{% elif form_data and form_data.contact_id == 'manual' %}selected{% endif %}>-- Ingresar Datos Manualmente --</option>
+                    </select>
+                </div>
+
+                <div id="manual_contact_fields" style="display: {% if travel.contact_id is none %}block{% elif form_data and form_data.contact_id == 'manual' %}block{% else %}none{% endif %};">
+                    <p class="text-muted fst-italic">En caso de no seleccionar un contacto, por favor, complete los siguientes datos:</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="nombre_contacto_manual" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre_contacto_manual" name="nombre_contacto_manual" value="{{ travel.nombre_contacto_manual or (form_data.nombre_contacto_manual if form_data else '') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="apellido_contacto_manual" class="form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="apellido_contacto_manual" name="apellido_contacto_manual" value="{{ travel.apellido_contacto_manual or (form_data.apellido_contacto_manual if form_data else '') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="telefono_contacto_manual" class="form-label">Teléfono:</label>
+                            <input type="tel" class="form-control" id="telefono_contacto_manual" name="telefono_contacto_manual" value="{{ travel.telefono_contacto_manual or (form_data.telefono_contacto_manual if form_data else '') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email_contacto_manual" class="form-label">Email:</label>
+                            <input type="email" class="form-control" id="email_contacto_manual" name="email_contacto_manual" value="{{ travel.email_contacto_manual or (form_data.email_contacto_manual if form_data else '') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Título principal -->
+        <h1 class="text-center my-4">Área Internacional</h1>
+
+        <!-- Información General del Viaje -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Información General del Viaje</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="declaracion_tarjetas" class="form-label">Informar la Declaración de Tarjetas:</label>
+                        <select class="form-select" id="declaracion_tarjetas" name="declaracion_tarjetas">
+                            <option value="">-- Seleccionar Banco/Cooperativa --</option>
+                            {% for option in declaracion_tarjetas_options %}
+                                <option value="{{ option }}" {% if travel.declaracion_tarjetas == option %}selected{% elif form_data and form_data.declaracion_tarjetas == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_reporte" class="form-label">Fecha de Reporte:</label>
+                        <input type="date" class="form-control" id="fecha_reporte" name="fecha_reporte" value="{{ travel.fecha_reporte.strftime('%Y-%m-%d') if travel.fecha_reporte else (form_data.fecha_reporte if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="vigencia_pasaporte" class="form-label">Código de Reporte:</label>
+                        <input type="text" class="form-control" id="vigencia_pasaporte" name="vigencia_pasaporte" value="{{ travel.vigencia_pasaporte or (form_data.vigencia_pasaporte if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pais_destino_america" class="form-label">País Destino América:</label>
+                        <select class="form-select" id="pais_destino_america" name="pais_destino_america" required>
+                            <option value="">-- Seleccionar País --</option>
+                            {% for pais in pais_destino_america_options %}
+                                <option value="{{ pais }}" {% if travel.pais_destino_america == pais %}selected{% elif form_data and form_data.pais_destino_america == pais %}selected{% endif %}>{{ pais }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vuelo de IDA -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Datos del Vuelo de IDA</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="aerolinea_ida" class="form-label">Aerolínea Ida:</label>
+                        <select class="form-select" id="aerolinea_ida" name="aerolinea_ida">
+                            <option value="">-- Seleccionar Aerolínea --</option>
+                            {% for aerolinea in aerolinea_options %}
+                                <option value="{{ aerolinea }}" {% if travel.aerolinea_ida == aerolinea %}selected{% elif form_data and form_data.aerolinea_ida == aerolinea %}selected{% endif %}>{{ aerolinea }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_vuelo_ida" class="form-label">Fecha de Vuelo Ida:</label>
+                        <input type="date" class="form-control" id="fecha_vuelo_ida" name="fecha_vuelo_ida" value="{{ travel.fecha_vuelo_ida.strftime('%Y-%m-%d') if travel.fecha_vuelo_ida else (form_data.fecha_vuelo_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="hora_salida_ida" class="form-label">Hora de Salida:</label>
+                        <input type="time" class="form-control" id="hora_salida_ida" name="hora_salida_ida" value="{{ travel.hora_salida_ida or (form_data.hora_salida_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="hora_llegada_ida" class="form-label">Hora de Llegada:</label>
+                        <input type="time" class="form-control" id="hora_llegada_ida" name="hora_llegada_ida" value="{{ travel.hora_llegada_ida or (form_data.hora_llegada_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="numero_vuelo_ida" class="form-label">Número de Vuelo:</label>
+                        <input type="text" class="form-control" id="numero_vuelo_ida" name="numero_vuelo_ida" value="{{ travel.numero_vuelo_ida or (form_data.numero_vuelo_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="codigo_confirmacion_ida" class="form-label">Código de Confirmación:</label>
+                        <input type="text" class="form-control" id="codigo_confirmacion_ida" name="codigo_confirmacion_ida" value="{{ travel.codigo_confirmacion_ida or (form_data.codigo_confirmacion_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="numero_asiento_ida" class="form-label">Número de Asiento:</label>
+                        <input type="text" class="form-control" id="numero_asiento_ida" name="numero_asiento_ida" value="{{ travel.numero_asiento_ida or (form_data.numero_asiento_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="check_in_ida" class="form-label">Check-In:</label>
+                        <input type="text" class="form-control" id="check_in_ida" name="check_in_ida" value="{{ travel.check_in_ida or (form_data.check_in_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="check_out_ida" class="form-label">Check-Out:</label>
+                        <input type="text" class="form-control" id="check_out_ida" name="check_out_ida" value="{{ travel.check_out_ida or (form_data.check_out_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="total_tickete_ida" class="form-label">Total Ticket:</label>
+                        <input type="number" step="0.01" class="form-control" id="total_tickete_ida" name="total_tickete_ida" value="{{ travel.total_tickete_ida or (form_data.total_tickete_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="impuesto_incluido_ida" class="form-label">Impuesto Incluido:</label>
+                        <select class="form-select" id="impuesto_incluido_ida" name="impuesto_incluido_ida">
+                            {% for option in si_no_aplica_options %}
+                                <option value="{{ option }}" {% if travel.impuesto_incluido_ida == option %}selected{% elif form_data and form_data.impuesto_incluido_ida == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_aeropuerto_ida" class="form-label">Nombre del Aeropuerto:</label>
+                        <input type="text" class="form-control" id="nombre_aeropuerto_ida" name="nombre_aeropuerto_ida" value="{{ travel.nombre_aeropuerto_ida or (form_data.nombre_aeropuerto_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="paises_escala_ida" class="form-label">Países de Escala:</label>
+                        <input type="text" class="form-control" id="paises_escala_ida" name="paises_escala_ida" value="{{ travel.paises_escala_ida or (form_data.paises_escala_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="aeropuerto_escala_ida" class="form-label">Aeropuerto de Escala:</label>
+                        <input type="text" class="form-control" id="aeropuerto_escala_ida" name="aeropuerto_escala_ida" value="{{ travel.aeropuerto_escala_ida or (form_data.aeropuerto_escala_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="carga_permitida_maleta_mano_ida" class="form-label">Carga Permitida por Maleta de Mano:</label>
+                        <input type="text" class="form-control" id="carga_permitida_maleta_mano_ida" name="carga_permitida_maleta_mano_ida" value="{{ travel.carga_permitida_maleta_mano_ida or (form_data.carga_permitida_maleta_mano_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="precio_maleta_mano_ida" class="form-label">Precio por Maleta de Mano:</label>
+                        <input type="number" step="0.01" class="form-control" id="precio_maleta_mano_ida" name="precio_maleta_mano_ida" value="{{ travel.precio_maleta_mano_ida or (form_data.precio_maleta_mano_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="necesita_visa_ida" class="form-label">Necesita VISA:</label>
+                        <select class="form-select" id="necesita_visa_ida" name="necesita_visa_ida">
+                            {% for option in necesita_visa_options %}
+                                <option value="{{ option }}" {% if travel.necesita_visa_ida == option %}selected{% elif form_data and form_data.necesita_visa_ida == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_aeropuerto_ida" class="form-label">Teléfono 1 Aeropuerto:</label>
+                        <input type="tel" class="form-control" id="telefono1_aeropuerto_ida" name="telefono1_aeropuerto_ida" value="{{ travel.telefono1_aeropuerto_ida or (form_data.telefono1_aeropuerto_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_aeropuerto_ida" class="form-label">Teléfono 2 Aeropuerto:</label>
+                        <input type="tel" class="form-control" id="telefono2_aeropuerto_ida" name="telefono2_aeropuerto_ida" value="{{ travel.telefono2_aeropuerto_ida or (form_data.telefono2_aeropuerto_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_aerolinea_ida" class="form-label">Teléfono 1 Aerolínea:</label>
+                        <input type="tel" class="form-control" id="telefono1_aerolinea_ida" name="telefono1_aerolinea_ida" value="{{ travel.telefono1_aerolinea_ida or (form_data.telefono1_aerolinea_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_aerolinea_ida" class="form-label">Teléfono 2 Aerolínea:</label>
+                        <input type="tel" class="form-control" id="telefono2_aerolinea_ida" name="telefono2_aerolinea_ida" value="{{ travel.telefono2_aerolinea_ida or (form_data.telefono2_aerolinea_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_embajada_consulado_ida" class="form-label">Teléfono 1 Embajada - Consulado:</label>
+                        <input type="tel" class="form-control" id="telefono1_embajada_consulado_ida" name="telefono1_embajada_consulado_ida" value="{{ travel.telefono1_embajada_consulado_ida or (form_data.telefono1_embajada_consulado_ida if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_embajada_consulado_ida" class="form-label">Teléfono 2 Embajada - Consulado:</label>
+                        <input type="tel" class="form-control" id="telefono2_embajada_consulado_ida" name="telefono2_embajada_consulado_ida" value="{{ travel.telefono2_embajada_consulado_ida or (form_data.telefono2_embajada_consulado_ida if form_data else '') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vuelo de VUELTA -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">Datos del Vuelo de VUELTA</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="aerolinea_vuelta" class="form-label">Aerolínea Vuelta:</label>
+                        <select class="form-select" id="aerolinea_vuelta" name="aerolinea_vuelta">
+                            <option value="">-- Seleccionar Aerolínea --</option>
+                            {% for aerolinea in aerolinea_options %}
+                                <option value="{{ aerolinea }}" {% if travel.aerolinea_vuelta == aerolinea %}selected{% elif form_data and form_data.aerolinea_vuelta == aerolinea %}selected{% endif %}>{{ aerolinea }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_vuelo_vuelta" class="form-label">Fecha de Vuelo Vuelta:</label>
+                        <input type="date" class="form-control" id="fecha_vuelo_vuelta" name="fecha_vuelo_vuelta" value="{{ travel.fecha_vuelo_vuelta.strftime('%Y-%m-%d') if travel.fecha_vuelo_vuelta else (form_data.fecha_vuelo_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="hora_salida_vuelta" class="form-label">Hora de Salida:</label>
+                        <input type="time" class="form-control" id="hora_salida_vuelta" name="hora_salida_vuelta" value="{{ travel.hora_salida_vuelta or (form_data.hora_salida_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="hora_llegada_vuelta" class="form-label">Hora de Llegada:</label>
+                        <input type="time" class="form-control" id="hora_llegada_vuelta" name="hora_llegada_vuelta" value="{{ travel.hora_llegada_vuelta or (form_data.hora_llegada_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="cantidad_dias_vuelta" class="form-label">Cantidad de Días:</label>
+                        <input type="number" class="form-control" id="cantidad_dias_vuelta" name="cantidad_dias_vuelta" value="{{ travel.cantidad_dias_vuelta or (form_data.cantidad_dias_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="numero_vuelo_vuelta" class="form-label">Número de Vuelo:</label>
+                        <input type="text" class="form-control" id="numero_vuelo_vuelta" name="numero_vuelo_vuelta" value="{{ travel.numero_vuelo_vuelta or (form_data.numero_vuelo_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="codigo_confirmacion_vuelta" class="form-label">Código de Confirmación:</label>
+                        <input type="text" class="form-control" id="codigo_confirmacion_vuelta" name="codigo_confirmacion_vuelta" value="{{ travel.codigo_confirmacion_vuelta or (form_data.codigo_confirmacion_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="numero_asiento_vuelta" class="form-label">Número de Asiento:</label>
+                        <input type="text" class="form-control" id="numero_asiento_vuelta" name="numero_asiento_vuelta" value="{{ travel.numero_asiento_vuelta or (form_data.numero_asiento_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="check_in_vuelta" class="form-label">Check-In:</label>
+                        <input type="text" class="form-control" id="check_in_vuelta" name="check_in_vuelta" value="{{ travel.check_in_vuelta or (form_data.check_in_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="check_out_vuelta" class="form-label">Check-Out:</label>
+                        <input type="text" class="form-control" id="check_out_vuelta" name="check_out_vuelta" value="{{ travel.check_out_vuelta or (form_data.check_out_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="total_tickete_pp_vuelta" class="form-label">Total Ticket P.P:</label>
+                        <input type="number" step="0.01" class="form-control" id="total_tickete_pp_vuelta" name="total_tickete_pp_vuelta" value="{{ travel.total_tickete_pp_vuelta or (form_data.total_tickete_pp_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="impuesto_incluido_vuelta" class="form-label">Impuesto Incluido:</label>
+                        <select class="form-select" id="impuesto_incluido_vuelta" name="impuesto_incluido_vuelta">
+                            {% for option in si_no_aplica_options %}
+                                <option value="{{ option }}" {% if travel.impuesto_incluido_vuelta == option %}selected{% elif form_data and form_data.impuesto_incluido_vuelta == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_aeropuerto_vuelta" class="form-label">Nombre del Aeropuerto:</label>
+                        <input type="text" class="form-control" id="nombre_aeropuerto_vuelta" name="nombre_aeropuerto_vuelta" value="{{ travel.nombre_aeropuerto_vuelta or (form_data.nombre_aeropuerto_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="paises_escala_vuelta" class="form-label">Países de Escala:</label>
+                        <input type="text" class="form-control" id="paises_escala_vuelta" name="paises_escala_vuelta" value="{{ travel.paises_escala_vuelta or (form_data.paises_escala_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="aeropuerto_escala_vuelta" class="form-label">Aeropuerto de Escala:</label>
+                        <input type="text" class="form-control" id="aeropuerto_escala_vuelta" name="aeropuerto_escala_vuelta" value="{{ travel.aeropuerto_escala_vuelta or (form_data.aeropuerto_escala_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="carga_permitida_maleta_mano_vuelta" class="form-label">Carga Permitida por Maleta de Mano:</label>
+                        <input type="text" class="form-control" id="carga_permitida_maleta_mano_vuelta" name="carga_permitida_maleta_mano_vuelta" value="{{ travel.carga_permitida_maleta_mano_vuelta or (form_data.carga_permitida_maleta_mano_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="precio_maleta_mano_vuelta" class="form-label">Precio por Maleta de Mano:</label>
+                        <input type="number" step="0.01" class="form-control" id="precio_maleta_mano_vuelta" name="precio_maleta_mano_vuelta" value="{{ travel.precio_maleta_mano_vuelta or (form_data.precio_maleta_mano_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="necesita_visa_vuelta" class="form-label">Necesita VISA:</label>
+                        <select class="form-select" id="necesita_visa_vuelta" name="necesita_visa_vuelta">
+                            {% for option in necesita_visa_options %}
+                                <option value="{{ option }}" {% if travel.necesita_visa_vuelta == option %}selected{% elif form_data and form_data.necesita_visa_vuelta == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_aeropuerto_vuelta" class="form-label">Teléfono 1 Aeropuerto:</label>
+                        <input type="tel" class="form-control" id="telefono1_aeropuerto_vuelta" name="telefono1_aeropuerto_vuelta" value="{{ travel.telefono1_aeropuerto_vuelta or (form_data.telefono1_aeropuerto_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_aeropuerto_vuelta" class="form-label">Teléfono 2 Aeropuerto:</label>
+                        <input type="tel" class="form-control" id="telefono2_aeropuerto_vuelta" name="telefono2_aeropuerto_vuelta" value="{{ travel.telefono2_aeropuerto_vuelta or (form_data.telefono2_aeropuerto_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_aerolinea_vuelta" class="form-label">Teléfono 1 Aerolínea:</label>
+                        <input type="tel" class="form-control" id="telefono1_aerolinea_vuelta" name="telefono1_aerolinea_vuelta" value="{{ travel.telefono1_aerolinea_vuelta or (form_data.telefono1_aerolinea_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_aerolinea_vuelta" class="form-label">Teléfono 2 Aerolínea:</label>
+                        <input type="tel" class="form-control" id="telefono2_aerolinea_vuelta" name="telefono2_aerolinea_vuelta" value="{{ travel.telefono2_aerolinea_vuelta or (form_data.telefono2_aerolinea_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_embajada_consulado_vuelta" class="form-label">Teléfono 1 Embajada - Consulado:</label>
+                        <input type="tel" class="form-control" id="telefono1_embajada_consulado_vuelta" name="telefono1_embajada_consulado_vuelta" value="{{ travel.telefono1_embajada_consulado_vuelta or (form_data.telefono1_embajada_consulado_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_embajada_consulado_vuelta" class="form-label">Teléfono 2 Embajada - Consulado:</label>
+                        <input type="tel" class="form-control" id="telefono2_embajada_consulado_vuelta" name="telefono2_embajada_consulado_vuelta" value="{{ travel.telefono2_embajada_consulado_vuelta or (form_data.telefono2_embajada_consulado_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="otro_telefono_vuelta" class="form-label">Otro Teléfono:</label>
+                        <input type="tel" class="form-control" id="otro_telefono_vuelta" name="otro_telefono_vuelta" value="{{ travel.otro_telefono_vuelta or (form_data.otro_telefono_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_estadia_vuelta" class="form-label">Nombre Estadía:</label>
+                        <input type="text" class="form-control" id="nombre_estadia_vuelta" name="nombre_estadia_vuelta" value="{{ travel.nombre_estadia_vuelta or (form_data.nombre_estadia_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_estadia_vuelta" class="form-label">Teléfono 1 Estadía:</label>
+                        <input type="tel" class="form-control" id="telefono1_estadia_vuelta" name="telefono1_estadia_vuelta" value="{{ travel.telefono1_estadia_vuelta or (form_data.telefono1_estadia_vuelta if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_estadia_vuelta" class="form-label">Teléfono 2 Estadía:</label>
+                        <input type="tel" class="form-control" id="telefono2_estadia_vuelta" name="telefono2_estadia_vuelta" value="{{ travel.telefono2_estadia_vuelta or (form_data.telefono2_estadia_vuelta if form_data else '') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vuelo de ESCALA (Nota: Llenar solo en caso que tenga vuelo con escala) -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Datos del Vuelo de ESCALA <span class="badge bg-light text-dark"> (Llenar solo en caso que tenga vuelo con escala)</span></h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="otra_aerolinea_escala" class="form-label">Otra Aerolínea Escala:</label>
+                        <select class="form-select" id="otra_aerolinea_escala" name="otra_aerolinea_escala">
+                            <option value="">-- Seleccionar Aerolínea --</option>
+                            {% for aerolinea in aerolinea_options %}
+                                <option value="{{ aerolinea }}" {% if travel.otra_aerolinea_escala == aerolinea %}selected{% elif form_data and form_data.otra_aerolinea_escala == aerolinea %}selected{% endif %}>{{ aerolinea }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fecha_vuelo_escala" class="form-label">Fecha de Vuelo Escala:</label>
+                        <input type="date" class="form-control" id="fecha_vuelo_escala" name="fecha_vuelo_escala" value="{{ travel.fecha_vuelo_escala.strftime('%Y-%m-%d') if travel.fecha_vuelo_escala else (form_data.fecha_vuelo_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="hora_salida_escala" class="form-label">Hora de Salida:</label>
+                        <input type="time" class="form-control" id="hora_salida_escala" name="hora_salida_escala" value="{{ travel.hora_salida_escala or (form_data.hora_salida_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="hora_llegada_escala" class="form-label">Hora de Llegada:</label>
+                        <input type="time" class="form-control" id="hora_llegada_escala" name="hora_llegada_escala" value="{{ travel.hora_llegada_escala or (form_data.hora_llegada_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="numero_vuelo_escala" class="form-label">Número de Vuelo:</label>
+                        <input type="text" class="form-control" id="numero_vuelo_escala" name="numero_vuelo_escala" value="{{ travel.numero_vuelo_escala or (form_data.numero_vuelo_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="codigo_confirmacion_escala" class="form-label">Código de Confirmación:</label>
+                        <input type="text" class="form-control" id="codigo_confirmacion_escala" name="codigo_confirmacion_escala" value="{{ travel.codigo_confirmacion_escala or (form_data.codigo_confirmacion_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="numero_asiento_escala" class="form-label">Número de Asiento:</label>
+                        <input type="text" class="form-control" id="numero_asiento_escala" name="numero_asiento_escala" value="{{ travel.numero_asiento_escala or (form_data.numero_asiento_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="enlace_telefono_check_in_escala" class="form-label">Enlace o Teléfono para Check-In:</label>
+                        <input type="text" class="form-control" id="enlace_telefono_check_in_escala" name="enlace_telefono_check_in_escala" value="{{ travel.enlace_telefono_check_in_escala or (form_data.enlace_telefono_check_in_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="enlace_telefono_check_out_escala" class="form-label">Enlace o Teléfono para Check-Out:</label>
+                        <input type="text" class="form-control" id="enlace_telefono_check_out_escala" name="enlace_telefono_check_out_escala" value="{{ travel.enlace_telefono_check_out_escala or (form_data.enlace_telefono_check_out_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="total_tickete_pp_escala" class="form-label">Total Ticket P.P:</label>
+                        <input type="number" step="0.01" class="form-control" id="total_tickete_pp_escala" name="total_tickete_pp_escala" value="{{ travel.total_tickete_pp_escala or (form_data.total_tickete_pp_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="impuesto_incluido_escala" class="form-label">Impuesto Incluido:</label>
+                        <select class="form-select" id="impuesto_incluido_escala" name="impuesto_incluido_escala">
+                            {% for option in si_no_aplica_options %}
+                                <option value="{{ option }}" {% if travel.impuesto_incluido_escala == option %}selected{% elif form_data and form_data.impuesto_incluido_escala == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_aeropuerto_escala" class="form-label">Nombre del Aeropuerto:</label>
+                        <input type="text" class="form-control" id="nombre_aeropuerto_escala" name="nombre_aeropuerto_escala" value="{{ travel.nombre_aeropuerto_escala or (form_data.nombre_aeropuerto_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="paises_escala_escala" class="form-label">Países de Escala:</label>
+                        <input type="text" class="form-control" id="paises_escala_escala" name="paises_escala_escala" value="{{ travel.paises_escala_escala or (form_data.paises_escala_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="aeropuerto_escala_escala" class="form-label">Aeropuerto de Escala:</label>
+                        <input type="text" class="form-control" id="aeropuerto_escala_escala" name="aeropuerto_escala_escala" value="{{ travel.aeropuerto_escala_escala or (form_data.aeropuerto_escala_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="carga_permitida_maleta_mano_escala" class="form-label">Carga Permitida por Maleta de Mano:</label>
+                        <input type="text" class="form-control" id="carga_permitida_maleta_mano_escala" name="carga_permitida_maleta_mano_escala" value="{{ travel.carga_permitida_maleta_mano_escala or (form_data.carga_permitida_maleta_mano_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="precio_maleta_mano_escala" class="form-label">Precio por Maleta de Mano:</label>
+                        <input type="number" step="0.01" class="form-control" id="precio_maleta_mano_escala" name="precio_maleta_mano_escala" value="{{ travel.precio_maleta_mano_escala or (form_data.precio_maleta_mano_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="necesita_visa_escala" class="form-label">Necesita VISA:</label>
+                        <select class="form-select" id="necesita_visa_escala" name="necesita_visa_escala">
+                            {% for option in necesita_visa_options %}
+                                <option value="{{ option }}" {% if travel.necesita_visa_escala == option %}selected{% elif form_data and form_data.necesita_visa_escala == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_aeropuerto_escala" class="form-label">Teléfono 1 Aeropuerto:</label>
+                        <input type="tel" class="form-control" id="telefono1_aeropuerto_escala" name="telefono1_aeropuerto_escala" value="{{ travel.telefono1_aeropuerto_escala or (form_data.telefono1_aeropuerto_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_aeropuerto_escala" class="form-label">Teléfono 2 Aeropuerto:</label>
+                        <input type="tel" class="form-control" id="telefono2_aeropuerto_escala" name="telefono2_aeropuerto_escala" value="{{ travel.telefono2_aeropuerto_escala or (form_data.telefono2_aeropuerto_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_aerolinea_escala" class="form-label">Teléfono 1 Aerolínea:</label>
+                        <input type="tel" class="form-control" id="telefono1_aerolinea_escala" name="telefono1_aerolinea_escala" value="{{ travel.telefono1_aerolinea_escala or (form_data.telefono1_aerolinea_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_aerolinea_escala" class="form-label">Teléfono 2 Aerolínea:</label>
+                        <input type="tel" class="form-control" id="telefono2_aerolinea_escala" name="telefono2_aerolinea_escala" value="{{ travel.telefono2_aerolinea_escala or (form_data.telefono2_aerolinea_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_embajada_consulado_escala" class="form-label">Teléfono 1 Embajada - Consulado:</label>
+                        <input type="tel" class="form-control" id="telefono1_embajada_consulado_escala" name="telefono1_embajada_consulado_escala" value="{{ travel.telefono1_embajada_consulado_escala or (form_data.telefono1_embajada_consulado_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_embajada_consulado_escala" class="form-label">Teléfono 2 Embajada - Consulado:</label>
+                        <input type="tel" class="form-control" id="telefono2_embajada_consulado_escala" name="telefono2_embajada_consulado_escala" value="{{ travel.telefono2_embajada_consulado_escala or (form_data.telefono2_embajada_consulado_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="otro_telefono_escala" class="form-label">Otro Teléfono:</label>
+                        <input type="tel" class="form-control" id="otro_telefono_escala" name="otro_telefono_escala" value="{{ travel.otro_telefono_escala or (form_data.otro_telefono_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_estadia_escala" class="form-label">Nombre Estadía:</label>
+                        <input type="text" class="form-control" id="nombre_estadia_escala" name="nombre_estadia_escala" value="{{ travel.nombre_estadia_escala or (form_data.nombre_estadia_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_estadia_escala" class="form-label">Teléfono 1 Estadía:</label>
+                        <input type="tel" class="form-control" id="telefono1_estadia_escala" name="telefono1_estadia_escala" value="{{ travel.telefono1_estadia_escala or (form_data.telefono1_estadia_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_estadia_escala" class="form-label">Teléfono 2 Estadía:</label>
+                        <input type="tel" class="form-control" id="telefono2_estadia_escala" name="telefono2_estadia_escala" value="{{ travel.telefono2_estadia_escala or (form_data.telefono2_estadia_escala if form_data else '') }}">
+                    </div>
+                    <div class="col-12">
+                        <label for="otros_detalles_escala" class="form-label">Otros Detalles:</label>
+                        <textarea class="form-control" id="otros_detalles_escala" name="otros_detalles_escala" rows="3">{{ travel.otros_detalles_escala or (form_data.otros_detalles_escala if form_data else '') }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Adicional de Contacto y Estadía -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Contactos y Estadía Adicional</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="otro_telefono" class="form-label">Otro Teléfono (General):</label>
+                        <input type="tel" class="form-control" id="otro_telefono" name="otro_telefono" value="{{ travel.otro_telefono or (form_data.otro_telefono if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nombre_estadia" class="form-label">Nombre Estadía (General):</label>
+                        <input type="text" class="form-control" id="nombre_estadia" name="nombre_estadia" value="{{ travel.nombre_estadia or (form_data.nombre_estadia if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_estadia" class="form-label">Teléfono 1 Estadía (General):</label>
+                        <input type="tel" class="form-control" id="telefono1_estadia" name="telefono1_estadia" value="{{ travel.telefono1_estadia or (form_data.telefono1_estadia if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_estadia" class="form-label">Teléfono 2 Estadía (General):</label>
+                        <input type="tel" class="form-control" id="telefono2_estadia" name="telefono2_estadia" value="{{ travel.telefono2_estadia or (form_data.telefono2_estadia if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="estadia_email" class="form-label">Estadía Email:</label>
+                        <input type="email" class="form-control" id="estadia_email" name="estadia_email" value="{{ travel.estadia_email or (form_data.estadia_email if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="otra_estadia_nombre" class="form-label">Nombre Otra Estadía:</label>
+                        <input type="text" class="form-control" id="otra_estadia_nombre" name="otra_estadia_nombre" value="{{ travel.otra_estadia_nombre or (form_data.otra_estadia_nombre if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono1_otra_estadia" class="form-label">Teléfono 1 Otra Estadía:</label>
+                        <input type="tel" class="form-control" id="telefono1_otra_estadia" name="telefono1_otra_estadia" value="{{ travel.telefono1_otra_estadia or (form_data.telefono1_otra_estadia if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_otra_estadia" class="form-label">Teléfono 2 Otra Estadía:</label>
+                        <input type="tel" class="form-control" id="telefono2_otra_estadia" name="telefono2_otra_estadia" value="{{ travel.telefono2_otra_estadia or (form_data.telefono2_otra_estadia if form_data else '') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tour Operador / Guía -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Tour Operador / Guía</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nombre_tour_operador" class="form-label">Nombre de Tour Operador / Guía:</label>
+                        <input type="text" class="form-control" id="nombre_tour_operador" name="nombre_tour_operador" value="{{ travel.nombre_tour_operador or (form_data.nombre_tour_operador if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono_tour_operador1" class="form-label">Teléfono 1 Tour Operador / Guía:</label>
+                        <input type="tel" class="form-control" id="telefono_tour_operador1" name="telefono_tour_operador1" value="{{ travel.telefono_tour_operador1 or (form_data.telefono_tour_operador1 if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono2_tour_operador2" class="form-label">Teléfono 2 Tour Operador / Guía:</label>
+                        <input type="tel" class="form-control" id="telefono2_tour_operador2" name="telefono2_tour_operador2" value="{{ travel.telefono2_tour_operador2 or (form_data.telefono2_tour_operador2 if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email_tour_operador" class="form-label">Email Tour Operador / Guía:</label>
+                        <input type="email" class="form-control" id="email_tour_operador" name="email_tour_operador" value="{{ travel.email_tour_operador or (form_data.email_tour_operador if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="total_operador_pp" class="form-label">Total Operador P.P:</label>
+                        <input type="number" step="0.01" class="form-control" id="total_operador_pp" name="total_operador_pp" value="{{ travel.total_operador_pp or (form_data.total_operador_pp if form_data else '') }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacto de Transporte -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Contacto de Transporte</h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="contacto_transporte_responsable" class="form-label">Nombre del Responsable:</label>
+                        <input type="text" class="form-control" id="contacto_transporte_responsable" name="contacto_transporte_responsable" value="{{ travel.contacto_transporte_responsable or (form_data.contacto_transporte_responsable if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contacto_transporte_telefono" class="form-label">Teléfono del Responsable:</label>
+                        <input type="tel" class="form-control" id="contacto_transporte_telefono" name="contacto_transporte_telefono" value="{{ travel.contacto_transporte_telefono or (form_data.contacto_transporte_telefono if form_data else '') }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="contacto_transporte_otro_telefono" class="form-label">Otro Teléfono:</label>
+                        <input type="tel" class="form-control" id="contacto_transporte_otro_telefono" name="contacto_transporte_otro_telefono" value="{{ travel.contacto_transporte_otro_telefono or (form_data.contacto_transporte_otro_telefono if form_data else '') }}">
+                    </div>
+                    <div class="col-12">
+                        <label for="contacto_transporte_otros_detalles" class="form-label">Otros Detalles:</label>
+                        <textarea class="form-control" id="contacto_transporte_otros_detalles" name="contacto_transporte_otros_detalles" rows="3">{{ travel.contacto_transporte_otros_detalles or (form_data.contacto_transporte_otros_detalles if form_data else '') }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTA: Se ha eliminado la sección de Recordatorios (Checklist) según tu solicitud. -->
+
+        <!-- Notas Generales (CKEditor) -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Notas Generales</h4>
+            </div>
+            <div class="card-body">
+                <textarea class="form-control" id="notas_generales_ckeditor" name="notas_generales_ckeditor">{{ travel.notas_generales_ckeditor or (form_data.notas_generales_ckeditor if form_data else '') }}</textarea>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-save"></i> Guardar Cambios</button>
+            <a href="{{ url_for('intern.detalle_intern', travel_id=travel.id) }}" class="btn btn-secondary btn-lg"><i class="fas fa-ban"></i> Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        // CKEditor Initialization
+        let editor;
+        ClassicEditor
+            .create( document.querySelector( '#notas_generales_ckeditor' ) )
+            .then( newEditor => {
+                editor = newEditor;
+            })
+            .catch( error => {
+                console.error( error );
+            } );
+
+        // Script para el selector de contactos
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactSelector = document.getElementById('contact_selector');
+            const manualContactFields = document.getElementById('manual_contact_fields');
+
+            contactSelector.addEventListener('change', function() {
+                if (this.value === 'manual') {
+                    manualContactFields.style.display = 'block';
+                } else {
+                    manualContactFields.style.display = 'none';
+                }
+            });
+
+            // NOTA: Se ha eliminado la funcionalidad y las variables del Checklist de Recordatorios.
+            // Las siguientes variables y funciones relacionadas con el checklist han sido eliminadas:
+            // - addRecordatorioBtn
+            // - newRecordatorioText
+            // - recordatoriosList
+            // - recordatoriosJsonInput
+            // - recordatoriosData
+            // - renderRecordatorios()
+            // - updateRecordatoriosJson()
+            // - Event listeners asociados (click en recordatoriosList, keypress en newRecordatorioText)
+        });
+    </script>
+{% endblock %}
