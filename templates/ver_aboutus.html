@@ -1,6 +1,5 @@
 <!-- templates/ver_aboutus.html -->
 {% extends 'base.html' %}
-{% block title %}Acerca de Nosotros{% endblock %}
 {% block head_content %}
     <style>
         /* Estilos generales para el contenedor principal */
@@ -209,11 +208,11 @@
                 {{ about_us_entry.detail | safe }}
             </div>
 
-            <div class="date-info">
+     <!--        <div class="date-info">
                 <p>Fecha de Creación: {{ about_us_entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                 <p>Fecha de Modificación: {{ about_us_entry.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
             </div>
-
+ -->
             {# Contenedor para los botones de acción flotantes a la derecha #}
             {% if session.role == 'Superuser' %}
                 <div class="fab-container-actions">

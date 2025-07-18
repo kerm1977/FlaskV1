@@ -74,16 +74,12 @@
             background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
         }
 
-        /* Estilo para el contenedor del editor Quill.js */
+        /* Estilo para el contenedor del editor CKEditor */
         #editor-container-detail {
-            height: 300px;
+            /* CKEditor maneja su propio estilo, pero podemos darle un alto mínimo */
+            min-height: 300px;
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
-        }
-
-        /* Ajuste del interlineado para el contenido de Quill.js */
-        .ql-editor p {
-            line-height: 1 !important; /* Interlineado de 1 */
         }
     </style>
 {% endblock %}
@@ -123,13 +119,11 @@
                     <input type="text" class="form-control" id="title" name="title" placeholder="Ej: Nuestra Historia, Quiénes Somos">
                 </div>
                 
-                {# Contenedor para Quill.js #}
+                {# Contenedor para CKEditor #}
                 <div class="mb-4">
-                    <label for="editor-container-detail" class="form-label text-gray-700 font-semibold">Detalle (Contenido Principal)</label>
-                    {# El editor de Quill.js se adjuntará a este div #}
-                    <div id="editor-container-detail"></div>
-                    {# Este input oculto contendrá el contenido HTML final de Quill #}
-                    <input type="hidden" name="detail" id="quill-content-input-detail">
+                    <label for="editor" class="form-label text-gray-700 font-semibold">Detalle (Contenido Principal)</label>
+                    {# El editor de CKEditor se adjuntará a este textarea #}
+                    <textarea name="detail" id="editor"></textarea>
                 </div>
 
                 {# Botón de submit original oculto, se activará con el FAB #}
@@ -138,54 +132,41 @@
         </div>
     </div>
 
-    {# Quill.js CSS #}
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    {# Quill.js JS #}
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    {# CKEditor 4 CDN - Versión Full #}
+    <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Quill.js para el campo 'detail'
-            const quillDetail = new Quill('#editor-container-detail', {
-                theme: 'snow', // Tema 'snow' para una barra de herramientas completa
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }], // h1 hasta h6
-                        ['bold', 'italic', 'underline', 'strike'], // negrita, cursiva, subrayado, tachado
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }], // números tipo lista, viñeta
-                        [{ 'align': [] }], // alineado centrado, justificado, derecha, izquierda
-                        ['link', 'image'], // enlace, imagen
-                        [{ 'script': 'sub'}, { 'script': 'super' }], // subíndice/superíndice
-                        [{ 'indent': '-1'}, { 'indent': '+1' }], // indentar/sangría
-                        [{ 'direction': 'rtl' }], // dirección de texto (derecha a izquierda)
-                        [{ 'color': [] }, { 'background': [] }], // color de texto, color de fondo
-                        ['blockquote', 'code-block'], // cita en bloque, bloque de código
-                        ['clean'] // Eliminar formato
-                    ],
-                    history: { // Para deshacer/rehacer
-                        delay: 2000,
-                        maxStack: 500,
-                        userOnly: true
-                    }
-                },
-                placeholder: 'Escribe el contenido principal de la sección aquí...',
+            // Inicializar CKEditor 4 en el textarea con id 'editor'
+            CKEDITOR.replace( 'editor', {
+                // La build 'full' de CKEditor 4 ya incluye la mayoría de los plugins.
+                // Puedes personalizar la barra de herramientas si quieres un orden específico
+                // o eliminar botones, pero 'full' ya trae muchas opciones, incluyendo alineación.
+                toolbar: [
+                    { name: 'document', items: [ 'Source', '-', 'NewPage', 'Preview', 'Print', '-', 'Templates' ] },
+                    { name: 'clipboard', items: [ 'Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo' ] },
+                    { name: 'editing', items: [ 'Find', 'Replace', '-', 'SelectAll', '-', 'Scayt' ] },
+                    { name: 'forms', items: [ 'Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField' ] },
+                    '/',
+                    { name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'CopyFormatting', 'RemoveFormat' ] },
+                    { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language' ] },
+                    { name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
+                    { name: 'insert', items: [ 'Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe' ] },
+                    '/',
+                    { name: 'styles', items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
+                    { name: 'colors', items: [ 'TextColor', 'BGColor' ] },
+                    { name: 'tools', items: [ 'Maximize', 'ShowBlocks' ] },
+                    { name: 'others', items: [ '-' ] },
+                    { name: 'about', items: [ 'About' ] }
+                ],
+                // El plugin 'justify' es parte de la build 'full', no necesita ser extraPlugins.
+                language: 'es' // Establece el idioma del editor a español
             });
 
-            // Cuando el contenido de Quill cambie, actualiza el input oculto
-            const quillContentInputDetail = document.getElementById('quill-content-input-detail');
-            quillDetail.on('text-change', function() {
-                // Guarda el contenido HTML en el input oculto
-                quillContentInputDetail.value = quillDetail.root.innerHTML;
-            });
-
-            // Asegúrate de que el contenido inicial se guarde al cargar (si es necesario)
-            // Esto es importante si hay un valor inicial en el textarea que Quill debe tomar.
-            // Para "crear", el textarea estará vacío, pero es buena práctica.
-            quillContentInputDetail.value = quillDetail.root.innerHTML;
-
-            // Cuando el formulario se envía, asegúrate de que el contenido final de Quill esté en el input oculto
+            // Cuando el formulario se envía, CKEditor 4 actualiza automáticamente el textarea
             document.querySelector('form').addEventListener('submit', function() {
-                quillContentInputDetail.value = quillDetail.root.innerHTML;
+                // No se necesita lógica adicional aquí para obtener el contenido,
+                // CKEditor 4 se encarga de que el textarea tenga el contenido actualizado.
             });
         });
     </script>
