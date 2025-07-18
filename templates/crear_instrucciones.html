@@ -66,11 +66,9 @@
     <h1 class="mb-4 text-warning text-center">Instrucciones</h1> {# Cambiado a text-warning text-center #}
     <hr class="text-warning"> {# Agregado hr con estilo warning #}
     <form method="POST" action="{{ url_for('instrucciones.crear_instrucciones') }}" id="createInstructionForm"> {# Añadido ID al formulario #}
-        <div class="card mb-4 mt-5"> {# Añadido mt-5 #}
-            <div class="card-header bg-warning text-white"> {# Cambiado a bg-warning text-white #}
-                <h2 class="card-title mb-0">Información General de la Caminata</h2>
-            </div>
-            <div class="card-body">
+        <div class="mb-4 mt-5 p-4"> {# Eliminado 'border rounded' #}
+            <h2 class="mb-3 bg-warning text-white p-2 rounded">Información General de la Caminata</h2> {# Eliminado card-header, card-title y añadido estilos de fondo y padding #}
+            <div class="form-section"> {# Agregada clase para mantener la estructura, puedes aplicar estilos si es necesario #}
                 <div class="mb-3">
                     <label for="caminata_id" class="form-label">Instrucciones para la Caminata <span class="text-danger">*</span></label>
                     <select class="form-select" id="caminata_id" name="caminata_id" required>
@@ -134,11 +132,9 @@
 
         <hr class="my-4"> {# Separador #}
 
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h2 class="card-title mb-0">Puntos de Recogida</h2>
-            </div>
-            <div class="card-body">
+        <div class="mb-4 p-4"> {# Eliminado 'border rounded' #}
+            <h2 class="mb-3 bg-info text-white p-2 rounded">Puntos de Recogida</h2>
+            <div class="form-section">
                 <div id="recogemos_en_container">
                     {% set current_recogemos_en = form_data.recogemos_en|from_json %}
                     {% if current_recogemos_en %}
@@ -161,11 +157,9 @@
 
         <hr class="my-4"> {# Separador #}
 
-        <div class="card mb-4">
-            <div class="card-header bg-success text-white">
-                <h2 class="card-title mb-0">Para el Camino</h2>
-            </div>
-            <div class="card-body">
+        <div class="mb-4 p-4"> {# Eliminado 'border rounded' #}
+            <h2 class="mb-3 bg-success text-white p-2 rounded">Para el Camino</h2>
+            <div class="form-section">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="hidratacion" class="form-label">Hidratación</label>
@@ -298,11 +292,9 @@
 
         <hr class="my-4"> {# Separador #}
 
-        <div class="card mb-4">
-            <div class="card-header bg-warning text-dark"> {# Cambiado a bg-warning text-dark #}
-                <h2 class="card-title mb-0">Otras Recomendaciones</h2>
-            </div>
-            <div class="card-body">
+        <div class="mb-4 p-4"> {# Eliminado 'border rounded' #}
+            <h2 class="mb-3 bg-warning text-dark p-2 rounded">Otras Recomendaciones</h2>
+            <div class="form-section">
                 <div class="mb-3">
                     <textarea class="form-control" id="otras_recomendaciones" name="otras_recomendaciones">{{ form_data.otras_recomendaciones }}</textarea>
                 </div>
@@ -311,11 +303,9 @@
 
         <hr class="my-4"> {# Separador #}
 
-        <div class="card mb-4">
-            <div class="card-header bg-danger text-white">
-                <h2 class="card-title mb-0">Normas Generales</h2>
-            </div>
-            <div class="card-body">
+        <div class="mb-4 p-4"> {# Eliminado 'border rounded' #}
+            <h2 class="mb-3 bg-danger text-white p-2 rounded">Normas Generales</h2>
+            <div class="form-section">
                 <div class="mb-3">
                     <textarea class="form-control" id="normas_generales" name="normas_generales">{{ form_data.normas_generales }}</textarea>
                 </div>
@@ -324,11 +314,9 @@
 
         <hr class="my-4"> {# Separador #}
 
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h2 class="card-title mb-0">Otras Indicaciones Generales</h2>
-            </div>
-            <div class="card-body">
+        <div class="mb-4 p-4"> {# Eliminado 'border rounded' #}
+            <h2 class="mb-3 bg-info text-white p-2 rounded">Otras Indicaciones Generales</h2>
+            <div class="form-section">
                 <div class="mb-3">
                     <textarea class="form-control" id="otras_indicaciones_generales" name="otras_indicaciones_generales">{{ form_data.otras_indicaciones_generales }}</textarea>
                 </div>

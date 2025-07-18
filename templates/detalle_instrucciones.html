@@ -91,7 +91,7 @@
         <div class="bg-warning text-white p-3 rounded-top">
             <h2 class="card-title mb-0">Información General de la Caminata</h2>
         </div>
-        <div class="p-3 border rounded-bottom">
+        <div class="p-3 rounded-bottom"> {# Se eliminó la clase 'border' #}
          
             <p><strong>Caminata:</strong> {{ instruction.caminata.nombre if instruction.caminata else 'N/A' }}
                 {% if instruction.caminata and instruction.caminata.etapa %}
@@ -170,17 +170,17 @@
             </ul>
 
             <h4 class="mt-4">Otras Recomendaciones:</h4>
-            <div class="bg-light mb-3 p-3 rounded border" id="otras-recomendaciones-content">
+            <div class="bg-light mb-3 p-3 rounded"> {# Se eliminó la clase 'border' #}
                 {{ instruction.otras_recomendaciones|replace('-', '<br>-')|safe }}
             </div>
 
             <h4 class="mt-4">Normas Generales:</h4>
-            <div class="bg-light mb-3 p-3 rounded border" id="normas-generales-content">
+            <div class="bg-light mb-3 p-3 rounded"> {# Se eliminó la clase 'border' #}
                 {{ instruction.normas_generales|replace('-', '<br>-')|safe }}
             </div>
 
             <h4 class="mt-4">Otras Indicaciones Generales:</h4>
-            <div class="bg-light mb-3 p-3 rounded border" id="otras-indicaciones-generales-content">
+            <div class="bg-light mb-3 p-3 rounded"> {# Se eliminó la clase 'border' #}
                 {{ instruction.otras_indicaciones_generales|replace('-', '<br>-')|safe }}
             </div>
 
@@ -364,3 +364,4 @@ function shareInstructionsViaWhatsApp() {
 }
 </script>
 {% endblock %}
+    

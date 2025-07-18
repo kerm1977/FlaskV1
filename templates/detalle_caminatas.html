@@ -30,13 +30,13 @@
         align-items: center;    
         justify-content: center;
         font-size: 1.5rem; /* Tamaño del icono */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto 3D */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */ /* Sombra eliminada */
         transition: all 0.3s ease; /* Transición suave para hover */
         text-decoration: none; /* Elimina el subrayado de los enlaces */
     }
     .fab-button-action:hover {
         transform: scale(1.1); /* Agranda el botón al pasar el ratón */
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada al pasar el ratón */
+        /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); */ /* Sombra eliminada */
     }
     .fab-button-edit { background-color: #ffc107; color: black; } /* Color amarillo para editar */
     .fab-button-delete { background-color: #dc3545; color: white; } /* Color rojo para eliminar */
@@ -44,6 +44,7 @@
     .fab-button-txt { background-color: #17a2b8; color: white; } /* Info-dark */
     .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange */
     .fab-button-info { background-color: #0dcaf0; color: black; } /* Info */
+    .fab-button-success { background-color: #28a745; color: white; } /* Success green */
 
 
     /* Modal styles - Copied from detalle_itinerario.html */
@@ -72,6 +73,7 @@
         left: 20px; /* Distancia desde la izquierda */
         right: auto; /* Anula la distancia derecha */
     }
+    /* El estilo .fab-container.top-right ya no es necesario para el botón de crear instrucción */
     .fab-button {
         width: 60px; /* Tamaño del botón */
         height: 60px; /* Tamaño del botón */
@@ -80,12 +82,12 @@
         align-items: center;
         justify-content: center;
         font-size: 1.8rem; /* Tamaño del icono */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para que se vea flotante */
+        /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */ /* Sombra eliminada */
         transition: all 0.3s ease;
     }
     .fab-button:hover {
         transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); */ /* Sombra eliminada */
     }
 
     /* Estilos para el modal de imagen a pantalla completa */
@@ -178,6 +180,19 @@
                         {{ caminata.otros_datos|safe }}
                     </div>
                 {% endif %}
+
+                {# NUEVO: Botón para ver instrucciones #}
+                <div class="mt-4">
+                    {% if caminata.instrucciones and caminata.instrucciones|length > 0 %}
+                        <a href="{{ url_for('instrucciones.detalle_instrucciones', instruction_id=caminata.instrucciones[0].id) }}" class="btn btn-info btn-lg w-100">
+                            <i class="fas fa-info-circle me-2"></i> Ver Instrucciones
+                        </a>
+                    {% else %}
+                        <button type="button" class="btn btn-secondary btn-lg w-100" disabled>
+                            <i class="fas fa-info-circle me-2"></i> No hay Instrucciones relacionadas
+                        </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -306,11 +321,7 @@
         <a href="#" class="fab-button-action fab-button-delete" title="Eliminar Caminata" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
             <i class="fas fa-trash-alt"></i>
         </a>
-        {% if caminata.instrucciones %}
-        <a href="{{ url_for('instrucciones.detalle_instrucciones', instruction_id=caminata.instrucciones[0].id) }}" class="fab-button-action fab-button-info" title="Ver Instrucciones">
-            <i class="fas fa-info-circle"></i>
-        </a>
-        {% endif %}
+        {# El botón "Ver Instrucciones" ya se movió al cuerpo principal #}
         <a href="{{ url_for('caminatas.exportar_caminata_pdf', caminata_id=caminata.id) }}" class="fab-button-action fab-button-pdf" title="Exportar a PDF">
             <i class="fas fa-file-pdf"></i>
         </a>
@@ -319,6 +330,10 @@
         </a>
         <a href="{{ url_for('caminatas.exportar_caminata_jpg', caminata_id=caminata.id) }}" class="fab-button-action fab-button-jpg" title="Exportar a JPG">
             <i class="fas fa-image"></i>
+        </a>
+        {# NUEVO: Botón flotante para crear nueva instrucción (solo para Superuser) - MOVIDO Y ESTILIZADO #}
+        <a href="{{ url_for('instrucciones.ver_instrucciones') }}" class="fab-button-action fab-button-success" title="Crear Nueva Instrucción">
+            <i class="fas fa-plus"></i>
         </a>
     {% endif %}
 </div>
