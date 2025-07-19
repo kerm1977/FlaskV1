@@ -182,7 +182,7 @@
                 {# Mostrar el título "Otros" solo si hay rutas de "Internacional", "Caminatas Programadas" o "Caminatas por Reconocer" #}
                 {% if rutas_por_categoria.get('Internacional') or rutas_por_categoria.get('Caminatas Programadas') or rutas_por_categoria.get('Caminatas por Reconocer') %}
                     <div class="mb-5">
-                        <div class="card-header-category other-category-title-bg mt-5"> {# Añadida la clase other-category-title-bg #}
+                        <div class="card-header-category other-category-title-bg mt-5 text-dark"> {# Añadida la clase other-category-title-bg #}
                             <h1 class="text-center text-dark">{{ categoria_display }}</h1>
                             <hr>
                         </div>
@@ -192,7 +192,7 @@
                 {% set has_any_routes = true %} {# Se encontraron rutas en una categoría válida #}
                 <div class="mb-4">
                     <div class="card-header-category mt-5"> {# Sin la clase other-category-title-bg #}
-                        <h2 class="text-center text-warning">{{ categoria_display }}</h2>
+                        <h2 class="text-center text-dark">{{ categoria_display }}</h2>
                         <hr>
                     </div>
                     <div>

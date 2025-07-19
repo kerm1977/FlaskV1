@@ -42,7 +42,11 @@ def role_required(roles):
             
             user_role = session.get('role')
             if user_role not in roles:
-                flash('No tienes permiso para acceder a esta página.', 'danger')
+                # Mensaje específico para el acceso a detalle_ruta
+                if f.__name__ == 'detalle_ruta':
+                    flash('SOLO ADMINISTRADORES PUEDEN VER EL CONTENIDO.', 'danger') # Mensaje más claro
+                else:
+                    flash('No tienes permiso para acceder a esta página.', 'danger')
                 return redirect(url_for('home'))
             return f(*args, **kwargs)
         return decorated_function
@@ -86,7 +90,7 @@ def get_embed_url(video_url):
     return None
 
 @rutas_bp.route('/rutas')
-@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
+#@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
 def ver_rutas():
     # Obtener el parámetro 'categoria' de la URL si existe
     categoria_seleccionada = request.args.get('categoria')
@@ -182,7 +186,7 @@ def editar_ruta(ruta_id):
     return render_template('editar_rutas.html', ruta=ruta, categorias_busqueda=categorias_para_formulario) # Pasa las categorías filtradas al formulario
 
 @rutas_bp.route('/rutas/<int:ruta_id>')
-@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver los detalles
+@role_required(['Superuser']) # Solo Superuser puede ver el detalle de la ruta
 def detalle_ruta(ruta_id):
     ruta = db.session.get(Ruta, ruta_id)
     if not ruta:
@@ -339,7 +343,7 @@ def exportar_todas_rutas_pdf():
                 c.showPage()
                 page_number += 1
                 y_position = 750
-                y_position = add_page_header(c, y_position, page_number)
+                y_position = add_page_header(c, y_position, page_num)
                 current_category = None # Resetear categoría para nuevo encabezado en la nueva página
 
             if ruta.provincia != current_category:
