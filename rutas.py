@@ -6,6 +6,7 @@ import json
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas as pdf_canvas # Renombrado para evitar conflicto con Flask canvas
+from datetime import datetime, date # Importar datetime y date para manejar fechas
 import re # NUEVO: Importar re para expresiones regulares
 
 # Crea un Blueprint para el módulo de rutas
@@ -63,7 +64,7 @@ def get_embed_url(video_url):
 
     # Expresiones regulares más robustas para YouTube
     youtube_patterns = [
-        re.compile(r'(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([a-zA-Z0-9_-]{11})(?:\S+)?'),
+        re.compile(r'(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|)([a-zA-Z0-9_-]{11})(?:\S+)?'),
         re.compile(r'(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})(?:\S+)?')
     ]
 
@@ -90,7 +91,7 @@ def get_embed_url(video_url):
     return None
 
 @rutas_bp.route('/rutas')
-#@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
+@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
 def ver_rutas():
     # Obtener el parámetro 'categoria' de la URL si existe
     categoria_seleccionada = request.args.get('categoria')
@@ -132,6 +133,28 @@ def crear_ruta():
         categoria = request.form['provincia'] 
         detalle = request.form['detalle']
         enlace_video = request.form.get('enlace_video')
+        
+        # Obtener y procesar la fecha
+        fecha_str = request.form.get('fecha')
+        fecha = None
+        if fecha_str:
+            try:
+                fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Formato de fecha inválido. Por favor, usa YYYY-MM-DD.', 'danger')
+                return redirect(url_for('rutas.crear_ruta'))
+
+        # Obtener y procesar el precio
+        precio_str = request.form.get('precio')
+        precio = None
+        if precio_str:
+            try:
+                # Convertir a entero primero, luego a float para el modelo
+                precio = float(int(precio_str)) 
+            except ValueError:
+                flash('Formato de precio inválido. Por favor, ingresa un número entero.', 'danger')
+                return redirect(url_for('rutas.crear_ruta'))
+
 
         if not nombre or not categoria:
             flash('El nombre y la categoría son campos obligatorios.', 'danger')
@@ -141,7 +164,9 @@ def crear_ruta():
             nombre=nombre,
             provincia=categoria, # Guardamos la categoría en el campo 'provincia'
             detalle=detalle,
-            enlace_video=enlace_video
+            enlace_video=enlace_video,
+            fecha=fecha, # Asignar la fecha procesada
+            precio=precio # Asignar el precio procesado
         )
         try:
             db.session.add(nueva_ruta)
@@ -171,6 +196,27 @@ def editar_ruta(ruta_id):
         ruta.provincia = request.form['provincia'] 
         ruta.detalle = request.form['detalle']
         ruta.enlace_video = request.form.get('enlace_video')
+
+        # Obtener y procesar la fecha
+        fecha_str = request.form.get('fecha')
+        ruta.fecha = None # Resetear la fecha por si se envía vacía
+        if fecha_str:
+            try:
+                ruta.fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Formato de fecha inválido. Por favor, usa YYYY-MM-DD.', 'danger')
+                return redirect(url_for('rutas.editar_ruta', ruta_id=ruta.id))
+
+        # Obtener y procesar el precio
+        precio_str = request.form.get('precio')
+        ruta.precio = None # Resetear el precio por si se envía vacío
+        if precio_str:
+            try:
+                # Convertir a entero primero, luego a float para el modelo
+                ruta.precio = float(int(precio_str))
+            except ValueError:
+                flash('Formato de precio inválido. Por favor, ingresa un número entero.', 'danger')
+                return redirect(url_for('rutas.editar_ruta', ruta_id=ruta.id))
         
         try:
             db.session.commit()
@@ -227,7 +273,9 @@ def exportar_ruta_txt(ruta_id):
     content = f"Nombre de la Ruta: {ruta.nombre}\n" \
               f"Categoría: {ruta.provincia}\n" \
               f"Detalle: {ruta.detalle}\n" \
-              f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n"
+              f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n" \
+              f"Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}\n" \
+              f"Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}\n" # Precio sin decimales
 
     response = make_response(content)
     response.headers["Content-Disposition"] = f"attachment; filename=ruta_{ruta.nombre.replace(' ', '_').lower()}.txt"
@@ -255,8 +303,12 @@ def exportar_ruta_pdf(ruta_id):
     c.setFont('Helvetica', 10)
     c.drawString(100, y_position, f"Categoría: {ruta.provincia}") # Cambiado de Provincia a Categoría
     y_position -= line_height
+    c.drawString(100, y_position, f"Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}") # Añadido fecha
+    y_position -= line_height
+    c.drawString(100, y_position, f"Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}") # Añadido precio sin decimales
+    y_position -= line_height
     c.drawString(100, y_position, f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}")
-    y_position -= (line_height * 2) # Ajuste de espacio tras eliminar fechas
+    y_position -= (line_height * 2) # Ajuste de espacio tras añadir campos
 
     c.setFont('Helvetica-Bold', 12)
     c.drawString(100, y_position, "Detalle de la Ruta:")
@@ -357,6 +409,10 @@ def exportar_todas_rutas_pdf():
             
             c.drawString(110, y_position, f"  - Nombre: {ruta.nombre}")
             y_position -= line_height
+            c.drawString(110, y_position, f"    Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}") # Añadido fecha
+            y_position -= line_height
+            c.drawString(110, y_position, f"    Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}") # Añadido precio sin decimales
+            y_position -= line_height
             c.drawString(110, y_position, f"    Detalle: {re.sub('<[^<]+?>', '', ruta.detalle)[:100]}...") # Limpiar HTML y truncar
             y_position -= line_height
             c.drawString(110, y_position, f"    Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}")
@@ -392,6 +448,8 @@ def exportar_todas_rutas_txt():
                 content += f"\n--- Categoría: {ruta.provincia} ---\n"
                 current_category = ruta.provincia
             content += f"Nombre: {ruta.nombre}\n"
+            content += f"Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}\n" # Añadido fecha
+            content += f"Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}\n" # Añadido precio sin decimales
             content += f"Detalle: {re.sub('<[^<]+?>', '', ruta.detalle)}\n" # Limpiar HTML
             content += f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n\n"
 

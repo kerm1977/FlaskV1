@@ -6,7 +6,7 @@
     <style>
         .route-name {
             font-weight: 500;
-            color: orange; /* Color de enlace primario */
+            color: black; /* Color de enlace primario cambiado a negro */
             text-decoration: none;
             font-size: 1.1rem; /* Tamaño de fuente por defecto para pantallas más grandes */
         }
@@ -16,7 +16,7 @@
 
         /* Estilos para el título principal con fondo gris claro */
         .main-title {
-            /*background-color: orange; /* Gris claro */*/
+            background-color: #f0f0f0; /* Gris claro */
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 20px; /* Margen inferior para separar del filtro */
@@ -28,12 +28,11 @@
             border-radius: 8px;
             margin-top: 30px; /* Margen superior más amplio */
             margin-bottom: 20px; /* Margen inferior más amplio */
-            color: black;
+            color: black; /* Color de texto por defecto para las categorías */
         }
         /* Nuevo estilo específico para el título "Otros" */
         .other-category-title-bg {
-            /*background-color: orange; /* Gris claro */*/
-
+            background-color: #f0f0f0; /* Gris claro */
         }
 
         /* Estilos específicos para el botón flotante (FAB) de crear ruta */
@@ -121,7 +120,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         .fab-button-export.pdf { background-color: #dc3545; } /* Rojo para PDF */
-        .fab-button-export.jpg { background-color: #17a2b8; } /* Info azul para JPG */
+        /* .fab-button-export.jpg { background-color: #17a2b8; } */ /* Info azul para JPG (ELIMINADO) */
         .fab-button-export.txt { background-color: #6c757d; } /* Gris para TXT */
 
         /* Ajuste de posición para los botones de exportación para que no choquen con el de añadir */
@@ -150,7 +149,7 @@
     </style>
 
 <div class="container mt-4">
-    <h1 class="main-title text-center mb-4 text-dark">Rutas Disponibles</h1>
+    <h1 class="main-title text-center mb-4 text-dark">Rutas Disponibles</h1> {# CAMBIO: text-warning a text-dark #}
 
     {# Formulario de filtro por categoría #}
     <div class="mb-4">
@@ -182,8 +181,8 @@
                 {# Mostrar el título "Otros" solo si hay rutas de "Internacional", "Caminatas Programadas" o "Caminatas por Reconocer" #}
                 {% if rutas_por_categoria.get('Internacional') or rutas_por_categoria.get('Caminatas Programadas') or rutas_por_categoria.get('Caminatas por Reconocer') %}
                     <div class="mb-5">
-                        <div class="card-header-category other-category-title-bg mt-5 text-dark"> {# Añadida la clase other-category-title-bg #}
-                            <h1 class="text-center text-dark">{{ categoria_display }}</h1>
+                        <div class="card-header-category other-category-title-bg mt-5 text-dark"> {# Añadida la clase other-category-title-bg y text-dark #}
+                            <h1 class="text-center text-dark">{{ categoria_display }}</h1> {# CAMBIO: h2 a h1 y text-dark #}
                             <hr>
                         </div>
                     </div>
@@ -191,8 +190,8 @@
             {% elif rutas_en_categoria %}
                 {% set has_any_routes = true %} {# Se encontraron rutas en una categoría válida #}
                 <div class="mb-4">
-                    <div class="card-header-category mt-5"> {# Sin la clase other-category-title-bg #}
-                        <h2 class="text-center text-dark">{{ categoria_display }}</h2>
+                    <div class="card-header-category mt-5"> {# Sin la clase other-category-title-bg, y sin text-dark aquí #}
+                        <h2 class="text-center text-dark">{{ categoria_display }}</h2> {# CAMBIO: text-dark #}
                         <hr>
                     </div>
                     <div>
@@ -200,9 +199,12 @@
                             {% for ruta in rutas_en_categoria %}
                                 <li class="route-item">
                                     <div>
+                                        {# Mostrar nombre de ruta - fecha - ¢precio, solo si existen #}
                                         <span class="me-2 text-muted">{{ loop.index }}.</span>
-                                        <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning">
-                                            {{ ruta.nombre | title}}
+                                        <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name"> {# ELIMINADO: text-warning #}
+                                            {{ ruta.nombre }}
+                                            {% if ruta.fecha %} - {{ ruta.fecha.strftime('%d/%m/%y') }}{% endif %}
+                                            {% if ruta.precio is not none %} - ¢{{ ruta.precio|int }}{% endif %}
                                         </a>
                                     </div>
                                 </li>
@@ -245,7 +247,7 @@
     <a href="{{ url_for('rutas.exportar_todas_rutas_pdf', categoria=provincia_seleccionada) }}" class="fab-button-export pdf" title="Exportar a PDF">
         <i class="fas fa-file-pdf"></i>
     </a>
-   
+    {# Botón de exportar a JPG ELIMINADO #}
     <a href="{{ url_for('rutas.exportar_todas_rutas_txt', categoria=provincia_seleccionada) }}" class="fab-button-export txt" title="Exportar a TXT">
         <i class="fas fa-file-alt"></i>
     </a>

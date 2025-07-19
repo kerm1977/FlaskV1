@@ -35,7 +35,15 @@
 <div class="container">
     <div class="content-wrapper">
         <div class="detail-section">
-            <p class="text-warning">Provincia:</p>
+            {# Mostrar nombre de ruta - fecha - ¢precio, solo si existen #}
+            <h2 class="text-warning">
+                {{ ruta.nombre }}
+                {% if ruta.fecha %} - {{ ruta.fecha.strftime('%d/%m/%Y') }}{% endif %}
+                {% if ruta.precio is not none %} - ¢{{ ruta.precio|int }}{% endif %} {# CAMBIO: |int para quitar decimales #}
+            </h2>
+        </div>
+        <div class="detail-section">
+            <p class="text-warning">Categoría:</p> {# Cambiado de Provincia a Categoría #}
             <p class="">{{ ruta.provincia }}</p>
         </div>
         <div class="detail-section">

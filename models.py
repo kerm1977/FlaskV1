@@ -406,6 +406,7 @@ class Pagos(db.Model):
     cantidad_acuatico = db.Column(db.Integer, default=0)
     precio_aereo = db.Column(db.Float, default=0)
     cantidad_aereo = db.Column(db.Integer, default=0)
+    # NUEVOS CAMPOS AÑADIDOS PARA "OTROS TRANSPORTE"
     precio_otros_transporte = db.Column(db.Float, default=0)
     cantidad_otros_transporte = db.Column(db.Integer, default=0)
     descripcion_otros_transporte = db.Column(db.String(255), nullable=True)
@@ -632,7 +633,11 @@ class Ruta(db.Model):
     provincia = db.Column(db.String(50), nullable=False) 
     detalle = db.Column(db.Text, nullable=True) # Para CKEditor o texto largo
     enlace_video = db.Column(db.String(500), nullable=True) # Enlace compatible con Facebook/YouTube
-
+    
+    # NUEVOS CAMPOS: fecha y precio
+    fecha = db.Column(db.Date, nullable=True) # Campo para la fecha de la ruta
+    precio = db.Column(db.Float, nullable=True) # Campo para el precio de la ruta
 
     def __repr__(self):
-        return f"Ruta(Nombre: {self.nombre}, Categoría: {self.provincia})" # Actualizado el __repr__
+        return f"Ruta(Nombre: {self.nombre}, Categoría: {self.provincia}, Fecha: {self.fecha}, Precio: {self.precio})" # Actualizado el __repr__
+
