@@ -12,6 +12,42 @@
         border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* Línea sutil en la parte inferior */
     }
     /* Puedes necesitar un padding-top en el body de base.html si el navbar superpone el contenido */
+
+    /* Mostrar icono y texto en móviles para ciertos enlaces */
+    @media (max-width: 991.98px) { /* Bootstrap's lg breakpoint para móvil */
+        .nav-item .nav-link .icon-only-mobile {
+            display: inline-block; /* Muestra el icono */
+            margin-right: 5px; /* Espacio entre icono y texto */
+        }
+        .nav-item .nav-link .text-only-desktop {
+            display: inline-block; /* Muestra el texto junto al icono en móvil */
+        }
+        /* Estilos para el separador en móvil */
+        .mobile-separator {
+            border-top: 1px solid rgba(0, 0, 0, 0.2); /* Línea más visible */
+            margin: 0.5rem 0; /* Espacio arriba y abajo */
+            display: block; /* Asegura que se muestre como un bloque */
+        }
+    }
+
+    /* En pantallas de escritorio, ocultar iconos y mostrar texto */
+    @media (min-width: 992px) {
+        .nav-item .nav-link .icon-only-mobile {
+            display: none; /* Oculta el icono */
+        }
+        .nav-item .nav-link .text-only-desktop {
+            display: inline; /* Muestra el texto */
+        }
+        /* Ocultar el separador en escritorio */
+        .mobile-separator {
+            display: none;
+        }
+    }
+
+    /* Añadir transición suave para el colapso del navbar */
+    .navbar-collapse {
+        transition: height 0.35s ease; /* Transición para la altura al abrir/cerrar */
+    }
 </style>
 <nav class="navbar navbar-expand-lg custom-navbar">
         <div class="container-fluid">
@@ -28,17 +64,29 @@
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {# El enlace de Caminatas siempre visible #}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('caminatas.ver_caminatas') }}">Caminatas</a>
+                        <a class="nav-link" href="{{ url_for('caminatas.ver_caminatas') }}">
+                            <i class="fas fa-hiking icon-only-mobile"></i> <!-- Icono de senderista -->
+                            <span class="text-only-desktop">Caminatas</span>
+                        </a>
                     </li>
                     {# Enlace para el reproductor de música #}
                     <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('player.show_player') }}">Música</a>
+                            <a class="nav-link" href="{{ url_for('player.show_player') }}">
+                                <i class="fas fa-music icon-only-mobile"></i> <!-- Icono de nota musical -->
+                                <span class="text-only-desktop">Música</span>
+                            </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('rutas.ver_rutas') }}">Rutas</a>
+                        <a class="nav-link" href="{{ url_for('rutas.ver_rutas') }}">
+                            <i class="fas fa-map-marker-alt icon-only-mobile"></i> <!-- Icono de geoposición -->
+                            <span class="text-only-desktop">Rutas</span>
+                        </a>
                     </li>
                      <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('aboutus.ver_aboutus') }}">Acerca de Nosotros</a>
+                        <a class="nav-link" href="{{ url_for('aboutus.ver_aboutus') }}">
+                            <i class="fas fa-info-circle icon-only-mobile"></i> <!-- Icono de acerca de -->
+                            <span class="text-only-desktop">Acerca de Nosotros</span>
+                        </a>
                     </li>
                   
 
@@ -57,31 +105,37 @@
                                     <li><a class="dropdown-item" href="{{ url_for('proyecto.ver_proyectos') }}">Gestor de Proyectos</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('notas.ver_notas') }}">Gestor de Notas</a></li>
                                     <li><a class="dropdown-item" href="{{ url_for('intern.index') }}">Internacional</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_for('itinerario.ver_itinerario') }}">Itinerarios</a></li>
                                     <li><a class="dropdown-item" href="https://www.pythonanywhere.com/user/kenth1977/">Pythonanywhere</a></li>
                                     <li><a class="dropdown-item" href="https://gpx.studio/app#10.16/9.6134/-83.8223">GPX Studio</a></li>
                                     <li><a class="dropdown-item" href="https://www.sinac.go.cr/ES/resvlinea/Paginas/default.aspx">Reservas Sinac</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger fw-bold" href="{{ url_for('contactos.admin_manage_roles') }}">Administrar Roles</a></li>
-
-
-
                                 </ul>
                             </li>
                         {% endif %}
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('perfil.ver_perfil') }}">{{ session.username }}</a>
+                            <a class="nav-link" href="{{ url_for('perfil.ver_perfil') }}">
+                                <i class="fas fa-user icon-only-mobile"></i> <!-- Icono de usuario para perfil logueado -->
+                                <span class="text-only-desktop">{{ session.username }}</span>
+                            </a>
                         </li>
                        
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+                            <hr class="mobile-separator d-lg-none"> {# Separador visible solo en móvil con estilo mejorado #}
+                            <a class="nav-link" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt icon-only-mobile"></i> <!-- Icono de cerrar sesión -->
+                                <span class="text-only-desktop">Cerrar Sesión</span>
+                            </a>
                         </li>
                     {% else %}
 
                         {# El enlace de Iniciar Sesión y Registro siempre visible si no está logueado #}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-user icon-only-mobile"></i> <!-- Icono de usuario para iniciar sesión -->
+                                <span class="text-only-desktop">Iniciar Sesión</span>
+                            </a>
                         </li>
 
                  {% endif %}
@@ -89,3 +143,50 @@
             </div>
         </div>
     </nav>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const navbarCollapseElement = document.getElementById('navbarNav');
+        const navbarToggler = document.querySelector('.navbar-toggler');
+
+        // Cerrar el navbar cuando se hace clic fuera de él, excepto si es un dropdown
+        document.addEventListener('click', function (event) {
+            // Verificar si el navbar está abierto
+            if (navbarCollapseElement.classList.contains('show')) {
+                // Verificar si el clic no es dentro del navbar ni en el botón del toggler
+                const isClickInsideNavbar = navbarCollapseElement.contains(event.target);
+                const isClickOnToggler = navbarToggler.contains(event.target);
+
+                // Verificar si el clic es en un dropdown-toggle o dentro de un dropdown-menu
+                const isClickOnDropdownToggle = event.target.closest('.dropdown-toggle');
+                const isClickInsideDropdownMenu = event.target.closest('.dropdown-menu');
+
+                // Si el clic no es dentro del navbar, ni en el toggler, y NO es un dropdown, entonces cerrar el navbar
+                if (!isClickInsideNavbar && !isClickOnToggler && !isClickOnDropdownToggle && !isClickInsideDropdownMenu) {
+                    // Simular un clic en el toggler para que Bootstrap maneje el cierre con su animación
+                    navbarToggler.click();
+                }
+            }
+        });
+
+        // Cerrar el navbar cuando se hace clic en un enlace dentro de él (para mejorar la UX en móviles)
+        // Asegurarse de que no sea un dropdown-toggle
+        navbarCollapseElement.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(event) {
+                // Si el enlace clicado es un dropdown-toggle, no cerrar el navbar principal
+                if (link.classList.contains('dropdown-toggle')) {
+                    return; // No hacer nada, dejar que Bootstrap maneje el dropdown
+                }
+
+                if (navbarCollapseElement.classList.contains('show')) {
+                    // Simular un clic en el toggler para que Bootstrap maneje el cierre con su animación
+                    navbarToggler.click();
+                }
+            });
+        });
+
+        // El botón del toggler ya funciona por sí mismo para abrir y cerrar debido a los atributos data-bs-toggle/target.
+        // No necesitamos JavaScript adicional para su funcionalidad básica de toggle.
+    });
+</script>
