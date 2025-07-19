@@ -34,12 +34,13 @@
                     <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('player.show_player') }}">Música</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('rutas.ver_rutas') }}">Rutas</a>
+                    </li>
                      <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('aboutus.ver_aboutus') }}">Acerca de Nosotros</a>
                     </li>
-                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('rutas.ver_rutas') }}">Rutas</a>
-                    </li>
+                  
 
                     {% if session.logged_in %}
                         {# MODIFICACIÓN: Mostrar "Más Opciones" solo para Superuser #}
@@ -59,6 +60,7 @@
                                     <li><a class="dropdown-item" href="{{ url_for('itinerario.ver_itinerario') }}">Itinerarios</a></li>
                                     <li><a class="dropdown-item" href="https://www.pythonanywhere.com/user/kenth1977/">Pythonanywhere</a></li>
                                     <li><a class="dropdown-item" href="https://gpx.studio/app#10.16/9.6134/-83.8223">GPX Studio</a></li>
+                                    <li><a class="dropdown-item" href="https://www.sinac.go.cr/ES/resvlinea/Paginas/default.aspx">Reservas Sinac</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger fw-bold" href="{{ url_for('contactos.admin_manage_roles') }}">Administrar Roles</a></li>
 
