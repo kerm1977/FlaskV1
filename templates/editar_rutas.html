@@ -31,6 +31,10 @@
             background-color: #ffc107; /* Color de fondo warning (naranja) */
             color: #212529; /* Color de texto oscuro para contraste */
             border: none; /* Asegurar que no haya borde */
+            text-decoration: none; /* Eliminar el subrayado del enlace */
+        }
+        .fab-button-save i {
+            color: black; /* Asegura que el icono sea negro */
         }
         .fab-button-save:hover {
             transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
@@ -38,10 +42,10 @@
             background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
         }
 
-        /* Estilos específicos para el botón flotante (FAB) de volver atrás - IDÉNTICOS a crear_rutas.html */
+        /* Botón flotante para VOLVER ATRÁS (idéntico al de ver_pagos.html) */
         .fab-container-back {
             position: fixed;
-            bottom: 70px; /* Distancia desde abajo */
+            bottom: 50px; /* Distancia desde abajo */
             left: 20px; /* Distancia desde la izquierda */
             right: auto; /* Anula la distancia derecha */
             z-index: 2000; /* Asegura que esté por encima de otros elementos */
@@ -67,50 +71,45 @@
         }
     </style>
 
-    <div> {# Este div reemplaza al card shadow-sm para coincidir con crear_rutas.html #}
-        <div class="bg-warning text-white p-3">
-            <h1 class="mb-0">Editar Ruta: {{ ruta.nombre }}</h1>
-        </div>
-        <div> {# Este div reemplaza al card-body para coincidir con crear_rutas.html #}
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+    <h1 class="main-title text-center mb-4 text-warning">Editar Ruta</h1>
 
-            <form method="POST" action="{{ url_for('rutas.editar_ruta', ruta_id=ruta.id) }}" id="main-form"> {# Se añadió el ID al formulario #}
-                <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre de la Ruta <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ ruta.nombre }}" required>
-                </div>
-                <div class="mb-3">
-                    <label for="provincia" class="form-label">Provincia <span class="text-danger">*</span></label>
-                    <select class="form-select" id="provincia" name="provincia" required>
-                        <option value="">Seleccione una provincia</option>
-                        {% for provincia_opcion in provincias %}
-                            <option value="{{ provincia_opcion }}" {% if provincia_opcion == ruta.provincia %}selected{% endif %}>{{ provincia_opcion }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="detalle" class="form-label">Detalle de la Ruta</label>
-                    <textarea class="form-control" id="detalle" name="detalle" rows="8">{{ ruta.detalle }}</textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="enlace_video" class="form-label">Enlace de Video (Facebook o YouTube)</label>
-                    <input type="url" class="form-control" id="enlace_video" name="enlace_video" value="{{ ruta.enlace_video if ruta.enlace_video else '' }}" placeholder="Ej: https://www.youtube.com/watch?v=VIDEO_ID o https://www.facebook.com/watch/?v=VIDEO_ID">
-                    <small class="form-text text-muted">Asegúrate de que el enlace sea compatible con incrustación.</small>
-                </div>
-                
-                {# Los botones originales han sido eliminados para ser reemplazados por los FABs flotantes #}
-            </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form id="main-form" method="POST" action="{{ url_for('rutas.editar_ruta', ruta_id=ruta.id) }}">
+        {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+        <div class="form-group mb-3">
+            <label for="nombre">Nombre de la Ruta:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ ruta.nombre }}" required>
         </div>
-    </div>
+        <div class="form-group mb-3">
+            <label for="provincia">Categoría:</label> {# CAMBIO DE TEXTO #}
+            <select class="form-control" id="provincia" name="provincia" required>
+                {# Se eliminó la opción "Todas" ya que no es relevante para la edición #}
+                {% for categoria in categorias_busqueda %} {# Iterar sobre las nuevas categorías #}
+                    {# Excluir "Todas las Categorías" y "Otros" de las opciones de edición #}
+                    {% if categoria != 'Todas las Categorías' and categoria != 'Otros' %}
+                        <option value="{{ categoria }}" {% if ruta.provincia == categoria %}selected{% endif %}>{{ categoria }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label for="enlace_video">Enlace de Video (YouTube/Facebook):</label>
+            <input type="url" class="form-control" id="enlace_video" name="enlace_video" value="{{ ruta.enlace_video if ruta.enlace_video else '' }}" placeholder="Ej: https://www.youtube.com/watch?v=VIDEO_ID">
+            <small class="form-text text-muted">Asegúrate de que el enlace sea de YouTube o Facebook para la reproducción.</small>
+        </div>
+        <div class="form-group mb-3">
+            <label for="detalle">Detalle de la Ruta:</label>
+            <textarea class="form-control" id="detalle" name="detalle" rows="10">{{ ruta.detalle }}</textarea>
+        </div>
+        {# El botón de submit se movió a un FAB #}
+    </form>
 </div>
 
 {# Botón flotante para GUARDAR CAMBIOS (idéntico al de crear/guardar en crear_rutas.html) #}

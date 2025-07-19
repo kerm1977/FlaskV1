@@ -626,11 +626,13 @@ class AboutUs(db.Model):
 class Ruta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255), nullable=False)
-    provincia = db.Column(db.String(50), nullable=False)
+    # CAMBIO: El campo 'provincia' ahora puede almacenar las nuevas categorías
+    # Se mantiene el nombre 'provincia' para evitar una migración de base de datos más compleja
+    # pero lógicamente ahora representa la 'categoría' de la ruta.
+    provincia = db.Column(db.String(50), nullable=False) 
     detalle = db.Column(db.Text, nullable=True) # Para CKEditor o texto largo
     enlace_video = db.Column(db.String(500), nullable=True) # Enlace compatible con Facebook/YouTube
 
 
     def __repr__(self):
-        return f"Ruta(Nombre: {self.nombre}, Provincia: {self.provincia})"
-
+        return f"Ruta(Nombre: {self.nombre}, Categoría: {self.provincia})" # Actualizado el __repr__

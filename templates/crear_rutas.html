@@ -25,9 +25,13 @@
             justify-content: center;
             font-size: 1.8rem; /* Tamaño del icono */
             transition: all 0.3s ease;
-            background-color: #ffc107; /* Color de fondo warning (naranja) */
+            background-color: #ffc107; /* Color de fondo warning (naranja */
             color: #212529; /* Color de texto oscuro para contraste */
             border: none; /* Asegurar que no haya borde */
+            text-decoration: none; /* Eliminar el subrayado del enlace */
+        }
+        .fab-button-save i {
+            color: black; /* Asegura que el icono sea negro */
         }
         .fab-button-save:hover {
             transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
@@ -35,10 +39,10 @@
             background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
         }
 
-        /* Estilos específicos para el botón flotante (FAB) de volver atrás - IDÉNTICOS a ver_pagos.html */
+        /* Estilos específicos para el botón flotante (FAB) de volver atrás (idénticos a ver_pagos.html) */
         .fab-container-back {
             position: fixed;
-            bottom: 70px; /* Distancia desde abajo (de ver_pagos.html) */
+            bottom: 50px; /* Distancia desde abajo */
             left: 20px; /* Distancia desde la izquierda */
             right: auto; /* Anula la distancia derecha */
             z-index: 2000; /* Asegura que esté por encima de otros elementos */
@@ -63,39 +67,47 @@
             background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
         }
     </style>
-    <div>
-        <div class="bg-warning text-white p-3">
-            <h1 class="mb-0">Nuestras Ruta</h1>
+
+    <h1 class="main-title text-center mb-4 text-warning">Crear Nueva Ruta</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form id="main-form" method="POST" action="{{ url_for('rutas.crear_ruta') }}">
+        {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+        <div class="form-group mb-3">
+            <label for="nombre">Nombre de la Ruta:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
         </div>
-        <div>
-            <form method="POST" action="{{ url_for('rutas.crear_ruta') }}" id="main-form"> {# Se añadió el ID al formulario #}
-                <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre de la Ruta <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" required>
-                </div>
-                <div class="mb-3">
-                    <label for="provincia" class="form-label">Provincia <span class="text-danger">*</span></label>
-                    <select class="form-select" id="provincia" name="provincia">
-                        <option value="">Seleccione una provincia</option>
-                        {% for provincia_opcion in provincias %}
-                            <option value="{{ provincia_opcion }}">{{ provincia_opcion }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="detalle" class="form-label">Detalle de la Ruta</label>
-                    <textarea class="form-control" id="detalle" name="detalle" rows="8"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="enlace_video" class="form-label">Enlace de Video (Facebook o YouTube)</label>
-                    <input type="url" class="form-control" id="enlace_video" name="enlace_video" placeholder="Ej: https://www.youtube.com/watch?v=VIDEO_ID o https://www.facebook.com/watch/?v=VIDEO_ID">
-                    <small class="form-text text-muted">Asegúrate de que el enlace sea compatible con incrustación.</small>
-                </div>
-                
-                {# Los botones originales han sido eliminados para ser reemplazados por los FABs flotantes #}
-            </form>
+        <div class="form-group mb-3">
+            <label for="provincia">Categoría:</label> {# CAMBIO DE TEXTO #}
+            <select class="form-control" id="provincia" name="provincia" required>
+                {# Se eliminó la opción "Todas" ya que no es relevante para la creación #}
+                <option value="" disabled selected>Selecciona una categoría</option> {# Opción por defecto #}
+                {% for categoria in categorias_busqueda %} {# Iterar sobre las nuevas categorías #}
+                    {# Excluir "Todas las Categorías" y "Otros" de las opciones de creación #}
+                    {% if categoria != 'Todas las Categorías' and categoria != 'Otros' %}
+                        <option value="{{ categoria }}">{{ categoria }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
         </div>
-    </div>
+        <div class="form-group mb-3">
+            <label for="enlace_video">Enlace de Video (YouTube/Facebook):</label>
+            <input type="url" class="form-control" id="enlace_video" name="enlace_video" placeholder="Ej: https://www.youtube.com/watch?v=VIDEO_ID">
+            <small class="form-text text-muted">Asegúrate de que el enlace sea de YouTube o Facebook para la reproducción.</small>
+        </div>
+        <div class="form-group mb-3">
+            <label for="detalle">Detalle de la Ruta:</label>
+            <textarea class="form-control" id="detalle" name="detalle" rows="10"></textarea>
+        </div>
+        {# El botón de submit se movió a un FAB #}
+    </form>
 </div>
 
 {# Botón flotante para CREAR RUTA (idéntico al de guardar en crear_pagos.html) #}

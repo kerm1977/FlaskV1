@@ -14,12 +14,34 @@
             text-decoration: underline;
         }
 
-        /* Estilos específicos para el botón flotante (FAB) de crear ruta - Ahora idénticos a ver_pagos.html */
+        /* Estilos para el título principal con fondo gris claro */
+        .main-title {
+            /*background-color: orange; /* Gris claro */*/
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px; /* Margen inferior para separar del filtro */
+        }
+
+        /* Estilos para el encabezado de categoría (sin fondo por defecto) y márgenes */
+        .card-header-category {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 30px; /* Margen superior más amplio */
+            margin-bottom: 20px; /* Margen inferior más amplio */
+            color: black;
+        }
+        /* Nuevo estilo específico para el título "Otros" */
+        .other-category-title-bg {
+            /*background-color: orange; /* Gris claro */*/
+
+        }
+
+        /* Estilos específicos para el botón flotante (FAB) de crear ruta */
         .btn-add-route {
             position: fixed;
-            bottom: 70px; /* Distancia desde abajo (ajustado a 70px para consistencia con ver_pagos.html) */
+            bottom: 70px; /* Distancia desde abajo */
             right: 20px; /* Distancia desde la derecha */
-            z-index: 1000;
+            z-index: 2000;
             width: 60px; /* Tamaño del botón */
             height: 60px; /* Tamaño del botón */
             border-radius: 50%; /* Hacerlo circular */
@@ -28,75 +50,120 @@
             justify-content: center;
             font-size: 1.8rem; /* Tamaño del icono */
             transition: all 0.3s ease;
-            /* Estilos del botón warning de ver_pagos.html */
             background-color: #ffc107; /* Color de fondo warning */
             color: #212529; /* Color de texto oscuro para contraste */
-            border: none; /* Asegurar que no haya borde */
-            text-decoration: none; /* Eliminar el subrayado del enlace */
+            border: none;
+            text-decoration: none;
         }
         .btn-add-route i {
-            color: black; /* Asegura que el icono sea negro */
+            color: black;
         }
         .btn-add-route:hover {
-            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
-            background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: #e0a800;
         }
 
-        /* Estilos específicos para el botón flotante (FAB) de volver atrás - IDÉNTICOS a crear_rutas.html */
+        /* Estilos específicos para el botón flotante (FAB) de volver atrás */
         .fab-container-back {
             position: fixed;
-            bottom: 70px; /* Distancia desde abajo (de ver_pagos.html) */
-            left: 20px; /* Distancia desde la izquierda */
-            right: auto; /* Anula la distancia derecha */
-            z-index: 2000; /* Asegura que esté por encima de otros elementos */
+            bottom: 70px;
+            left: 20px;
+            right: auto;
+            z-index: 2000;
         }
         .fab-button-back {
-            width: 60px; /* Tamaño del botón */
-            height: 60px; /* Tamaño del botón */
-            border-radius: 50%; /* Hacerlo circular */
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem; /* Tamaño del icono */
+            font-size: 1.8rem;
             transition: all 0.3s ease;
             background-color: #007bff; /* Color de fondo primary (azul) */
-            color: #ffffff; /* Color de texto blanco */
-            border: none; /* Asegurar que no haya borde */
-            text-decoration: none; /* Eliminar el subrayado */
+            color: #ffffff;
+            border: none;
+            text-decoration: none;
         }
         .fab-button-back:hover {
-            transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
-            background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: #0056b3;
         }
 
+        /* NUEVOS ESTILOS para los botones flotantes de exportación */
+        .fab-container-export {
+            position: fixed;
+            right: 20px; /* Misma posición horizontal que el botón de añadir */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column; /* Apilar verticalmente */
+            align-items: flex-end; /* Alinear a la derecha */
+        }
+        .fab-button-export {
+            width: 50px; /* Un poco más pequeños que los principales */
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            color: #ffffff;
+            border: none;
+            text-decoration: none;
+            margin-bottom: 10px; /* Espacio entre botones */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .fab-button-export:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .fab-button-export.pdf { background-color: #dc3545; } /* Rojo para PDF */
+        .fab-button-export.jpg { background-color: #17a2b8; } /* Info azul para JPG */
+        .fab-button-export.txt { background-color: #6c757d; } /* Gris para TXT */
+
+        /* Ajuste de posición para los botones de exportación para que no choquen con el de añadir */
+        .fab-container-export {
+            bottom: 110px; /* Empieza más arriba que el botón de añadir ruta */
+        }
         /* Media query para pantallas pequeñas (móviles) */
         @media (max-width: 768px) {
             .route-name {
                 font-size: 0.9rem; /* Tamaño de fuente más pequeño para móviles */
             }
+            /* Ajuste de posición de los FABs para móviles si es necesario */
+            .fab-container-export {
+                bottom: 100px; /* Ajuste para móviles */
+                right: 15px;
+            }
+            .btn-add-route {
+                bottom: 40px; /* Ajuste para móviles */
+                right: 15px;
+            }
+            .fab-container-back {
+                bottom: 40px; /* Ajuste para móviles */
+                left: 15px;
+            }
         }
-        /* Estilos para las fechas en la lista (se eliminan si no se usan) */
-        /* .route-item-dates {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 5px;
-        } */
     </style>
 
 <div class="container mt-4">
-    <h1 class="main-title text-center mb-4 text-warning">Rutas Disponibles</h1>
+    <h1 class="main-title text-center mb-4 text-dark">Rutas Disponibles</h1>
 
-    {# Formulario de filtro por provincia #}
+    {# Formulario de filtro por categoría #}
     <div class="mb-4">
         <form action="{{ url_for('rutas.ver_rutas') }}" method="GET" class="d-flex align-items-center">
-            <label for="provincia-filter" class="form-label me-2 mb-0">Filtrar por Provincia:</label>
-            <select class="form-select me-2" id="provincia-filter" name="provincia" onchange="this.form.submit()">
-                <option value="Todas" {% if provincia_seleccionada == 'Todas' %}selected{% endif %}>Todas las Provincias</option>
-                {% for provincia in provincias %}
-                    <option value="{{ provincia }}" {% if provincia_seleccionada == provincia %}selected{% endif %}>{{ provincia }}</option>
-                    <hr>
+            <label for="categoria-filter" class="form-label me-2 mb-0">Buscar por:</label> {# CAMBIO DE TEXTO #}
+            <select class="form-select me-2" id="categoria-filter" name="categoria" onchange="this.form.submit()">
+                {# Iterar sobre las categorías de búsqueda definidas en Python #}
+                {% for categoria in categorias_busqueda %}
+                    {% if categoria == 'Otros' %}
+                        <option value="{{ categoria }}" disabled class="font-weight-bold">{{ categoria }}</option> {# Título deshabilitado #}
+                    {% else %}
+                        <option value="{{ categoria }}" {% if provincia_seleccionada == categoria %}selected{% endif %}>{{ categoria }}</option>
+                    {% endif %}
                 {% endfor %}
             </select>
             {# Puedes añadir un botón de búsqueda si no quieres que se envíe automáticamente en el cambio #}
@@ -104,37 +171,60 @@
         </form>
     </div>
 
-    {% if rutas_por_provincia %}
-        {% for provincia, rutas_list in rutas_por_provincia.items() %}
-            <div class="mb-4"> {# Se eliminan las clases 'card' y 'shadow-sm' #}
-                <div class="card-header-province mt-5">
-                    <h2 class="text-center">
-                    {{ provincia }}
-                    </h2>
-                    <hr>
+    {# Iterar sobre las categorías en el orden deseado y mostrar las rutas #}
+    {% set has_any_routes = false %} {# Variable para verificar si hay alguna ruta en total #}
+    {% for categoria_display in categorias_busqueda %}
+        {# Solo procesar si la categoría no es "Todas las Categorías" #}
+        {% if categoria_display != 'Todas las Categorías' %}
+            {% set rutas_en_categoria = rutas_por_categoria.get(categoria_display, []) %}
+
+            {% if categoria_display == 'Otros' %}
+                {# Mostrar el título "Otros" solo si hay rutas de "Internacional", "Caminatas Programadas" o "Caminatas por Reconocer" #}
+                {% if rutas_por_categoria.get('Internacional') or rutas_por_categoria.get('Caminatas Programadas') or rutas_por_categoria.get('Caminatas por Reconocer') %}
+                    <div class="mb-5">
+                        <div class="card-header-category other-category-title-bg mt-5"> {# Añadida la clase other-category-title-bg #}
+                            <h1 class="text-center text-dark">{{ categoria_display }}</h1>
+                            <hr>
+                        </div>
+                    </div>
+                {% endif %}
+            {% elif rutas_en_categoria %}
+                {% set has_any_routes = true %} {# Se encontraron rutas en una categoría válida #}
+                <div class="mb-4">
+                    <div class="card-header-category mt-5"> {# Sin la clase other-category-title-bg #}
+                        <h2 class="text-center text-warning">{{ categoria_display }}</h2>
+                        <hr>
+                    </div>
+                    <div>
+                        <ul class="list-unstyled">
+                            {% for ruta in rutas_en_categoria %}
+                                <li class="route-item">
+                                    <div>
+                                        <span class="me-2 text-muted">{{ loop.index }}.</span>
+                                        <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning">
+                                            {{ ruta.nombre | title}}
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                <div> {# Se eliminan las clases 'card-body' #}
-                    <ul class="list-unstyled">
-                        {% for ruta in rutas_list %}
-                            <li class="route-item">
-                                <div>
-                                    <span class="me-2 text-muted">{{ loop.index }}.</span>
-                                    <a href="{{ url_for('rutas.detalle_ruta', ruta_id=ruta.id) }}" class="route-name text-warning">
-                                        {{ ruta.nombre | title}}
-                                    </a>
-                                </div>
-                                {# Se eliminan las referencias a fecha_creacion y fecha_modificacion #}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {# Mostrar mensaje si no se encontraron rutas en ninguna categoría #}
+    {% if not rutas_por_categoria and provincia_seleccionada == 'Todas las Categorías' %}
         <div class="alert alert-info text-center" role="alert">
             No hay rutas disponibles. ¡Crea una nueva!
         </div>
+    {% elif not rutas_por_categoria and provincia_seleccionada != 'Todas las Categorías' %}
+        <div class="alert alert-info text-center" role="alert">
+            No hay rutas disponibles para la categoría seleccionada.
+        </div>
     {% endif %}
+
 
     {% if session.get('role') == 'Superuser' %}
     <a href="{{ url_for('rutas.crear_ruta') }}" class="btn btn-success btn-add-route" title="Crear nueva ruta">
@@ -143,10 +233,21 @@
     {% endif %}
 </div>
 
-{# Botón flotante para VOLVER ATRÁS (idéntico al de crear_rutas.html) #}
+{# Botón flotante para VOLVER ATRÁS #}
 <div class="fab-container-back">
     <a href="{{ url_for('caminatas.ver_caminatas') }}" class="fab-button-back" title="Volver a Caminatas">
         <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+
+{# NUEVOS BOTONES FLOTANTES PARA EXPORTAR #}
+<div class="fab-container-export">
+    <a href="{{ url_for('rutas.exportar_todas_rutas_pdf', categoria=provincia_seleccionada) }}" class="fab-button-export pdf" title="Exportar a PDF">
+        <i class="fas fa-file-pdf"></i>
+    </a>
+   
+    <a href="{{ url_for('rutas.exportar_todas_rutas_txt', categoria=provincia_seleccionada) }}" class="fab-button-export txt" title="Exportar a TXT">
+        <i class="fas fa-file-alt"></i>
     </a>
 </div>
 

@@ -14,6 +14,16 @@ rutas_bp = Blueprint('rutas', __name__, template_folder='templates')
 # Lista de provincias de Costa Rica
 PROVINCIAS = ["Alajuela", "Cartago", "Heredia", "Puntarenas", "Limón", "Guanacaste", "San José"]
 
+# NUEVA: Lista de categorías de búsqueda, con las provincias primero, luego el separador y las nuevas opciones
+CATEGORIAS_BUSQUEDA = [
+    "Todas las Categorías", # Opción por defecto para mostrar todo
+] + sorted(PROVINCIAS) + [ # Añade las provincias ordenadas alfabéticamente
+    "Otros", # Nueva etiqueta de grupo
+    "Internacional", # Nueva categoría: Internacional
+    "Caminatas Programadas", # Nueva categoría 1
+    "Caminatas por Reconocer" # Nueva categoría 2
+]
+
 # DECORADOR PARA ROLES (MOVIDO AQUÍ DESDE app.py)
 def role_required(roles):
     """
@@ -78,42 +88,54 @@ def get_embed_url(video_url):
 @rutas_bp.route('/rutas')
 @role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
 def ver_rutas():
-    # Obtener el parámetro 'provincia' de la URL si existe
-    provincia_seleccionada = request.args.get('provincia')
+    # Obtener el parámetro 'categoria' de la URL si existe
+    categoria_seleccionada = request.args.get('categoria')
 
-    if provincia_seleccionada and provincia_seleccionada != 'Todas':
-        rutas = Ruta.query.filter_by(provincia=provincia_seleccionada).order_by(Ruta.nombre).all()
-    else:
-        rutas = Ruta.query.order_by(Ruta.provincia, Ruta.nombre).all()
-        provincia_seleccionada = 'Todas' # Asegura que el dropdown muestre 'Todas' si no hay filtro o es inválido
+    # Consulta inicial para todas las rutas
+    query = Ruta.query
+
+    # Aplicar filtro si se seleccionó una categoría específica (que no sea "Todas las Categorías" o "Otros")
+    if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' and categoria_seleccionada != 'Otros':
+        query = query.filter_by(provincia=categoria_seleccionada) # El campo 'provincia' ahora almacena la categoría
+
+    # Obtener todas las rutas filtradas
+    rutas = query.order_by(Ruta.provincia, Ruta.nombre).all()
     
-    rutas_por_provincia = {}
+    # Si no se seleccionó ninguna categoría o se seleccionó "Todas las Categorías",
+    # asegúrate de que el dropdown muestre "Todas las Categorías"
+    if not categoria_seleccionada:
+        categoria_seleccionada = 'Todas las Categorías'
+    
+    # Agrupar las rutas por su "provincia" (que ahora es la categoría)
+    # Esto se hace aquí en Python para evitar la lógica compleja en Jinja2
+    rutas_por_categoria = {}
     for ruta in rutas:
-        if ruta.provincia not in rutas_por_provincia:
-            rutas_por_provincia[ruta.provincia] = []
-        rutas_por_provincia[ruta.provincia].append(ruta)
-            
+        if ruta.provincia not in rutas_por_categoria:
+            rutas_por_categoria[ruta.provincia] = []
+        rutas_por_categoria[ruta.provincia].append(ruta)
+
     return render_template('ver_rutas.html', 
-                           rutas_por_provincia=rutas_por_provincia, 
-                           provincias=PROVINCIAS, # Pasa la lista completa de provincias
-                           provincia_seleccionada=provincia_seleccionada) # Pasa la provincia seleccionada para el dropdown
+                           rutas_por_categoria=rutas_por_categoria, # Pasa las rutas agrupadas por categoría
+                           categorias_busqueda=CATEGORIAS_BUSQUEDA, # Pasa la lista completa de categorías para el dropdown
+                           provincia_seleccionada=categoria_seleccionada) # Pasa la categoría seleccionada para el dropdown
 
 @rutas_bp.route('/rutas/crear', methods=['GET', 'POST'])
 @role_required('Superuser')
 def crear_ruta():
     if request.method == 'POST':
         nombre = request.form['nombre']
-        provincia = request.form['provincia']
+        # El campo 'provincia' del formulario ahora almacenará la categoría seleccionada
+        categoria = request.form['provincia'] 
         detalle = request.form['detalle']
         enlace_video = request.form.get('enlace_video')
 
-        if not nombre or not provincia:
-            flash('El nombre y la provincia son campos obligatorios.', 'danger')
-            return render_template('crear_rutas.html', provincias=PROVINCIAS)
+        if not nombre or not categoria:
+            flash('El nombre y la categoría son campos obligatorios.', 'danger')
+            return render_template('crear_rutas.html', categorias_busqueda=CATEGORIAS_BUSQUEDA)
 
         nueva_ruta = Ruta(
             nombre=nombre,
-            provincia=provincia,
+            provincia=categoria, # Guardamos la categoría en el campo 'provincia'
             detalle=detalle,
             enlace_video=enlace_video
         )
@@ -127,7 +149,9 @@ def crear_ruta():
             flash(f'Error al crear la ruta: {e}', 'danger')
             current_app.logger.error(f"Error al crear ruta: {e}")
     
-    return render_template('crear_rutas.html', provincias=PROVINCIAS)
+    # Filtrar CATEGORIAS_BUSQUEDA para no incluir "Todas las Categorías" ni "Otros" en el formulario de creación
+    categorias_para_formulario = [cat for cat in CATEGORIAS_BUSQUEDA if cat != 'Todas las Categorías' and cat != 'Otros']
+    return render_template('crear_rutas.html', categorias_busqueda=categorias_para_formulario) # Pasa las categorías filtradas al formulario
 
 @rutas_bp.route('/rutas/editar/<int:ruta_id>', methods=['GET', 'POST'])
 @role_required('Superuser')
@@ -139,7 +163,8 @@ def editar_ruta(ruta_id):
 
     if request.method == 'POST':
         ruta.nombre = request.form['nombre']
-        ruta.provincia = request.form['provincia']
+        # El campo 'provincia' del formulario ahora almacenará la categoría seleccionada
+        ruta.provincia = request.form['provincia'] 
         ruta.detalle = request.form['detalle']
         ruta.enlace_video = request.form.get('enlace_video')
         
@@ -152,7 +177,9 @@ def editar_ruta(ruta_id):
             flash(f'Error al actualizar la ruta: {e}', 'danger')
             current_app.logger.error(f"Error al actualizar ruta {ruta_id}: {e}")
     
-    return render_template('editar_rutas.html', ruta=ruta, provincias=PROVINCIAS)
+    # Filtrar CATEGORIAS_BUSQUEDA para no incluir "Todas las Categorías" ni "Otros" en el formulario de edición
+    categorias_para_formulario = [cat for cat in CATEGORIAS_BUSQUEDA if cat != 'Todas las Categorías' and cat != 'Otros']
+    return render_template('editar_rutas.html', ruta=ruta, categorias_busqueda=categorias_para_formulario) # Pasa las categorías filtradas al formulario
 
 @rutas_bp.route('/rutas/<int:ruta_id>')
 @role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver los detalles
@@ -194,7 +221,7 @@ def exportar_ruta_txt(ruta_id):
 
     # Se eliminan las referencias a fecha_creacion y fecha_modificacion
     content = f"Nombre de la Ruta: {ruta.nombre}\n" \
-              f"Provincia: {ruta.provincia}\n" \
+              f"Categoría: {ruta.provincia}\n" \
               f"Detalle: {ruta.detalle}\n" \
               f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n"
 
@@ -222,7 +249,7 @@ def exportar_ruta_pdf(ruta_id):
     y_position -= (line_height * 2)
 
     c.setFont('Helvetica', 10)
-    c.drawString(100, y_position, f"Provincia: {ruta.provincia}")
+    c.drawString(100, y_position, f"Categoría: {ruta.provincia}") # Cambiado de Provincia a Categoría
     y_position -= line_height
     c.drawString(100, y_position, f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}")
     y_position -= (line_height * 2) # Ajuste de espacio tras eliminar fechas
@@ -275,3 +302,103 @@ def exportar_ruta_jpg(ruta_id):
     flash('La exportación a JPG desde el servidor no está implementada directamente. Considere usar una solución de captura de pantalla en el cliente (navegador) o un servicio externo si es indispensable.', 'info')
     return redirect(url_for('rutas.detalle_ruta', ruta_id=ruta_id))
 
+
+# NUEVAS RUTAS PARA EXPORTAR TODAS LAS RUTAS (o las filtradas por la categoría seleccionada)
+@rutas_bp.route('/rutas/exportar/todas/pdf')
+@role_required(['Superuser', 'Usuario Regular'])
+def exportar_todas_rutas_pdf():
+    categoria_seleccionada = request.args.get('categoria')
+    query = Ruta.query
+    if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' and categoria_seleccionada != 'Otros':
+        query = query.filter_by(provincia=categoria_seleccionada)
+    rutas = query.order_by(Ruta.provincia, Ruta.nombre).all()
+
+    buffer = BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=letter)
+    
+    y_position = 750
+    line_height = 15
+    page_number = 1
+
+    def add_page_header(canvas_obj, y_pos, page_num):
+        canvas_obj.setFont('Helvetica-Bold', 10)
+        canvas_obj.drawString(500, 770, f"Página {page_num}")
+        canvas_obj.setFont('Helvetica-Bold', 14)
+        canvas_obj.drawString(100, y_pos, "Listado de Rutas Disponibles")
+        canvas_obj.setFont('Helvetica', 10)
+        return y_pos - (line_height * 2)
+
+    y_position = add_page_header(c, y_position, page_number)
+
+    if not rutas:
+        c.drawString(100, y_position, "No hay rutas disponibles para exportar.")
+    else:
+        current_category = None
+        for ruta in rutas:
+            if y_position < 70: # Si queda poco espacio, añadir nueva página
+                c.showPage()
+                page_number += 1
+                y_position = 750
+                y_position = add_page_header(c, y_position, page_number)
+                current_category = None # Resetear categoría para nuevo encabezado en la nueva página
+
+            if ruta.provincia != current_category:
+                if current_category is not None: # No añadir línea antes del primer encabezado
+                    y_position -= line_height # Espacio entre categorías
+                c.setFont('Helvetica-Bold', 12)
+                c.drawString(100, y_position, f"Categoría: {ruta.provincia}")
+                y_position -= line_height
+                c.setFont('Helvetica', 10)
+                current_category = ruta.provincia
+            
+            c.drawString(110, y_position, f"  - Nombre: {ruta.nombre}")
+            y_position -= line_height
+            c.drawString(110, y_position, f"    Detalle: {re.sub('<[^<]+?>', '', ruta.detalle)[:100]}...") # Limpiar HTML y truncar
+            y_position -= line_height
+            c.drawString(110, y_position, f"    Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}")
+            y_position -= (line_height * 1.5) # Espacio entre rutas
+
+    c.save()
+    pdf_data = buffer.getvalue()
+    buffer.close()
+
+    response = make_response(pdf_data)
+    filename = f"todas_las_rutas_{categoria_seleccionada.replace(' ', '_').lower()}.pdf" if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' else "todas_las_rutas.pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    response.headers["Content-type"] = "application/pdf"
+    return response
+
+
+@rutas_bp.route('/rutas/exportar/todas/txt')
+@role_required(['Superuser', 'Usuario Regular'])
+def exportar_todas_rutas_txt():
+    categoria_seleccionada = request.args.get('categoria')
+    query = Ruta.query
+    if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' and categoria_seleccionada != 'Otros':
+        query = query.filter_by(provincia=categoria_seleccionada)
+    rutas = query.order_by(Ruta.provincia, Ruta.nombre).all()
+
+    content = "Listado de Rutas Disponibles\n\n"
+    if not rutas:
+        content += "No hay rutas disponibles para exportar."
+    else:
+        current_category = None
+        for ruta in rutas:
+            if ruta.provincia != current_category:
+                content += f"\n--- Categoría: {ruta.provincia} ---\n"
+                current_category = ruta.provincia
+            content += f"Nombre: {ruta.nombre}\n"
+            content += f"Detalle: {re.sub('<[^<]+?>', '', ruta.detalle)}\n" # Limpiar HTML
+            content += f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n\n"
+
+    response = make_response(content)
+    filename = f"todas_las_rutas_{categoria_seleccionada.replace(' ', '_').lower()}.txt" if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' else "todas_las_rutas.txt"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    response.headers["Content-type"] = "text/plain; charset=utf-8"
+    return response
+
+@rutas_bp.route('/rutas/exportar/todas/jpg')
+@role_required(['Superuser', 'Usuario Regular'])
+def exportar_todas_rutas_jpg():
+    flash('La exportación de todas las rutas a JPG desde el servidor no está implementada directamente. Considere usar una solución de captura de pantalla en el cliente (navegador) o un servicio externo si es indispensable.', 'info')
+    return redirect(url_for('rutas.ver_rutas', categoria=request.args.get('categoria'))) # Redirigir a la vista actual
