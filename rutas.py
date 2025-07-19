@@ -25,6 +25,13 @@ CATEGORIAS_BUSQUEDA = [
     "Caminatas por Reconocer" # Nueva categoría 2
 ]
 
+# Define la categoría permitida para la exportación masiva
+ALLOWED_EXPORT_CATEGORY = "Caminatas Programadas"
+
+# Define las categorías que están explícitamente prohibidas para la exportación masiva
+FORBIDDEN_MASS_EXPORT_CATEGORIES = PROVINCIAS + ["Internacional", "Caminatas por Reconocer", "Otros"]
+
+
 # DECORADOR PARA ROLES (MOVIDO AQUÍ DESDE app.py)
 def role_required(roles):
     """
@@ -90,8 +97,34 @@ def get_embed_url(video_url):
     # Si no se reconoce ninguna plataforma de video conocida, devuelve None
     return None
 
+# Helper function to return an empty PDF or TXT document
+def _return_empty_pdf_or_txt(is_pdf=True):
+    """
+    Función de ayuda para devolver un documento PDF o TXT vacío
+    con un mensaje indicando que la categoría no es exportable.
+    """
+    if is_pdf:
+        buffer = BytesIO()
+        c = pdf_canvas.Canvas(buffer, pagesize=letter)
+        c.setFont('Helvetica', 12)
+        c.drawString(100, 750, "No hay rutas disponibles para exportar en la categoría seleccionada.")
+        c.save()
+        pdf_data = buffer.getvalue()
+        buffer.close()
+        response = make_response(pdf_data)
+        response.headers["Content-Disposition"] = f"attachment; filename=rutas_no_exportables.pdf"
+        response.headers["Content-type"] = "application/pdf"
+        return response
+    else:
+        content = "No hay rutas disponibles para exportar en la categoría seleccionada."
+        response = make_response(content)
+        response.headers["Content-Disposition"] = f"attachment; filename=rutas_no_exportables.txt"
+        response.headers["Content-type"] = "text/plain; charset=utf-8"
+        return response
+
+
 @rutas_bp.route('/rutas')
-@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
+# @role_required(['Superuser', 'Usuario Regular']) # COMENTADO: Ahora los usuarios regulares también pueden ver las rutas
 def ver_rutas():
     # Obtener el parámetro 'categoria' de la URL si existe
     categoria_seleccionada = request.args.get('categoria')
@@ -213,7 +246,7 @@ def editar_ruta(ruta_id):
         if precio_str:
             try:
                 # Convertir a entero primero, luego a float para el modelo
-                ruta.precio = float(int(precio_str))
+                precio = float(int(precio_str))
             except ValueError:
                 flash('Formato de precio inválido. Por favor, ingresa un número entero.', 'danger')
                 return redirect(url_for('rutas.editar_ruta', ruta_id=ruta.id))
@@ -232,7 +265,7 @@ def editar_ruta(ruta_id):
     return render_template('editar_rutas.html', ruta=ruta, categorias_busqueda=categorias_para_formulario) # Pasa las categorías filtradas al formulario
 
 @rutas_bp.route('/rutas/<int:ruta_id>')
-@role_required(['Superuser']) # Solo Superuser puede ver el detalle de la ruta
+@role_required(['Superuser', 'Usuario Regular']) # Los usuarios regulares también pueden ver el detalle de la ruta
 def detalle_ruta(ruta_id):
     ruta = db.session.get(Ruta, ruta_id)
     if not ruta:
@@ -262,16 +295,22 @@ def eliminar_ruta(ruta_id):
     return redirect(url_for('rutas.ver_rutas'))
 
 @rutas_bp.route('/rutas/exportar/txt/<int:ruta_id>')
-@role_required(['Superuser', 'Usuario Regular'])
+# @role_required(['Superuser', 'Usuario Regular']) # COMENTADO
 def exportar_ruta_txt(ruta_id):
     ruta = db.session.get(Ruta, ruta_id)
     if not ruta:
         flash('Ruta no encontrada para exportar.', 'danger')
         return redirect(url_for('rutas.ver_rutas'))
 
+    # Lógica para restringir la exportación a "Caminatas Programadas" para Usuario Regular
+    user_role = session.get('role')
+    if user_role == 'Usuario Regular' and ruta.provincia != ALLOWED_EXPORT_CATEGORY:
+        flash(f'Como Usuario Regular, solo puedes exportar rutas de "{ALLOWED_EXPORT_CATEGORY}".', 'danger')
+        return redirect(url_for('rutas.detalle_ruta', ruta_id=ruta.id))
+
     # Se eliminan las referencias a fecha_creacion y fecha_modificacion
+    # Se eliminó la línea de categoría para la exportación individual
     content = f"Nombre de la Ruta: {ruta.nombre}\n" \
-              f"Categoría: {ruta.provincia}\n" \
               f"Detalle: {ruta.detalle}\n" \
               f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n" \
               f"Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}\n" \
@@ -283,12 +322,18 @@ def exportar_ruta_txt(ruta_id):
     return response
 
 @rutas_bp.route('/rutas/exportar/pdf/<int:ruta_id>')
-@role_required(['Superuser', 'Usuario Regular'])
+# @role_required(['Superuser', 'Usuario Regular']) # COMENTADO
 def exportar_ruta_pdf(ruta_id):
     ruta = db.session.get(Ruta, ruta_id)
     if not ruta:
         flash('Ruta no encontrada para exportar.', 'danger')
         return redirect(url_for('rutas.ver_rutas'))
+
+    # Lógica para restringir la exportación a "Caminatas Programadas" para Usuario Regular
+    user_role = session.get('role')
+    if user_role == 'Usuario Regular' and ruta.provincia != ALLOWED_EXPORT_CATEGORY:
+        flash(f'Como Usuario Regular, solo puedes exportar rutas de "{ALLOWED_EXPORT_CATEGORY}".', 'danger')
+        return redirect(url_for('rutas.detalle_ruta', ruta_id=ruta.id))
 
     buffer = BytesIO()
     c = pdf_canvas.Canvas(buffer, pagesize=letter)
@@ -301,8 +346,8 @@ def exportar_ruta_pdf(ruta_id):
     y_position -= (line_height * 2)
 
     c.setFont('Helvetica', 10)
-    c.drawString(100, y_position, f"Categoría: {ruta.provincia}") # Cambiado de Provincia a Categoría
-    y_position -= line_height
+    # Se eliminó la línea de categoría para la exportación individual en PDF
+    
     c.drawString(100, y_position, f"Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}") # Añadido fecha
     y_position -= line_height
     c.drawString(100, y_position, f"Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}\n") # Añadido precio sin decimales
@@ -348,7 +393,8 @@ def exportar_ruta_pdf(ruta_id):
     buffer.close()
 
     response = make_response(pdf_data)
-    response.headers["Content-Disposition"] = f"attachment; filename=ruta_{ruta.nombre.replace(' ', '_').lower()}.pdf"
+    filename = f"ruta_{ruta.nombre.replace(' ', '_').lower()}.pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
     response.headers["Content-type"] = "application/pdf"
     return response
 
@@ -361,12 +407,27 @@ def exportar_ruta_jpg(ruta_id):
 
 # NUEVAS RUTAS PARA EXPORTAR TODAS LAS RUTAS (o las filtradas por la categoría seleccionada)
 @rutas_bp.route('/rutas/exportar/todas/pdf')
-@role_required(['Superuser', 'Usuario Regular'])
+# Eliminado: @role_required(['Superuser', 'Usuario Regular'])
 def exportar_todas_rutas_pdf():
     categoria_seleccionada = request.args.get('categoria')
+    
+    # Si la categoría solicitada está en la lista de categorías prohibidas para exportación masiva
+    if categoria_seleccionada in FORBIDDEN_MASS_EXPORT_CATEGORIES:
+        flash(f'La categoría "{categoria_seleccionada}" no puede ser exportada en este formato masivo.', 'danger')
+        return _return_empty_pdf_or_txt(is_pdf=True)
+
     query = Ruta.query
-    if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' and categoria_seleccionada != 'Otros':
-        query = query.filter_by(provincia=categoria_seleccionada)
+
+    if categoria_seleccionada == ALLOWED_EXPORT_CATEGORY:
+        query = query.filter_by(provincia=ALLOWED_EXPORT_CATEGORY)
+    elif categoria_seleccionada == 'Todas las Categorías' or not categoria_seleccionada: # Si no se selecciona categoría, se considera "Todas las Categorías"
+        # Si se selecciona "Todas las Categorías", se excluyen las categorías prohibidas de los resultados
+        query = query.filter(Ruta.provincia.notin_(FORBIDDEN_MASS_EXPORT_CATEGORIES))
+    else:
+        # Para cualquier otra categoría no reconocida o no permitida explícitamente
+        flash(f'Categoría de exportación no válida: "{categoria_seleccionada}".', 'danger')
+        return _return_empty_pdf_or_txt(is_pdf=True)
+
     rutas = query.order_by(Ruta.provincia, Ruta.nombre).all()
 
     buffer = BytesIO()
@@ -376,7 +437,7 @@ def exportar_todas_rutas_pdf():
     line_height = 15
     page_number = 1
 
-    def add_page_header(canvas_obj, y_pos, current_page_num): # Renombrado page_num a current_page_num
+    def add_page_header(canvas_obj, y_pos, current_page_num):
         canvas_obj.setFont('Helvetica-Bold', 10)
         canvas_obj.drawString(500, 770, f"Página {current_page_num}")
         canvas_obj.setFont('Helvetica-Bold', 14)
@@ -395,9 +456,10 @@ def exportar_todas_rutas_pdf():
                 c.showPage()
                 page_number += 1
                 y_position = 750
-                y_position = add_page_header(c, y_position, page_number) # CORREGIDO: Usar page_number
+                y_position = add_page_header(c, y_position, page_number)
                 current_category = None # Resetear categoría para nuevo encabezado en la nueva página
 
+            # Solo se muestra la categoría si es la primera vez que aparece o si cambia
             if ruta.provincia != current_category:
                 if current_category is not None: # No añadir línea antes del primer encabezado
                     y_position -= line_height # Espacio entre categorías
@@ -430,12 +492,26 @@ def exportar_todas_rutas_pdf():
 
 
 @rutas_bp.route('/rutas/exportar/todas/txt')
-@role_required(['Superuser', 'Usuario Regular'])
+# Eliminado: @role_required(['Superuser', 'Usuario Regular'])
 def exportar_todas_rutas_txt():
     categoria_seleccionada = request.args.get('categoria')
+
+    # Si la categoría solicitada está en la lista de categorías prohibidas para exportación masiva
+    if categoria_seleccionada in FORBIDDEN_MASS_EXPORT_CATEGORIES:
+        flash(f'La categoría "{categoria_seleccionada}" no puede ser exportada en este formato masivo.', 'danger')
+        return _return_empty_pdf_or_txt(is_pdf=False)
+
     query = Ruta.query
-    if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' and categoria_seleccionada != 'Otros':
-        query = query.filter_by(provincia=categoria_seleccionada)
+    if categoria_seleccionada == ALLOWED_EXPORT_CATEGORY:
+        query = query.filter_by(provincia=ALLOWED_EXPORT_CATEGORY)
+    elif categoria_seleccionada == 'Todas las Categorías' or not categoria_seleccionada: # Si no se selecciona categoría, se considera "Todas las Categorías"
+        # Si se selecciona "Todas las Categorías", se excluyen las categorías prohibidas de los resultados
+        query = query.filter(Ruta.provincia.notin_(FORBIDDEN_MASS_EXPORT_CATEGORIES))
+    else:
+        # Para cualquier otra categoría no reconocida o no permitida explícitamente
+        flash(f'Categoría de exportación no válida: "{categoria_seleccionada}".', 'danger')
+        return _return_empty_pdf_or_txt(is_pdf=False)
+
     rutas = query.order_by(Ruta.provincia, Ruta.nombre).all()
 
     content = "Listado de Rutas Disponibles\n\n"
@@ -444,6 +520,7 @@ def exportar_todas_rutas_txt():
     else:
         current_category = None
         for ruta in rutas:
+            # Solo se muestra la categoría si es la primera vez que aparece o si cambia
             if ruta.provincia != current_category:
                 content += f"\n--- Categoría: {ruta.provincia} ---\n"
                 current_category = ruta.provincia
