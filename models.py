@@ -555,6 +555,7 @@ class Song(db.Model):
     cover_image_path = db.Column(db.String(500), nullable=True) # Ruta a la carátula
 
     # Relación con Playlist (muchas a muchas)
+    # CORRECCIÓN: back_populates debe apuntar a la propiedad 'songs' en Playlist
     playlists = db.relationship('Playlist', secondary='playlist_songs', back_populates='songs')
 
     def __repr__(self):
@@ -566,6 +567,7 @@ class Playlist(db.Model):
     name = db.Column(db.String(255), nullable=False, unique=True)
     
     # Relación con Song (muchas a muchas)
+    # CORRECCIÓN: back_populates debe apuntar a la propiedad 'playlists' en Song
     songs = db.relationship('Song', secondary='playlist_songs', back_populates='playlists')
 
     def __repr__(self):
@@ -628,8 +630,7 @@ class Ruta(db.Model):
     detalle = db.Column(db.Text, nullable=True) # Para CKEditor o texto largo
     enlace_video = db.Column(db.String(500), nullable=True) # Enlace compatible con Facebook/YouTube
 
-    # fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    # fecha_modificacion = db.Column(db.DateTime, onupdate=datetime.utcnow, nullable=True)
 
     def __repr__(self):
         return f"Ruta(Nombre: {self.nombre}, Provincia: {self.provincia})"
+

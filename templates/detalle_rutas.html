@@ -43,6 +43,7 @@
             {# Se eliminó el filtro '| title' para que el contenido HTML se renderice correctamente #}
             <div class="">{{ ruta.detalle | safe }}</div>
         </div>
+        {# Se eliminan las referencias a fecha_creacion y fecha_modificacion #}
     </div>
 </div>
 
@@ -105,6 +106,7 @@
 {% block scripts %}
     {# Se eliminan los atributos integrity y crossorigin ya que pueden causar problemas en algunos entornos #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    {# Se elimina la carga de timezone_converter.js ya que no se usa para las fechas de ruta #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const confirmDeleteButton = document.getElementById('confirmDeleteBtn');

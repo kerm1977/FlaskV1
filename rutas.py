@@ -47,25 +47,36 @@ def get_embed_url(video_url):
     if not video_url:
         return None
 
-    # Intentar con YouTube
-    youtube_match = re.search(r'(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([a-zA-Z0-9_-]{11})(?:\S+)?', video_url)
-    if youtube_match:
-        video_id = youtube_match.group(1)
-        # CORRECCIÓN: Usa la URL de incrustación estándar de YouTube
-        return f"https://www.youtube.com/embed/{video_id}"
+    # Expresiones regulares más robustas para YouTube
+    youtube_patterns = [
+        re.compile(r'(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([a-zA-Z0-9_-]{11})(?:\S+)?'),
+        re.compile(r'(?:https?:\/\/)?(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})(?:\S+)?')
+    ]
 
-    # Intentar con Facebook
-    # Expresión regular para capturar el ID de video de Facebook desde "watch/?v="
-    facebook_watch_match = re.search(r'(?:https?:\/\/)?(?:www\.)?(?:facebook\.com)\/watch\/\?v=(\d+)', video_url)
-    if facebook_watch_match:
-        # Para Facebook, el plugin de video usa la URL original como el parámetro 'href'
-        return f"https://www.facebook.com/plugins/video.php?href={video_url}&show_text=0&width=1280"
+    for pattern in youtube_patterns:
+        youtube_match = pattern.search(video_url)
+        if youtube_match:
+            video_id = youtube_match.group(1)
+            return f"https://www.youtube.com/embed/{video_id}"
+
+    # Expresiones regulares para Facebook
+    facebook_patterns = [
+        re.compile(r'(?:https?:\/\/)?(?:www\.)?(?:facebook\.com)\/watch\/\?v=(\d+)'),
+        re.compile(r'(?:https?:\/\/)?(?:www\.)?(?:facebook\.com)\/([a-zA-Z0-9\.]+)\/videos\/(?:vb\.\d+\/)?(\d+)(?:\S+)?')
+    ]
+
+    for pattern in facebook_patterns:
+        facebook_match = pattern.search(video_url)
+        if facebook_match:
+            # Para Facebook, el plugin de video usa la URL original como el parámetro 'href'
+            # y requiere el width para que se muestre correctamente en el iframe.
+            return f"https://www.facebook.com/plugins/video.php?href={video_url}&show_text=0&width=1280"
     
     # Si no se reconoce ninguna plataforma de video conocida, devuelve None
     return None
 
 @rutas_bp.route('/rutas')
-# @role_required(['Superuser', 'Usuario Regular'])
+@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver las rutas
 def ver_rutas():
     # Obtener el parámetro 'provincia' de la URL si existe
     provincia_seleccionada = request.args.get('provincia')
@@ -106,10 +117,15 @@ def crear_ruta():
             detalle=detalle,
             enlace_video=enlace_video
         )
-        db.session.add(nueva_ruta)
-        db.session.commit()
-        flash('Ruta creada exitosamente.', 'success')
-        return redirect(url_for('rutas.ver_rutas'))
+        try:
+            db.session.add(nueva_ruta)
+            db.session.commit()
+            flash('Ruta creada exitosamente.', 'success')
+            return redirect(url_for('rutas.ver_rutas'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear la ruta: {e}', 'danger')
+            current_app.logger.error(f"Error al crear ruta: {e}")
     
     return render_template('crear_rutas.html', provincias=PROVINCIAS)
 
@@ -127,14 +143,19 @@ def editar_ruta(ruta_id):
         ruta.detalle = request.form['detalle']
         ruta.enlace_video = request.form.get('enlace_video')
         
-        db.session.commit()
-        flash('Ruta actualizada exitosamente.', 'success')
-        return redirect(url_for('rutas.detalle_ruta', ruta_id=ruta.id))
+        try:
+            db.session.commit()
+            flash('Ruta actualizada exitosamente.', 'success')
+            return redirect(url_for('rutas.detalle_ruta', ruta_id=ruta.id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar la ruta: {e}', 'danger')
+            current_app.logger.error(f"Error al actualizar ruta {ruta_id}: {e}")
     
     return render_template('editar_rutas.html', ruta=ruta, provincias=PROVINCIAS)
 
 @rutas_bp.route('/rutas/<int:ruta_id>')
-# @role_required(['Superuser', 'Usuario Regular'])
+@role_required(['Superuser', 'Usuario Regular']) # Asegúrate de que los usuarios regulares también puedan ver los detalles
 def detalle_ruta(ruta_id):
     ruta = db.session.get(Ruta, ruta_id)
     if not ruta:
@@ -142,10 +163,6 @@ def detalle_ruta(ruta_id):
         return redirect(url_for('rutas.ver_rutas'))
         
     embed_url = get_embed_url(ruta.enlace_video) if ruta.enlace_video else None
-    # Si estás usando Flask-WTF o similar para CSRF, asegúrate de pasar el token aquí
-    # Por ejemplo, si usas Flask-WTF, podrías tener form.csrf_token en tu contexto
-    # Para este ejemplo, asumimos que csrf_token es una variable global o que Flask-WTF
-    # lo inyecta automáticamente. Si no, necesitarás un Formulario Flask-WTF para generarlo.
     return render_template('detalle_rutas.html', ruta=ruta, embed_url=embed_url)
 
 @rutas_bp.route('/rutas/eliminar/<int:ruta_id>', methods=['POST'])
@@ -175,16 +192,11 @@ def exportar_ruta_txt(ruta_id):
         flash('Ruta no encontrada para exportar.', 'danger')
         return redirect(url_for('rutas.ver_rutas'))
 
-    # Manejo de AttributeError para fecha_creacion y fecha_modificacion
-    fecha_creacion_str = ruta.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S') if hasattr(ruta, 'fecha_creacion') and ruta.fecha_creacion else 'N/A'
-    fecha_modificacion_str = ruta.fecha_modificacion.strftime('%Y-%m-%d %H:%M:%S') if hasattr(ruta, 'fecha_modificacion') and ruta.fecha_modificacion else 'N/A'
-
+    # Se eliminan las referencias a fecha_creacion y fecha_modificacion
     content = f"Nombre de la Ruta: {ruta.nombre}\n" \
               f"Provincia: {ruta.provincia}\n" \
               f"Detalle: {ruta.detalle}\n" \
-              f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n" \
-              f"Fecha de Creación: {fecha_creacion_str}\n" \
-              f"Última Modificación: {fecha_modificacion_str}\n"
+              f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}\n"
 
     response = make_response(content)
     response.headers["Content-Disposition"] = f"attachment; filename=ruta_{ruta.nombre.replace(' ', '_').lower()}.txt"
@@ -213,33 +225,40 @@ def exportar_ruta_pdf(ruta_id):
     c.drawString(100, y_position, f"Provincia: {ruta.provincia}")
     y_position -= line_height
     c.drawString(100, y_position, f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}")
-    y_position -= line_height
-    
-    # Manejo de AttributeError para fecha_creacion y fecha_modificacion
-    if hasattr(ruta, 'fecha_creacion') and ruta.fecha_creacion:
-        c.drawString(100, y_position, f"Fecha de Creación: {ruta.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S')}")
-    else:
-        c.drawString(100, y_position, "Fecha de Creación: N/A")
-    y_position -= line_height
-
-    if hasattr(ruta, 'fecha_modificacion') and ruta.fecha_modificacion:
-        c.drawString(100, y_position, f"Última Modificación: {ruta.fecha_modificacion.strftime('%Y-%m-%d %H:%M:%S')}")
-    else:
-        c.drawString(100, y_position, "Última Modificación: N/A")
-    y_position -= (line_height * 2)
+    y_position -= (line_height * 2) # Ajuste de espacio tras eliminar fechas
 
     c.setFont('Helvetica-Bold', 12)
     c.drawString(100, y_position, "Detalle de la Ruta:")
     y_position -= line_height
     c.setFont('Helvetica', 10)
     
-    for line in ruta.detalle.split('\n'):
-        if y_position < 50:
-            c.showPage()
-            c.setFont('Helvetica', 10)
-            y_position = 750
-        c.drawString(100, y_position, line)
-        y_position -= line_height
+    # Limpiar el HTML del detalle para el PDF
+    clean_detail = re.sub('<[^<]+?>', '', ruta.detalle)
+    lines = clean_detail.split('\n')
+    for line in lines:
+        # Dividir líneas largas si exceden el ancho de la página
+        words = line.split(' ')
+        current_line = []
+        for word in words:
+            test_line = ' '.join(current_line + [word])
+            # Estimación simple del ancho del texto (ajusta según sea necesario)
+            if c.stringWidth(test_line, 'Helvetica', 10) < 400: # Ancho de 400 puntos, ajusta si es necesario
+                current_line.append(word)
+            else:
+                if y_position < 50:
+                    c.showPage()
+                    c.setFont('Helvetica', 10)
+                    y_position = 750
+                c.drawString(100, y_position, ' '.join(current_line))
+                y_position -= line_height
+                current_line = [word]
+        if current_line:
+            if y_position < 50:
+                c.showPage()
+                c.setFont('Helvetica', 10)
+                y_position = 750
+            c.drawString(100, y_position, ' '.join(current_line))
+            y_position -= line_height
 
     c.save()
     pdf_data = buffer.getvalue()
@@ -253,5 +272,6 @@ def exportar_ruta_pdf(ruta_id):
 @rutas_bp.route('/rutas/exportar/jpg/<int:ruta_id>')
 @role_required(['Superuser', 'Usuario Regular'])
 def exportar_ruta_jpg(ruta_id):
-    flash('La exportación a JPG desde el servidor no está implementada directamente. Considere usar una solución de captura de pantalla en el cliente (navegador).', 'info')
+    flash('La exportación a JPG desde el servidor no está implementada directamente. Considere usar una solución de captura de pantalla en el cliente (navegador) o un servicio externo si es indispensable.', 'info')
     return redirect(url_for('rutas.detalle_ruta', ruta_id=ruta_id))
+

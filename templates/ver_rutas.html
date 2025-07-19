@@ -77,6 +77,12 @@
                 font-size: 0.9rem; /* Tamaño de fuente más pequeño para móviles */
             }
         }
+        /* Estilos para las fechas en la lista (se eliminan si no se usan) */
+        /* .route-item-dates {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 5px;
+        } */
     </style>
 
 <div class="container mt-4">
@@ -117,9 +123,7 @@
                                         {{ ruta.nombre | title}}
                                     </a>
                                 </div>
-                                <div>
-                                    
-                                </div>
+                                {# Se eliminan las referencias a fecha_creacion y fecha_modificacion #}
                             </li>
                         {% endfor %}
                     </ul>
@@ -149,7 +153,8 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" xintegrity="sha512-..." crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    {# Se elimina la carga de timezone_converter.js ya que no se usa para las fechas de ruta #}
     <script>
         // Opcional: Script para añadir interactividad si es necesario
     </script>
