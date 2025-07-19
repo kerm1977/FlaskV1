@@ -305,7 +305,7 @@ def exportar_ruta_pdf(ruta_id):
     y_position -= line_height
     c.drawString(100, y_position, f"Fecha: {ruta.fecha.strftime('%d/%m/%Y') if ruta.fecha else 'N/A'}") # Añadido fecha
     y_position -= line_height
-    c.drawString(100, y_position, f"Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}") # Añadido precio sin decimales
+    c.drawString(100, y_position, f"Precio: ¢{int(ruta.precio) if ruta.precio is not None else 'N/A'}\n") # Añadido precio sin decimales
     y_position -= line_height
     c.drawString(100, y_position, f"Enlace de Video: {ruta.enlace_video if ruta.enlace_video else 'N/A'}")
     y_position -= (line_height * 2) # Ajuste de espacio tras añadir campos
@@ -376,9 +376,9 @@ def exportar_todas_rutas_pdf():
     line_height = 15
     page_number = 1
 
-    def add_page_header(canvas_obj, y_pos, page_num):
+    def add_page_header(canvas_obj, y_pos, current_page_num): # Renombrado page_num a current_page_num
         canvas_obj.setFont('Helvetica-Bold', 10)
-        canvas_obj.drawString(500, 770, f"Página {page_num}")
+        canvas_obj.drawString(500, 770, f"Página {current_page_num}")
         canvas_obj.setFont('Helvetica-Bold', 14)
         canvas_obj.drawString(100, y_pos, "Listado de Rutas Disponibles")
         canvas_obj.setFont('Helvetica', 10)
@@ -395,7 +395,7 @@ def exportar_todas_rutas_pdf():
                 c.showPage()
                 page_number += 1
                 y_position = 750
-                y_position = add_page_header(c, y_position, page_num)
+                y_position = add_page_header(c, y_position, page_number) # CORREGIDO: Usar page_number
                 current_category = None # Resetear categoría para nuevo encabezado en la nueva página
 
             if ruta.provincia != current_category:

@@ -45,6 +45,7 @@
     .fab-button-jpg { background-color: #fd7e14; color: white; } /* Orange */
     .fab-button-info { background-color: #0dcaf0; color: black; } /* Info */
     .fab-button-success { background-color: #28a745; color: white; } /* Success green */
+    .fab-button-whatsapp { background-color: #25D366; color: white; } /* WhatsApp green */
 
 
     /* Modal styles - Copied from detalle_itinerario.html */
@@ -314,6 +315,17 @@
 
 {# FAB buttons for actions - Copied from detalle_itinerario.html #}
 <div class="fab-container-actions">
+    {# Botón de WhatsApp - NUEVO #}
+    {% set whatsapp_message = "Hola, estoy interesad@ en esta caminata: " ~
+                              "Actividad: " ~ caminata.actividad ~ ", " ~
+                              "Nombre: " ~ caminata.nombre ~ ", " ~
+                              "Precio: ¢" ~ (caminata.precio | int) ~ ", " ~
+                              "Fecha: " ~ caminata.fecha.strftime('%d-%m-%Y') ~ ", " ~
+                              "Dificultad: " ~ (caminata.dificultad if caminata.dificultad != 'N/A' else 'N/A') %}
+    <a href="https://wa.me/50686227500?text={{ whatsapp_message | urlencode }}" class="fab-button-action fab-button-whatsapp" title="Consultar por WhatsApp" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
     {% if session.role == 'Superuser' %}
         <a href="{{ url_for('caminatas.editar_caminata', caminata_id=caminata.id) }}" class="fab-button-action fab-button-edit" title="Editar Caminata">
             <i class="fas fa-edit"></i>
