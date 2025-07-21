@@ -182,10 +182,10 @@ def crear_ruta():
         precio = None
         if precio_str:
             try:
-                # Convertir a entero primero, luego a float para el modelo
-                precio = float(int(precio_str)) 
+                # Convertir directamente a float
+                precio = float(precio_str)
             except ValueError:
-                flash('Formato de precio inválido. Por favor, ingresa un número entero.', 'danger')
+                flash('Formato de precio inválido. Por favor, ingresa un número válido.', 'danger')
                 return redirect(url_for('rutas.crear_ruta'))
 
 
@@ -245,10 +245,10 @@ def editar_ruta(ruta_id):
         ruta.precio = None # Resetear el precio por si se envía vacío
         if precio_str:
             try:
-                # Convertir a entero primero, luego a float para el modelo
-                precio = float(int(precio_str))
+                # Convertir directamente a float
+                ruta.precio = float(precio_str)
             except ValueError:
-                flash('Formato de precio inválido. Por favor, ingresa un número entero.', 'danger')
+                flash('Formato de precio inválido. Por favor, ingresa un número válido.', 'danger')
                 return redirect(url_for('rutas.editar_ruta', ruta_id=ruta.id))
         
         try:
