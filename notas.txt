@@ -654,3 +654,63 @@ detalle_rutas.html va a contener absolutamente toda la información de la ruta y
 
 
 
+
+VERSIONES
+
+Genial ahora necesito crear un area nueva área
+todos los botones de borrar o eliminar tienen que ser construidos con Flask y Flash y el Modal con bootstrap
+las opciones de exportar a jpg, pdf, txt con utf-8 para que reconozca la ñ y las tildes (solo en caso de que existiera)
+cada archivo y cada vista vas a darmelo cuando te diga ok
+
+app va a contener las importaciones para que esta área funcione
+
+
+vamos a construir un area de acerca de rutas
+
+lógica
+en app.py solo vas a importar las lineas del archivo rutas.py y en 
+version.py absolutamente la lógica del  rutas y las tablas como las demás áreas 
+En el footer va a tener a la par de Hecho con ❤️ Por La Tribu de Los Libres - 2025 - (aquí un enlace den la palabra Versión)
+
+
+
+
+vistas
+ver_version.html
+aqui va a estar todo el diseño del version
+este va a contener 
+
+
+crear_version.html
+titulo
+Parrafo
+-------un separador hr 
+Nombre de la versión
+número de la versión 
+Descripción de la versión (textarea - ckedit)
+Pendiente (textarea - ckedit)
+fecha de creación tomada desde  timezone_converter.js
+fecha de modificación tomada desde  timezone_converter.js
+
+
+
+editar_version.html En esta vista permitir editar el contenido de  absolutamente todo lo creado desde crear_version.html
+
+
+ver_version.html mostrará la lista con número consecutivo y el Nombre de la versión seguido del número de la versión la provincia y fecha de creación tomada desde  timezone_converter.js luego un enlace  Ver más que va a detalle_version.html 
+
+detalle_version.html va a contener absolutamente toda la información de la versión
+el diseño de esta vista va a ser
+titulo en centrado y color warning
+contenido del parrafo
+
+el separador
+
+nombre del la versión seguido de número de la versión 
+Descripción
+Pendiente 
+
+el separador
+
+fecha de creación tomada desde  timezone_converter.js
+fecha de modificación tomada desde  timezone_converter.js

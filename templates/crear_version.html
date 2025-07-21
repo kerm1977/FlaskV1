@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Nueva Versión{% endblock %}
+
+{% block head_content %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Crear Nueva Versión</h1>
+    <hr class="mb-4">
+
+    <form method="POST">
+        <div class="mb-3">
+            <label for="titulo" class="form-label">Título</label> {# Eliminado span text-danger y required #}
+            <input type="text" class="form-control" id="titulo" name="titulo">
+        </div>
+        <div class="mb-3">
+            <label for="parrafo" class="form-label">Párrafo</label>
+            <textarea class="form-control" id="parrafo" name="parrafo" rows="3"></textarea>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="mb-3">
+            <label for="nombre_version" class="form-label">Nombre de la Versión <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="nombre_version" name="nombre_version" required>
+        </div>
+        <div class="mb-3">
+            <label for="numero_version" class="form-label">Número de la Versión <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="numero_version" name="numero_version" required>
+        </div>
+         <div class="mb-3">
+            <label for="provincia" class="form-label">Provincia</label>
+            <select class="form-select" id="provincia" name="provincia">
+                <option value="Seleccionar Provincia">Seleccionar Provincia</option>
+                {% for provincia in provincia_opciones %}
+                    <option value="{{ provincia }}">{{ provincia }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción de la Versión</label>
+            <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="pendiente" class="form-label">Pendiente</label>
+            <textarea class="form-control" id="pendiente" name="pendiente"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Guardar Versión</button>
+        <a href="{{ url_for('version.ver_versiones') }}" class="btn btn-secondary mt-3">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    ClassicEditor
+        .create( document.querySelector( '#descripcion' ) )
+        .catch( error => {
+            console.error( error );
+        } );
+    ClassicEditor
+        .create( document.querySelector( '#pendiente' ) )
+        .catch( error => {
+            console.error( error );
+        } );
+</script>
+{% endblock %}

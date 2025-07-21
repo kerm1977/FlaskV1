@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Versión{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center text-warning mb-4">{{ version.titulo }}</h1>
+    <p class="text-center">{{ version.parrafo }}</p>
+
+    <hr class="my-4">
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Versión: {{ version.nombre_version }} - {{ version.numero_version }}</h5>
+            {% if version.provincia %}
+                <p class="card-text"><strong>Provincia:</strong> {{ version.provincia }}</p>
+            {% endif %}
+            <h6 class="card-subtitle mt-3 mb-2 text-muted">Descripción:</h6>
+            <div class="card-text ckeditor-content">{{ version.descripcion | safe }}</div>
+
+            <h6 class="card-subtitle mt-4 mb-2 text-muted">Pendiente:</h6>
+            <div class="card-text ckeditor-content">{{ version.pendiente | safe }}</div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="mt-4 text-muted text-center">
+        <p><strong>Fecha de Creación:</strong>
+            <span class="utc-datetime" data-utc="{{ version.fecha_creacion.isoformat() }}">
+                {{ version.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S') }}
+            </span>
+        </p>
+        <p><strong>Última Modificación:</strong>
+            <span class="utc-datetime" data-utc="{{ version.fecha_modificacion.isoformat() }}">
+                {{ version.fecha_modificacion.strftime('%Y-%m-%d %H:%M:%S') }}
+            </span>
+        </p>
+    </div>
+
+    <div class="mt-4 text-center">
+        <a href="{{ url_for('version.ver_versiones') }}" class="btn btn-secondary">Volver a la Lista</a>
+        {% if session.get('role') == 'Superuser' %}
+        <a href="{{ url_for('version.editar_version', version_id=version.id) }}" class="btn btn-warning ms-2">Editar Versión</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block head_content %}
+<style>
+    /* Estilos para el contenido de CKEditor para asegurar que se vea bien */
+    .ckeditor-content img {
+        max-width: 100%;
+        height: auto;
+    }
+    .ckeditor-content table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .ckeditor-content table, .ckeditor-content th, .ckeditor-content td {
+        border: 1px solid #ccc;
+        padding: 8px;
+    }
+</style>
+{% endblock %}

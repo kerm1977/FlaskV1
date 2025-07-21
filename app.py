@@ -10,8 +10,7 @@ from functools import wraps # Importar wraps para decoradores
 # MODIFICADO: Importa db, bcrypt, migrate y User desde models.py
 # ES CRUCIAL QUE EL MODELO USER Y LAS INSTANCIAS DE DB, BCRYPT Y MIGRATE
 # SE IMPORTEN ÚNICAMENTE DESDE models.py PARA EVITAR IMPORTACIONES CIRCULARES.
-from models import db, bcrypt, migrate, User, Project, Note, InternationalTravel, Caminata, AbonoCaminata, caminata_participantes, Pagos, CalendarEvent, Instruction, Song, Playlist, Itinerario, AboutUs # MODIFICADO: Agrega todos los nuevos modelos, incluyendo Itinerario y AboutUs
-
+from models import db, bcrypt, migrate, User, Project, Note, InternationalTravel, Caminata, AbonoCaminata, caminata_participantes, Pagos, CalendarEvent, Instruction, Song, Playlist, Itinerario, AboutUs
 from contactos import contactos_bp
 from perfil import perfil_bp # Importa el Blueprint de perfil
 from proyecto import proyecto_bp # Importa el Blueprint de proyectos
@@ -25,6 +24,8 @@ from player import player_bp # Importa el Blueprint del reproductor
 from itinerario import itinerario_bp # NUEVA: Importa el Blueprint del itinerario
 from aboutus import aboutus_bp # NUEVA: Importa el Blueprint de AboutUs
 from rutas import rutas_bp # NUEVA: Importa el Blueprint de Rutas
+from version import version_bp, Version # NUEVA: Importa el Blueprint de Version
+
 
 
 from sqlalchemy.exc import IntegrityError # NUEVO: Importar IntegrityError
@@ -164,6 +165,21 @@ def role_required(roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+
+# NUEVO: Procesador de contexto para inyectar la última versión en todas las plantillas
+@app.context_processor
+def inject_latest_version():
+    try:
+        latest_version = Version.query.order_by(Version.fecha_creacion.desc()).first()
+        if latest_version:
+            return {'latest_version_number': latest_version.numero_version}
+    except Exception as e:
+        # Esto es importante para manejar el caso donde la tabla Version aún no existe
+        # durante el primer inicio o antes de las migraciones.
+        print(f"DEBUG: Error al obtener la última versión: {e}")
+    return {'latest_version_number': 'N/A'} # Valor por defecto si no hay versiones o hay un error
+
 
 
 # LÓGICA PARA EL PRIMER SUPERUSUARIO: Se ejecuta antes de cada solicitud
@@ -430,6 +446,7 @@ app.register_blueprint(player_bp)
 app.register_blueprint(itinerario_bp, url_prefix='/itinerario') # NUEVA: Registro del Blueprint de Itinerario
 app.register_blueprint(aboutus_bp, url_prefix='/aboutus') # NUEVA: Registro del Blueprint de AboutUs
 app.register_blueprint(rutas_bp, url_prefix='/rutas') # NUEVA: Registro del Blueprint de Rutas
+app.register_blueprint(version_bp, url_prefix='/version') # NUEVA: Registro del Blueprint de Version
 
 
 if __name__ == '__main__':
