@@ -31,15 +31,7 @@
             <label for="numero_version" class="form-label">Número de la Versión <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="numero_version" name="numero_version" required>
         </div>
-         <div class="mb-3">
-            <label for="provincia" class="form-label">Provincia</label>
-            <select class="form-select" id="provincia" name="provincia">
-                <option value="Seleccionar Provincia">Seleccionar Provincia</option>
-                {% for provincia in provincia_opciones %}
-                    <option value="{{ provincia }}">{{ provincia }}</option>
-                {% endfor %}
-            </select>
-        </div>
+
         <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción de la Versión</label>
             <textarea class="form-control" id="descripcion" name="descripcion"></textarea>

@@ -2,59 +2,178 @@
 
 {% block title %}Ver Versiones{% endblock %}
 
+{% block head_content %}
+{# Estilos específicos para esta página que no están en main.css o sobrescriben base.html #}
+<style>
+    /* Estilos para el contenedor principal de todos los FABs de acción (Crear, Editar, Eliminar) */
+    .fab-main-actions-container {
+        position: fixed;
+        bottom: 75px; /* Distancia desde abajo, para que el FAB de crear esté a 20px */
+        right: 20px; /* Distancia desde la derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+        display: flex;
+        flex-direction: column; /* Apila los elementos verticalmente */
+        align-items: flex-end; /* Alinea los items a la derecha */
+        gap: 10px; /* Espacio entre los botones apilados */
+    }
+
+    /* Estilos comunes para todos los botones FAB de acción (Crear, Editar, Eliminar) */
+    .fab-button-common {
+        width: 60px; /* Tamaño del botón idéntico al de crear/volver */
+        height: 60px; /* Tamaño del botón idéntico */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none; /* Asegurar que no haya borde */
+    }
+
+    .fab-button-common:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de crear */
+    .fab-button-create {
+        background-color: #ffc107; /* Color de fondo warning (naranja) */
+        color: #212529; /* Color de texto oscuro (negro) para contraste */
+    }
+    .fab-button-create:hover {
+        background-color: #e0a800; /* Tono más oscuro al pasar el ratón */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de editar */
+    .fab-button-edit {
+        background-color: #007bff; /* Azul (primary) */
+        color: white; /* Blanco */
+    }
+    .fab-button-edit:hover {
+        background-color: #0056b3; /* Azul más oscuro */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de eliminar */
+    .fab-button-delete {
+        background-color: #dc3545; /* Rojo (danger) */
+        color: white; /* Blanco */
+    }
+    .fab-button-delete:hover {
+        background-color: #c82333; /* Rojo más oscuro */
+    }
+
+    /* Estilos específicos para el botón flotante (FAB) de volver atrás */
+    .fab-container-back {
+        position: fixed;
+        bottom: 75px; /* Ajustado a 20px para consistencia con los otros FABs */
+        left: 20px; /* Distancia desde la izquierda */
+        right: auto; /* Anula la distancia derecha */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    }
+    .fab-button-back {
+        width: 60px; /* Tamaño del botón */
+        height: 60px; /* Tamaño del botón */
+        border-radius: 50%; /* Hacerlo circular */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem; /* Tamaño del icono */
+        transition: all 0.3s ease;
+        background-color: #007bff; /* Color de fondo primary (azul) */
+        color: #ffffff; /* Color de texto blanco */
+        border: none; /* Asegurar que no haya borde */
+        text-decoration: none; /* Eliminar el subrayado */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .fab-button-back:hover {
+        transform: scale(1.05); /* Pequeño efecto al pasar el ratón */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra al pasar el ratón */
+        background-color: #0056b3; /* Tono más oscuro al pasar el ratón */
+    }
+
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4 text-center">Lista de Versiones</h1>
 
-    {% if session.get('role') == 'Superuser' %}
-    <div class="text-end mb-3">
-        <a href="{{ url_for('version.crear_version') }}" class="btn btn-primary">
-            <i class="fas fa-plus-circle"></i> Crear Nueva Versión
-        </a>
-    </div>
-    {% endif %}
+    {# ELIMINADO: El botón "Crear Nueva Versión" se reemplaza por el FAB flotante #}
 
     {% if versiones %}
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nombre de la Versión</th>
-                    <th scope="col">Número de Versión</th>
-                    <th scope="col">Provincia</th>
-                    <th scope="col">Fecha de Creación</th>
-                    <th scope="col">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for version in versiones %}
-                <tr>
-                    <th scope="row">{{ loop.index }}</th>
-                    <td>{{ version.nombre_version }}</td>
-                    <td>{{ version.numero_version }}</td>
-                    <td>{{ version.provincia if version.provincia else 'N/A' }}</td>
-                    <td>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"> {# Esto creará una cuadrícula de tarjetas #}
+        {% for version in versiones %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ version.nombre_version }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Versión: {{ version.numero_version }}</h6>
+                    <p class="card-text">
+                        <strong>Provincia:</strong> {{ version.provincia if version.provincia else 'N/A' }}<br>
+                        <strong>Fecha de Creación:</strong>
                         <span class="utc-datetime" data-utc="{{ version.fecha_creacion.isoformat() }}">
                             {{ version.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S') }}
                         </span>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('version.detalle_version', version_id=version.id) }}" class="btn btn-info btn-sm">Ver Más</a>
-                        {% if session.get('role') == 'Superuser' %}
-                        <a href="{{ url_for('version.editar_version', version_id=version.id) }}" class="btn btn-warning btn-sm ms-2">Editar</a>
-                        <form action="{{ url_for('version.eliminar_version', version_id=version.id) }}" method="POST" style="display:inline-block;">
-                            <button type="submit" class="btn btn-danger btn-sm ms-2" onclick="return confirm('¿Estás seguro de que quieres eliminar esta versión?');">Eliminar</button>
+                    </p>
+                    <div class="mt-auto"> {# Para empujar el botón "Ver Más" hacia abajo #}
+                        <a href="{{ url_for('version.detalle_version', version_id=version.id) }}" class="btn btn-info btn-sm w-100">Ver Más</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="confirmDeleteModal{{ version.id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ version.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel{{ version.id }}">Confirmar Eliminación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Estás seguro de que deseas eliminar la versión "{{ version.nombre_version }}" (Número: {{ version.numero_version }})? Esta acción no se puede deshacer.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <form action="{{ url_for('version.eliminar_version', version_id=version.id) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
                         </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
     {% else %}
     <p class="text-center">No hay versiones registradas aún.</p>
     {% endif %}
+</div>
+
+{# Contenedor principal para los FABs de acción (Crear, Editar, Eliminar) #}
+<div class="fab-main-actions-container">
+    {% if session.get('role') == 'Superuser' %}
+    {# Botón flotante para editar la primera versión (puedes ajustar esta lógica si necesitas editar una versión específica) #}
+    {% if versiones %} {# Solo si hay versiones para editar #}
+    <a href="{{ url_for('version.editar_version', version_id=versiones[0].id) }}" class="fab-button-common fab-button-edit" title="Editar Primera Versión">
+        <i class="fas fa-edit"></i>
+    </a>
+    {# Botón flotante para eliminar la primera versión (puedes ajustar esta lógica si necesitas eliminar una versión específica) #}
+    <a href="#" class="fab-button-common fab-button-delete" title="Eliminar Primera Versión" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ versiones[0].id }}">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    {% endif %}
+    {# Botón flotante para crear versión #}
+    <a href="{{ url_for('version.crear_version') }}" class="fab-button-common fab-button-create" title="Crear Nueva Versión">
+        <i class="fas fa-plus" style="color: black;"></i> {# Icono de más en negro #}
+    </a>
+    {% endif %}
+</div>
+
+{# Botón flotante para volver atrás #}
+<div class="fab-container-back">
+    <a href="{{ url_for('index') }}" class="fab-button-back" title="Volver al Inicio">
+        <i class="fas fa-arrow-left"></i> {# Icono de flecha izquierda #}
+    </a>
 </div>
 {% endblock %}
