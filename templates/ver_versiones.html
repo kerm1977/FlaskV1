@@ -100,7 +100,15 @@
 <div class="container mt-4">
     <h1 class="mb-4 text-center">Lista de Versiones</h1>
 
-    {# ELIMINADO: El botón "Crear Nueva Versión" se reemplaza por el FAB flotante #}
+   <hr>
+
+    <p class="text-justify">Es necesario dejar claro que todas las vistas de este sitio son libres de sobrecarga gráfica, eliminando lo máximo que se pueda imagenes, videos y efectos css pesados para evitar el consumo de datos excesivo pensando principalmente en servicios móviles pre-pago. Esta área muestra las versiones de la aplicación de La Tribu de Los Libres. Antes es necesario indicar que la construcción de este sitio fue realizado con el lenguaje PYTHON y el marco de trabajo Flask, Javascript, CSS, html5 principalmente, además cuenta con un hashing criptográfico que utiliza el algoritmo Blowfish resistente a ataques de fuerza bruta. </p>
+
+   <p class="text-justify">Aun hay áreas si terminar y es probable que se encuentren varios fallos en el diseño y respuesta del backend por esa razón se va a clasificar con un nombre, cada versión según su fortaleza y funcionalidad como una forma de identificar los cambios, mejoras y errores que van apareciendo con el tiempo. Los nombres de cada versión tienen un nombre de aves en ingles  solo para identificar cada modificación de una sección o área especifica. Además la versión tendrá al menos 3  variantes más antes de brincar a la 1.2 y así sucesivamente hasta la 1.9 antes de pasar a la versión 2.0.</p>
+
+    <p class="text-justify"> Versión 1.0 Canario: Son aves pequeñas, delicadas y criadas principalmente por su canto, convirtiéndolas en aves muy frágiles pero prácticas como criatura. Así mismo estamos ante una aplicación aún delicada con limitantes pero sencilla de asimilar.</p>
+
+    <hr class="mt-5 mb-5">
 
     {% if versiones %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"> {# Esto creará una cuadrícula de tarjetas #}
