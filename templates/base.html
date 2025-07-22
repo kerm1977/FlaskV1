@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mi App Flask{% endblock %}</title>
-    <!-- Incluye Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Incluye Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> {# ¡Asegúrate de incluir Font Awesome! #}
 
     {# Enlace al archivo CSS personalizado #}
- 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block head_content %}{% endblock %} {# Bloque para contenido adicional en el head #}
 
@@ -28,6 +26,7 @@
             }
         }
 
+ 
         /* Estilos para el banner de instalación automático (Chromium) */
         #installBanner {
             position: fixed;
@@ -72,28 +71,42 @@
         }
 
         /* Estilos para el botón de instalación manual */
+        /* MODIFICACIÓN AQUÍ: Hacemos el botón flotante, redondo y a la izquierda */
         #showManualInstallInstructionsButton {
             position: fixed;
-            bottom: 20px; /* Un poco más arriba que el banner automático */
-            right: 20px;
-            background-color: #007bff; /* Un color diferente para distinguirlo */
+            bottom: 30px;
+            left: 75px; /* Cambiado de 'right' a 'left' */
+            background-color: orange; /* Un color diferente para distinguirlo */
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            /* Eliminamos padding para un control más fino del tamaño del círculo */
+            padding: 0; /* Añadido */
+            width: 60px; /* Añadido: Para un botón redondo */
+            height: 60px; /* Añadido: Para un botón redondo */
+            border-radius: 50%; /* Añadido: Para que sea redondo */
+            display: flex; /* Añadido: Para centrar el contenido (icono + texto) */
+            justify-content: center; /* Añadido */
+            align-items: center; /* Añadido */
+            flex-direction: column; /* Añadido: Para que el icono y el texto estén en columna */
+            font-size: 0.7em; /* Añadido: Ajusta el tamaño de fuente si el texto es muy grande */
+            text-align: center; /* Añadido: Centra el texto */
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1040; /* Por debajo del banner automático, pero visible */
-            display: none; /* Oculto por defecto */
+            z-index: 1040;
+            display: none;
             font-weight: bold;
         }
 
         #showManualInstallInstructionsButton:hover {
-            background-color: #0056b3;
+            background-color: #e08000; /* Un tono más oscuro de naranja al pasar el ratón */
+        }
+
+        /* Estilos para el icono dentro del botón */
+        #showManualInstallInstructionsButton i {
+            font-size: 1.5em; /* Tamaño del icono */
+            margin-bottom: 3px; /* Espacio entre icono y texto */
         }
     </style>
 
-    <!-- INICIO: Configuraciones PWA -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -101,9 +114,7 @@
     <link rel="apple-touch-icon" href="/static/uploads/icons/icon-192x192.jpg"> {# Asegúrate de que esta ruta sea correcta #}
     <meta name="msapplication-TileImage" content="/static/uploads/icons/icon-192x192.jpg"> {# Asegúrate de que esta ruta sea correcta #}
     <meta name="msapplication-TileColor" content="#fe3000"> {# Usa el color de tu tema #}
-    <!-- FIN: Configuraciones PWA -->
-
-</head>
+    </head>
 <body>
 
     {% include "navbar.html" %}
@@ -123,19 +134,16 @@
     </footer>
     {# FIN: FOOTER #}
 
-    <!-- Banner de instalación PWA automático (para navegadores Chromium) -->
     <div id="installBanner">
         <button class="close-button text-center" id="closeInstallBanner">&times;</button>
         ¿Quieres instalar "La Tribu" para una mejor experiencia?
-        <button id="installButton">Instalar App</button>
+        <button id="installButton" class="installButton">Instalar App</button>
     </div>
 
-    <!-- Botón para mostrar instrucciones de instalación manual -->
+    {# MODIFICACIÓN AQUÍ: Añadimos un <span> para el texto "Instalar App" y el icono #}
     <button id="showManualInstallInstructionsButton" class="btn btn-primary">
-        <i class="fas fa-download text-center"></i> Instalar App
-    </button>
+        <i class="fas fa-download"></i> <span></span> </button>
 
-    <!-- Modal de instrucciones de instalación manual -->
     <div class="modal fade" id="manualInstallModal" tabindex="-1" aria-labelledby="manualInstallModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -177,14 +185,12 @@
         </div>
     </div>
 
-    <!-- Scripts JS de Bootstrap y otros JS globales -->
-        <script src="{{ url_for('static', filename='js/timezone_converter.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timezone_converter.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script> {# CKEditor si es global, si no, mantener en plantillas específicas #}
     {% block scripts %}{% endblock %} {# Bloque para scripts adicionales de cada página #}
 
-    <!-- INICIO: Lógica para el registro del Service Worker y el prompt de instalación PWA -->
     <script>
         let deferredPrompt; // Variable para almacenar el evento de instalación
         const installBanner = document.getElementById('installBanner');
@@ -207,7 +213,7 @@
                 setTimeout(() => {
                     if (!deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone) {
                         // Solo muestra el botón manual si no hay prompt automático y la app no está instalada
-                        showManualInstallInstructionsButton.style.display = 'block';
+                        showManualInstallInstructionsButton.style.display = 'flex'; // Cambiado de 'block' a 'flex'
                         console.log('Mostrando botón de instalación manual.');
                     }
                 }, 3000); // Espera 3 segundos
@@ -260,7 +266,7 @@
                 }
                 // Si el usuario cierra el banner automático, ofrecemos la opción manual
                 if (!window.matchMedia('(display-mode: standalone)').matches && !navigator.standalone) {
-                    showManualInstallInstructionsButton.style.display = 'block';
+                    showManualInstallInstructionsButton.style.display = 'flex'; // Cambiado de 'block' a 'flex'
                 }
                 console.log('Banner de instalación automático cerrado por el usuario.');
             });
@@ -297,7 +303,5 @@
             }
         }
     </script>
-    <!-- FIN: Lógica para el registro del Service Worker y el prompt de instalación PWA -->
-
-</body>
+    </body>
 </html>
