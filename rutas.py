@@ -124,7 +124,6 @@ def _return_empty_pdf_or_txt(is_pdf=True):
 
 
 @rutas_bp.route('/rutas')
-# @role_required(['Superuser', 'Usuario Regular']) # COMENTADO: Ahora los usuarios regulares también pueden ver las rutas
 def ver_rutas():
     # Obtener el parámetro 'categoria' de la URL si existe
     categoria_seleccionada = request.args.get('categoria')
@@ -132,9 +131,26 @@ def ver_rutas():
     # Consulta inicial para todas las rutas
     query = Ruta.query
 
+    # Obtener el estado de inicio de sesión del usuario
+    user_logged_in = session.get('logged_in', False)
+
+    # Si el usuario NO ha iniciado sesión, excluye 'Caminatas por Reconocer' de la consulta general
+    if not user_logged_in:
+        query = query.filter(Ruta.provincia != 'Caminatas por Reconocer')
+
     # Aplicar filtro si se seleccionó una categoría específica (que no sea "Todas las Categorías" o "Otros")
     if categoria_seleccionada and categoria_seleccionada != 'Todas las Categorías' and categoria_seleccionada != 'Otros':
-        query = query.filter_by(provincia=categoria_seleccionada) # El campo 'provincia' ahora almacena la categoría
+        # Si la categoría seleccionada es 'Caminatas por Reconocer' y el usuario no está logueado,
+        # la consulta ya estará filtrada por la condición anterior, resultando en 0 rutas.
+        # Si el usuario está logueado, el filtro por categoria_seleccionada se aplica normalmente.
+        query = query.filter_by(provincia=categoria_seleccionada)
+    
+    # Si la categoría seleccionada es 'Caminatas por Reconocer' y el usuario no está logueado,
+    # y no se seleccionó específicamente esa categoría, se aseguran que no aparezca en el listado general.
+    # Esta es una doble verificación para asegurar que siempre se excluya si no está logueado.
+    if not user_logged_in and categoria_seleccionada != 'Caminatas por Reconocer':
+        query = query.filter(Ruta.provincia != 'Caminatas por Reconocer')
+
 
     # Obtener todas las rutas filtradas
     rutas = query.order_by(Ruta.provincia, Ruta.nombre).all()
@@ -145,18 +161,28 @@ def ver_rutas():
         categoria_seleccionada = 'Todas las Categorías'
     
     # Agrupar las rutas por su "provincia" (que ahora es la categoría)
-    # Esto se hace aquí en Python para evitar la lógica compleja en Jinja2
     rutas_por_categoria = {}
     for ruta in rutas:
+        # Asegurarse de no añadir 'Caminatas por Reconocer' si el usuario no está logueado
+        if not user_logged_in and ruta.provincia == 'Caminatas por Reconocer':
+            continue # Saltar esta ruta si el usuario no está logueado y es de la categoría restringida
+            
         if ruta.provincia not in rutas_por_categoria:
             rutas_por_categoria[ruta.provincia] = []
         rutas_por_categoria[ruta.provincia].append(ruta)
 
     return render_template('ver_rutas.html', 
-                           rutas_por_categoria=rutas_por_categoria, # Pasa las rutas agrupadas por categoría
-                           categorias_busqueda=CATEGORIAS_BUSQUEDA, # Pasa la lista completa de categorías para el dropdown
-                           provincia_seleccionada=categoria_seleccionada) # Pasa la categoría seleccionada para el dropdown
+                           rutas_por_categoria=rutas_por_categoria,
+                           categorias_busqueda=CATEGORIAS_BUSQUEDA,
+                           provincia_seleccionada=categoria_seleccionada)
 
+
+
+
+
+
+
+    
 @rutas_bp.route('/rutas/crear', methods=['GET', 'POST'])
 @role_required('Superuser')
 def crear_ruta():
